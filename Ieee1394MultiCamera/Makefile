@@ -7,8 +7,9 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-IDLDIR		= ../idl
-IDLS		= $(IDLDIR)/Img.idl
+VPATH		= ../idl
+
+IDLS		= Img.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__
@@ -35,7 +36,6 @@ HDRSDIR		= $(PREFIX)/include
 #########################
 #  Macros set by mkmf	#
 #########################
-.SUFFIXES:	.cu .idl .hh .so
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
 EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \

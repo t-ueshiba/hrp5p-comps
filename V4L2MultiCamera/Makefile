@@ -7,8 +7,9 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-IDLDIR		= ../idl
-IDLS		= $(IDLDIR)/Img.idl
+VPATH		= ../idl
+
+IDLS		= Img.idl Cam.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include -I../Ieee1394MultiCamera
 CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__
@@ -35,9 +36,21 @@ HDRSDIR		= $(PREFIX)/include
 #########################
 #  Macros set by mkmf	#
 #########################
-.SUFFIXES:	.cu .idl .hh .so
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../Ieee1394MultiCamera/MultiCamera.h
+EXTHDRS		= ../Ieee1394MultiCamera/MultiCamera.h \
+		/usr/local/include/TU/Array++.h \
+		/usr/local/include/TU/Geometry++.h \
+		/usr/local/include/TU/Image++.h \
+		/usr/local/include/TU/Minimize.h \
+		/usr/local/include/TU/V4L2++.h \
+		/usr/local/include/TU/V4L2CameraArray.h \
+		/usr/local/include/TU/Vector++.h \
+		/usr/local/include/TU/functional.h \
+		/usr/local/include/TU/io.h \
+		/usr/local/include/TU/iterator.h \
+		/usr/local/include/TU/mmInstructions.h \
+		/usr/local/include/TU/tuple.h \
+		/usr/local/include/TU/types.h
 HDRS		=
 SRCS		= V4L2MultiCamera.cc \
 		V4L2MultiCameraComp.cc
@@ -49,5 +62,12 @@ include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
-V4L2MultiCamera.o: ../Ieee1394MultiCamera/MultiCamera.h
+V4L2MultiCamera.o: /usr/local/include/TU/V4L2CameraArray.h \
+	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
+	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
+	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
+	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
+	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
+	../Ieee1394MultiCamera/MultiCamera.h
 V4L2MultiCameraComp.o: ../Ieee1394MultiCamera/MultiCamera.h
