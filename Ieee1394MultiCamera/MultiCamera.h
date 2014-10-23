@@ -22,7 +22,7 @@ class MultiCamera : public RTC::DataFlowComponentBase
 {
   private:
     typedef typename CAMERAS::camera_type	camera_type;
-    
+
   public:
     MultiCamera(RTC::Manager* manager)					;
     ~MultiCamera()							;
@@ -45,23 +45,17 @@ class MultiCamera : public RTC::DataFlowComponentBase
   private:
     static size_t	setImageHeader(const camera_type& camera,
 				       Img::TimedImage& image)		;
+    RTC::Time		getTime(const camera_type& camera)	const	;
     
   protected:
     Img::TimedImages			_images;
     RTC::OutPort<Img::TimedImages>	_imagesOut;
 
   private:
+    std::string				_cameraConfig;
+    int					_useTimestamp;
     CAMERAS				_cameras;
 };
-
-template <class CAMERAS>
-MultiCamera<CAMERAS>::MultiCamera(RTC::Manager* manager)
-    :RTC::DataFlowComponentBase(manager),
-     _images(),
-     _imagesOut("TimedImages", _images),
-     _cameras()
-{
-}
 
 template <class CAMERAS>
 MultiCamera<CAMERAS>::~MultiCamera()
@@ -112,7 +106,10 @@ MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 #endif
     exec(_cameras, &camera_type::snap);
     for (size_t i = 0; i < _cameras.size(); ++i)
+    {
 	_cameras[i]->captureRaw(_images[i].data.get_buffer());
+	_images[i].tm = getTime(*_cameras[i]);
+    }
     _imagesOut.write();
     
     return RTC::RTC_OK;
@@ -124,7 +121,7 @@ MultiCamera<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCamera::onAborting" << std::endl;
 #endif
-    exec(_cameras, &camera_type::stopContinuousShot);  // 連続撮影を終了
+    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
 
     return RTC::RTC_OK;
 }

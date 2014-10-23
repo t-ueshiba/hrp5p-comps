@@ -1,12 +1,15 @@
 /*
  *  $Id$
  */
+#include <fstream>
 #include "TU/V4L2CameraArray.h"
 #include "MultiCamera.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
+#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/V4L2Camera.conf"
+
 // Module specification
 static const char* v4l2multicamera_spec[] =
 {
@@ -21,6 +24,7 @@ static const char* v4l2multicamera_spec[] =
     "max_instance",		"0",
     "language",			"C++",
     "lang_type",		"compile",
+    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
     ""
 };
 
@@ -42,6 +46,17 @@ V4L2MultiCameraInit(RTC::Manager* manager)
 /************************************************************************
 *  class MultiCamera<TU::Ieee1394CameraArray>				*
 ************************************************************************/
+template <>
+MultiCamera<TU::V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
+    :RTC::DataFlowComponentBase(manager),
+     _images(),
+     _imagesOut("TimedImages", _images),
+     _cameraConfig(DEFAULT_CAMERA_CONFIG),
+     _useTimestamp(0),
+     _cameras()
+{
+}
+
 template <> RTC::ReturnCode_t
 MultiCamera<TU::V4L2CameraArray>::onInitialize()
 {
@@ -49,11 +64,15 @@ MultiCamera<TU::V4L2CameraArray>::onInitialize()
     std::cerr << "MultiCamera::onInitialize" << std::endl;
 #endif
     addOutPort("TimedImages", _imagesOut);
+    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
 
     try
     {
-	_cameras.initialize(TU_V4L2_DEFAULT_CAMERA_NAME,
-			    TU_V4L2_DEFAULT_CONFIG_DIRS, -1);
+	std::ifstream	in(_cameraConfig.c_str());
+	if (!in)
+	    throw std::runtime_error("MultiCamera<TU::V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+
+	in >> _cameras;
     }
     catch (std::exception& err)
     {
@@ -87,4 +106,13 @@ MultiCamera<TU::V4L2CameraArray>::setImageHeader(const camera_type& camera,
 
     throw std::runtime_error("Unsupported pixel format!!");
     return 0;
+}
+
+template <> RTC::Time
+MultiCamera<TU::V4L2CameraArray>::getTime(const camera_type& camera) const
+{
+    u_int64_t	usec = camera.arrivaltime();
+    RTC::Time	time = {usec / 1000000, (usec % 1000000) * 1000};
+    
+    return time;
 }

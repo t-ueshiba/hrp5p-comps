@@ -1,12 +1,16 @@
 /*
  *  $Id$
  */
+#include <fstream>
 #include "TU/Ieee1394CameraArray.h"
 #include "MultiCamera.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
+#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IEEE1394Camera.conf"
+#define DEFAULT_USE_TIMESTAMP	"1"	// "0": arrival time, "1": timestamp
+
 // Module specification
 static const char* ieee1394multicamera_spec[] =
 {
@@ -21,6 +25,8 @@ static const char* ieee1394multicamera_spec[] =
     "max_instance",		"0",
     "language",			"C++",
     "lang_type",		"compile",
+    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
+    "conf.default.int_useTimestamp",	DEFAULT_USE_TIMESTAMP,
     ""
 };
 
@@ -43,6 +49,17 @@ Ieee1394MultiCameraInit(RTC::Manager* manager)
 /************************************************************************
 *  class MultiCamera<TU::Ieee1394CameraArray>				*
 ************************************************************************/
+template <>
+MultiCamera<TU::Ieee1394CameraArray>::MultiCamera(RTC::Manager* manager)
+    :RTC::DataFlowComponentBase(manager),
+     _images(),
+     _imagesOut("TimedImages", _images),
+     _cameraConfig(DEFAULT_CAMERA_CONFIG),
+     _useTimestamp(DEFAULT_USE_TIMESTAMP[0] - '0'),
+     _cameras()
+{
+}
+
 template <> RTC::ReturnCode_t
 MultiCamera<TU::Ieee1394CameraArray>::onInitialize()
 {
@@ -50,11 +67,19 @@ MultiCamera<TU::Ieee1394CameraArray>::onInitialize()
     std::cerr << "MultiCamera::onInitialize" << std::endl;
 #endif
     addOutPort("TimedImages", _imagesOut);
-
+    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
+    bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
+    
     try
     {
-	_cameras.initialize(DEFAULT_CAMERA_NAME, DEFAULT_CONFIG_DIRS,
-			    TU::Ieee1394Node::SPD_400M, -1);
+	std::ifstream	in(_cameraConfig.c_str());
+	if (!in)
+	    throw std::runtime_error("MultiCamera<TU::Ieee1394CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+
+	in >> _cameras;
+
+	if (_useTimestamp)
+	    TU::exec(_cameras, &TU::Ieee1394Camera::embedTimestamp);
     }
     catch (std::exception& err)
     {
@@ -94,4 +119,13 @@ MultiCamera<TU::Ieee1394CameraArray>::setImageHeader(const camera_type& camera,
 
     throw std::runtime_error("Unsupported pixel format!!");
     return 0;
+}
+
+template <> RTC::Time
+MultiCamera<TU::Ieee1394CameraArray>::getTime(const camera_type& camera) const
+{
+    u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
+				      : camera.arrivaltime());
+    RTC::Time	time = {usec / 1000000, (usec % 1000000) * 1000};
+    return time;
 }
