@@ -1,0 +1,37 @@
+/*
+ *  $Id$
+ */
+#ifndef __TU_CAM_IDL
+#define __TU_CAM_IDL
+
+#include <BasicDataType.idl>
+
+module Cam
+{
+interface Controller
+{
+    unsigned long	ncameras()					;
+    void		selectCamera(in unsigned long n)		;
+    unsigned long	selectedCamera()				;
+    
+    void		setROI(inout unsigned long u0,
+			       inout unsigned long v0,
+			       inout unsigned long width,
+			       inout unsigned long height)		;
+    void		getROI(out unsigned long u0,
+			       out unsigned long v0,
+			       out unsigned long width,
+			       out unsigned long height)		;
+    
+    string		availableFormats()				;
+    unsigned long	getFormat()					;
+    unsigned long	setFormat(in unsigned long format)		;
+
+    string		availableFeatures()				;
+    long		getValue(in unsigned long feature)		;
+    long		setValue(in unsigned long feature, in long val)	;
+};
+
+};
+
+#endif	/* __TU_CAM_IDL	*/
