@@ -5,6 +5,15 @@
 #include "TU/V4L2CameraArray.h"
 #include "MultiCamera.h"
 
+namespace TU
+{
+namespace v
+{
+CmdDefs	createFormatCmds (const V4L2Camera& camera)			;
+CmdDefs	createFeatureCmds(const V4L2Camera& camera)			;
+}
+}
+
 /************************************************************************
 *  static data								*
 ************************************************************************/
@@ -49,11 +58,12 @@ V4L2MultiCameraInit(RTC::Manager* manager)
 template <>
 MultiCamera<TU::V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
+     _cameras(),
+     _cameraConfig(DEFAULT_CAMERA_CONFIG),
      _images(),
      _imagesOut("TimedImages", _images),
-     _cameraConfig(DEFAULT_CAMERA_CONFIG),
-     _useTimestamp(0),
-     _cameras()
+     _command(_cameras),
+     _commandPort("Command")
 {
 }
 
@@ -63,9 +73,13 @@ MultiCamera<TU::V4L2CameraArray>::onInitialize()
 #ifdef DEBUG
     std::cerr << "MultiCamera::onInitialize" << std::endl;
 #endif
-    addOutPort("TimedImages", _imagesOut);
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
 
+    addOutPort("TimedImages", _imagesOut);
+
+    _commandPort.registerProvider("Command", "Cam::Controller", _command);
+    addPort(_commandPort);
+    
     try
     {
 	std::ifstream	in(_cameraConfig.c_str());
