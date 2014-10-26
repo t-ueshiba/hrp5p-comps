@@ -5,6 +5,15 @@
 #include "TU/Ieee1394CameraArray.h"
 #include "MultiCamera.h"
 
+namespace TU
+{
+namespace v
+{
+CmdDefs	createFormatCmds (const Ieee1394Camera& camera)			;
+CmdDefs	createFeatureCmds(const Ieee1394Camera& camera)			;
+}
+}
+
 /************************************************************************
 *  static data								*
 ************************************************************************/
@@ -52,11 +61,13 @@ Ieee1394MultiCameraInit(RTC::Manager* manager)
 template <>
 MultiCamera<TU::Ieee1394CameraArray>::MultiCamera(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
-     _images(),
-     _imagesOut("TimedImages", _images),
+     _cameras(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
      _useTimestamp(DEFAULT_USE_TIMESTAMP[0] - '0'),
-     _cameras()
+     _images(),
+     _imagesOut("TimedImages", _images),
+     _command(_cameras),
+     _commandPort("Command")
 {
 }
 
@@ -66,10 +77,14 @@ MultiCamera<TU::Ieee1394CameraArray>::onInitialize()
 #ifdef DEBUG
     std::cerr << "MultiCamera::onInitialize" << std::endl;
 #endif
-    addOutPort("TimedImages", _imagesOut);
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
     bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
     
+    addOutPort("TimedImages", _imagesOut);
+
+    _commandPort.registerProvider("Command", "Cam::Controller", _command);
+    addPort(_commandPort);
+
     try
     {
 	std::ifstream	in(_cameraConfig.c_str());

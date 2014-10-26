@@ -13,6 +13,7 @@
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include "Img.hh"
+#include "CamSVC_impl.h"
 
 /************************************************************************
 *  class MultiCamera<CAMERAS>						*
@@ -40,6 +41,9 @@ class MultiCamera : public RTC::DataFlowComponentBase
   //virtual RTC::ReturnCode_t	onReset(RTC::UniqueId ec_id)		;
   //virtual RTC::ReturnCode_t	onStateUpdate(RTC::UniqueId ec_id)	;
   //virtual RTC::ReturnCode_t	onRateChanged(RTC::UniqueId ec_id)	;
+
+    size_t		ncameras()				const	;
+    
 #endif
     
   private:
@@ -47,14 +51,16 @@ class MultiCamera : public RTC::DataFlowComponentBase
 				       Img::TimedImage& image)		;
     RTC::Time		getTime(const camera_type& camera)	const	;
     
+  private:
+    CAMERAS				_cameras;
+    std::string				_cameraConfig;
+    int					_useTimestamp;
+
   protected:
     Img::TimedImages			_images;
     RTC::OutPort<Img::TimedImages>	_imagesOut;
-
-  private:
-    std::string				_cameraConfig;
-    int					_useTimestamp;
-    CAMERAS				_cameras;
+    CamSVC_impl<CAMERAS>		_command;
+    RTC::CorbaPort			_commandPort;
 };
 
 template <class CAMERAS>
