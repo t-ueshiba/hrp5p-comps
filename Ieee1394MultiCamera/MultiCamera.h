@@ -117,7 +117,7 @@ MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	_images[i].tm = getTime(*_cameras[i]);
     }
     _imagesOut.write();
-    
+
     return RTC::RTC_OK;
 }
 
@@ -132,7 +132,7 @@ MultiCamera<CAMERAS>::onAborting(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 
-#ifdef DEUBUG
+#ifdef DEBUG
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCamera<CAMERAS>::onFinalize()
 {

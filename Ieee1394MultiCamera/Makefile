@@ -12,7 +12,7 @@ VPATH		= ../idl $(shell rtm-config --rtm-idldir)
 IDLS		= Img.idl Cam.idl BasicDataType.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include
-CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__
+CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
 CFLAGS		= -g
 NVCCFLAGS	= -g
 ifneq ($(findstring icpc,$(CXX)),)

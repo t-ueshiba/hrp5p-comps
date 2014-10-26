@@ -2,7 +2,6 @@
  *  $Id$
  */
 #include <boost/archive/xml_oarchive.hpp>
-#include <boost/archive/xml_iarchive.hpp>
 #include "TU/Ieee1394CameraArray.h"
 #include "CamSVC_impl.h"
 
