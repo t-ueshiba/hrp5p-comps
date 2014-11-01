@@ -7,9 +7,9 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ../idl $(shell rtm-config --rtm-idldir)
+VPATH		= ../idl
 
-IDLS		= Img.idl Cam.idl BasicDataType.idl
+IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
@@ -20,7 +20,7 @@ ifneq ($(findstring icpc,$(CXX)),)
   NVCCFLAGS	= -O			# must < -O2
   CPPFLAGS     += -DSSE3
 endif
-CCFLAGS		= $(CFLAGS)
+CCFLAGS		= $(CFLAGS) -std=c++11
 
 LIBS		= -lTUIeee1394++ -lTUTools++ -lraw1394 -lboost_serialization
 ifneq ($(findstring darwin,$(OSTYPE)),)
@@ -49,50 +49,32 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/mmInstructions.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
-HDRS		= CamSVC_impl.h \
-		CmdDef.h \
+HDRS		= CmdDef.h \
+		CmdSVC_impl.h \
 		MultiCamera.h
-SRCS		= Ieee1394CamSVC_impl.cc \
+SRCS		= Ieee1394CmdSVC_impl.cc \
 		Ieee1394MultiCamera.cc \
-		Ieee1394MultiCameraComp.cc \
-		createFeatureCmds.cc \
-		createFormatCmds.cc
-OBJS		= Ieee1394CamSVC_impl.o \
+		Ieee1394MultiCameraComp.cc
+OBJS		= Ieee1394CmdSVC_impl.o \
 		Ieee1394MultiCamera.o \
-		Ieee1394MultiCameraComp.o \
-		createFeatureCmds.o \
-		createFormatCmds.o
+		Ieee1394MultiCameraComp.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
 include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
-Ieee1394CamSVC_impl.o: /usr/local/include/TU/Ieee1394CameraArray.h \
+Ieee1394CmdSVC_impl.o: /usr/local/include/TU/Ieee1394CameraArray.h \
 	/usr/local/include/TU/Ieee1394++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h CamSVC_impl.h CmdDef.h
+	/usr/local/include/TU/Minimize.h CmdSVC_impl.h CmdDef.h
 Ieee1394MultiCamera.o: /usr/local/include/TU/Ieee1394CameraArray.h \
 	/usr/local/include/TU/Ieee1394++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h MultiCamera.h CamSVC_impl.h CmdDef.h
-createFeatureCmds.o: /usr/local/include/TU/Ieee1394++.h \
-	/usr/local/include/TU/Image++.h /usr/local/include/TU/types.h \
-	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h CmdDef.h
-createFormatCmds.o: /usr/local/include/TU/Ieee1394++.h \
-	/usr/local/include/TU/Image++.h /usr/local/include/TU/types.h \
-	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h CmdDef.h
+	/usr/local/include/TU/Minimize.h MultiCamera.h CmdSVC_impl.h CmdDef.h

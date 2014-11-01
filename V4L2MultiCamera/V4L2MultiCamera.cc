@@ -5,15 +5,6 @@
 #include "TU/V4L2CameraArray.h"
 #include "MultiCamera.h"
 
-namespace TU
-{
-namespace v
-{
-CmdDefs	createFormatCmds (const V4L2Camera& camera)			;
-CmdDefs	createFeatureCmds(const V4L2Camera& camera)			;
-}
-}
-
 /************************************************************************
 *  static data								*
 ************************************************************************/
@@ -28,7 +19,7 @@ static const char* v4l2multicamera_spec[] =
     "version",			"1.0.0",
     "vendor",			"t.ueshiba@aist.go.jp",
     "category",			"sensor",
-    "activity_type",		"PERIODIC",
+    "activity_type",		"SPORADIC",
     "kind",			"DataFlowComponent",
     "max_instance",		"0",
     "language",			"C++",
@@ -46,12 +37,15 @@ void
 V4L2MultiCameraInit(RTC::Manager* manager)
 {
     coil::Properties	profile(v4l2multicamera_spec);
-    manager->registerFactory(profile,
-			     RTC::Create<MultiCamera<TU::V4L2CameraArray> >,
-			     RTC::Delete<MultiCamera<TU::V4L2CameraArray> >);
+    manager->registerFactory(
+		 profile,
+		 RTC::Create<TU::MultiCamera<TU::V4L2CameraArray> >,
+		 RTC::Delete<TU::MultiCamera<TU::V4L2CameraArray> >);
 }
 };
 
+namespace TU
+{
 /************************************************************************
 *  class MultiCamera<TU::Ieee1394CameraArray>				*
 ************************************************************************/
@@ -73,11 +67,14 @@ MultiCamera<TU::V4L2CameraArray>::onInitialize()
 #ifdef DEBUG
     std::cerr << "MultiCamera::onInitialize" << std::endl;
 #endif
+  // コンフィグレーションをセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
 
+  // データポートをセットアップ
     addOutPort("TimedImages", _imagesOut);
 
-    _commandPort.registerProvider("Command", "Cam::Controller", _command);
+  // サービスプロバイダとサービスポートをセットアップ
+    _commandPort.registerProvider("Command", "Cmd::Controller", _command);
     addPort(_commandPort);
     
     try
@@ -109,16 +106,17 @@ MultiCamera<TU::V4L2CameraArray>::setImageHeader(const camera_type& camera,
     {
       case TU::V4L2Camera::GREY:
 	image.format = Img::MONO_8;
-	return camera.width() * camera.height();
+	return image.width * image.height;
       case TU::V4L2Camera::YUYV:
 	image.format = Img::YUV_422;
-	return camera.width() * camera.height() * 2;
+	return image.width * image.height * 2;
       case TU::V4L2Camera::RGB24:
 	image.format = Img::RGB_24;
-	return camera.width() * camera.height() * 3;
+	return image.width * image.height * 3;
+      default:
+	throw std::runtime_error("Unsupported pixel format!!");
     }
 
-    throw std::runtime_error("Unsupported pixel format!!");
     return 0;
 }
 
@@ -126,7 +124,10 @@ template <> RTC::Time
 MultiCamera<TU::V4L2CameraArray>::getTime(const camera_type& camera) const
 {
     u_int64_t	usec = camera.arrivaltime();
-    RTC::Time	time = {usec / 1000000, (usec % 1000000) * 1000};
+    RTC::Time	time = {CORBA::ULong( usec / 1000000),
+			CORBA::ULong((usec % 1000000) * 1000)};
     
     return time;
+}
+
 }

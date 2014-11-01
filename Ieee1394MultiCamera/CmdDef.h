@@ -17,11 +17,9 @@ namespace TU
 {
 namespace v
 {
-typedef u_int	CmdId;		// ID for each item command or menu
-    
 enum CmdType
 {
-    C_EndOfCmds,
+    C_Null,
     
     C_Button,			// Button
     C_ChoiceFrame,		// Choice frame
@@ -49,6 +47,8 @@ enum CmdAttributes
     CA_NoSpace	     =  0x800,	// No space between widgets
 };
 
+typedef u_int	CmdId;		// ID for each item command or menu
+    
 // standard menu item definitions
 const CmdId	M_File		= 32000;
 const CmdId	M_Edit		= 32001;
@@ -111,13 +111,14 @@ struct CmdDef
 {
     typedef int		value_type;
 
-    CmdDef(CmdType type_=C_EndOfCmds, const std::string& name_="",
+    CmdDef(CmdType type_=C_Null, const std::string& name_="",
 	   CmdId id_=0, value_type val_=0, CmdDefs subcmds_=CmdDefs(),
-	   value_type min_=0, value_type max_=1, value_type step_=1,
-	   u_int attrs_=CA_None, size_t gridx_=0, size_t gridy_=0,
+	   value_type min_=0, value_type max_=0,
+	   value_type step_=0, u_int div_=1, u_int attrs_=CA_None,
+	   size_t gridx_=0, size_t gridy_=0,
 	   size_t gridWidth_=1, size_t gridHeight_=1, size_t size_=0)
 	:type(type_), name(name_), id(id_), val(val_), subcmds(subcmds_),
-	 min(min_), max(max_), step(step_), attrs(attrs_),
+	 min(min_), max(max_), step(step_), div(div_), attrs(attrs_),
 	 gridx(gridx_), gridy(gridy_),
 	 gridWidth(gridWidth_), gridHeight(gridHeight_), size(size_)	{}
 
@@ -131,6 +132,7 @@ struct CmdDef
 	ar & BOOST_SERIALIZATION_NVP(min);
 	ar & BOOST_SERIALIZATION_NVP(max);
 	ar & BOOST_SERIALIZATION_NVP(step);
+	ar & BOOST_SERIALIZATION_NVP(div);
 	ar & BOOST_SERIALIZATION_NVP(attrs);
 	ar & BOOST_SERIALIZATION_NVP(gridx);
 	ar & BOOST_SERIALIZATION_NVP(gridy);
@@ -148,6 +150,7 @@ struct CmdDef
     value_type	min;
     value_type	max;
     value_type	step;
+    u_int	div;
     u_int	attrs;
     size_t	gridx;
     size_t	gridy;
@@ -174,11 +177,15 @@ operator <<(std::ostream& out, const CmdDefs& cmds)
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDef& cmd)
 {
-    return out << cmd.name
-	       << '['	<< cmd.id
-	       << "]: " << cmd.val
-	       << " ["  << cmd.min << ',' << cmd.max << ':' << cmd.step
-	       << "]@"  << cmd.gridWidth << 'x' << cmd.gridHeight
+    out << cmd.name << '[' << cmd.id << "]: ";
+    if (cmd.div == 1)
+	out << cmd.val << " [" << cmd.min << ',' << cmd.max << ':' << cmd.step;
+    else
+	out << float(cmd.val) /float(cmd.div) << " ["
+	    << float(cmd.min) /float(cmd.div) << ","
+	    << float(cmd.max) /float(cmd.div) << ':'
+	    << float(cmd.step)/float(cmd.div);
+    return out << "]@"  << cmd.gridWidth << 'x' << cmd.gridHeight
 	       << '+'   << cmd.gridx	 << '+' << cmd.gridy
 	       << ", subcmds=" << cmd.subcmds; 
 }
