@@ -1,0 +1,26 @@
+/*
+ *  $Id$
+ */
+#ifndef __TU_CMD_IDL
+#define __TU_CMD_IDL
+
+#include <BasicDataType.idl>
+
+module Cmd
+{
+typedef sequence<long>	IValues;
+typedef sequence<float>	FValues;
+    
+interface Controller
+{
+    string	getCmds()						;
+    
+    void	getIValues(in unsigned long id, out   IValues vals)	;
+    void	setIValues(in unsigned long id, inout IValues vals)	;
+    void	getFValues(in unsigned long id, out   FValues vals)	;
+    void	setFValues(in unsigned long id, inout FValues vals)	;
+};
+
+};
+
+#endif	/* __TU_CAM_IDL	*/
