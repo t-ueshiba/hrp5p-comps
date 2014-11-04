@@ -12,7 +12,7 @@ VPATH		= ../idl
 IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include
-CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
+CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ #-DDEBUG
 CFLAGS		= -g
 NVCCFLAGS	= -g
 ifneq ($(findstring icpc,$(CXX)),)

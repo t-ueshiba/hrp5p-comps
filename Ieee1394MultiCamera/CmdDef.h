@@ -113,8 +113,8 @@ struct CmdDef
 
     CmdDef(CmdType type_=C_Null, const std::string& name_="",
 	   CmdId id_=0, value_type val_=0, CmdDefs subcmds_=CmdDefs(),
-	   value_type min_=0, value_type max_=0,
-	   value_type step_=0, u_int div_=1, u_int attrs_=CA_None,
+	   value_type min_=0, value_type max_=1,
+	   value_type step_=1, u_int div_=1, u_int attrs_=CA_None,
 	   size_t gridx_=0, size_t gridy_=0,
 	   size_t gridWidth_=1, size_t gridHeight_=1, size_t size_=0)
 	:type(type_), name(name_), id(id_), val(val_), subcmds(subcmds_),

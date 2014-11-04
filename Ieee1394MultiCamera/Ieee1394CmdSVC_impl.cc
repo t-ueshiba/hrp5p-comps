@@ -186,9 +186,9 @@ CmdSVC_impl<Ieee1394CameraArray>::addCmds(const camera_type& camera,
 
 		    u_int	min, max;
 		    camera.getMinMax(feature.id, min, max);
-		    cmd.min = min;
-		    cmd.max = max;
-
+		    cmd.min  = min;
+		    cmd.max  = max;
+		    
 		    if (feature.id == Ieee1394Camera::WHITE_BALANCE)
 		    {
 			u_int	ub, vr;
@@ -227,8 +227,6 @@ CmdSVC_impl<Ieee1394CameraArray>::addCmds(const camera_type& camera,
 					  camera.isTurnedOn(feature.id)));
 		    CmdDef&	onOffCmd = cmds.back();
 
-		    onOffCmd.max   = 1;
-		    onOffCmd.step  = 1;
 		    onOffCmd.gridx = x++;
 		    onOffCmd.gridy = y;
 		}
@@ -241,8 +239,6 @@ CmdSVC_impl<Ieee1394CameraArray>::addCmds(const camera_type& camera,
 					  camera.isAuto(feature.id)));
 		    CmdDef&	autoCmd = cmds.back();
 
-		    autoCmd.max   = 1;
-		    autoCmd.step  = 1;
 		    autoCmd.gridx = x;
 		    autoCmd.gridy = y;
 		}
