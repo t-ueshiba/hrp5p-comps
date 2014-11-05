@@ -71,8 +71,9 @@ CmdSVC_impl<CAMERAS>::~CmdSVC_impl()
 template <class CAMERAS> char*
 CmdSVC_impl<CAMERAS>::getCmds()
 {
+#ifdef DEBUG
     std::cerr << "CmdSVC_impl<CAMERAS>::getCmds() called!" << std::endl;
-    
+#endif
     std::ostringstream			oss;
     boost::archive::xml_oarchive	oar(oss);
     CmdDefs				cmds = createCmds();
