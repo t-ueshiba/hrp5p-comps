@@ -29,9 +29,9 @@ endif
 
 LINKER		= $(CXX)
 
-PROGDIR		= $(PREFIX)/bin
+BINDIR		= $(PREFIX)/bin
 LIBDIR		= $(PREFIX)/lib
-HDRSDIR		= $(PREFIX)/include
+INCDIR		= $(PREFIX)/include
 
 #########################
 #  Macros set by mkmf	#
