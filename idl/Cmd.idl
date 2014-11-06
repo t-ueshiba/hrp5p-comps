@@ -8,17 +8,14 @@
 
 module Cmd
 {
-typedef sequence<long>	IValues;
-typedef sequence<float>	FValues;
+typedef sequence<long>	Values;
     
 interface Controller
 {
     string	getCmds()						;
     
-    void	getIValues(in unsigned long id, out   IValues vals)	;
-    void	setIValues(in unsigned long id, inout IValues vals)	;
-    void	getFValues(in unsigned long id, out   FValues vals)	;
-    void	setFValues(in unsigned long id, inout FValues vals)	;
+    void	getValues(out   Values vals)				;
+    void	setValues(inout Values vals)				;
 };
 
 };
