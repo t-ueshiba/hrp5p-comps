@@ -35,8 +35,8 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
-    void		getValues(Values_out vals)			;
-    void		setValues(Values& vals)				;
+    void		setValues(CORBA::ULong id, const Values& vals)	;
+    Cmd::Values*	getValues(CORBA::ULong id)			;
 
   private:
     CmdDefs		createCmds()				const	;
@@ -79,35 +79,19 @@ CmdSVC_impl<CAMERAS>::getCmds()
 }
 
 template <class CAMERAS> void
-CmdSVC_impl<CAMERAS>::getValues(Values_out vals)
-{
-    switch (vals[0])
-    {
-      case c_ContinuousShot:
-	vals[1] = (_cameras.size() ? _cameras[0]->inContinuousShot() : 0);
-	break;
-      case c_Format:
-      //getFormat(vals);
-	break;
-      case c_CameraChoice:
-	vals[1] = _n;
-	break;
-      default:
-      //getFeatureValue(vals);
-	break;
-    }
-}
-
-template <class CAMERAS> void
-CmdSVC_impl<CAMERAS>::setValues(Values& vals)
+CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::setValues() called!" << std::endl;
+    std::cerr << "CmdSVC_impl<CAMERAS>::setValues(): id = " << id
+	      << ", vals =";
+    for (CORBA::ULong i = 0; i < vals.length(); ++i)
+	std::cerr << ' ' << vals[i];
+    std::cerr << std::endl;
 #endif
-    switch (vals[0])
+    switch (id)
     {
       case c_ContinuousShot:
-	if (vals[1])
+	if (vals[0])
 	    exec(_cameras, &camera_type::continuousShot);
 	else
 	    exec(_cameras, &camera_type::stopContinuousShot);
@@ -116,12 +100,41 @@ CmdSVC_impl<CAMERAS>::setValues(Values& vals)
       //setFormat(vals);
 	break;
       case c_CameraChoice:
-	_n = vals[1];
+	_n = vals[0];
 	break;
       default:
-	handleCameraFeatures(_cameras, vals[0], vals[1], _n);
+	handleCameraFeatures(_cameras, id, vals[0], _n);
 	break;
     }
+}
+
+template <class CAMERAS> Cmd::Values*
+CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
+{
+#ifdef DEBUG
+    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): id = " << id << std::endl;
+#endif
+    Cmd::Values	vals;
+    
+    switch (id)
+    {
+      case c_ContinuousShot:
+	vals.length(1);
+	vals[0] = (_cameras.size() ? _cameras[0]->inContinuousShot() : 0);
+	break;
+      case c_Format:
+      //getFormat(id, vals);
+	break;
+      case c_CameraChoice:
+	vals.length(1);
+	vals[0] = _n;
+	break;
+      default:
+      //getFeatureValue(id, vals);
+	break;
+    }
+
+    return new Cmd::Values(vals);
 }
 
 template <class CAMERAS> typename TU::v::CmdDefs
