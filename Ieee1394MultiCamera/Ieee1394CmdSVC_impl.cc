@@ -51,7 +51,6 @@ static Format formats[] =
     {Ieee1394Camera::Format_7_6,	"Format_7_6"},
     {Ieee1394Camera::Format_7_6,	"Format_7_7"}
 };
-static const size_t	NFORMATS = sizeof(formats)/sizeof(formats[0]);
 
 struct FrameRate
 {
@@ -68,7 +67,22 @@ static FrameRate frameRates[] =
     {Ieee1394Camera::FrameRate_60,	"60fps"},
     {Ieee1394Camera::FrameRate_x,	"custom frame rate"}
 };
-static const size_t	NRATES = sizeof(frameRates)/sizeof(frameRates[0]);
+
+struct TriggerMode
+{
+    Ieee1394Camera::TriggerMode	triggerMode;
+    const char*			name;
+};
+static TriggerMode triggerModes[] =
+{
+    {Ieee1394Camera::Trigger_Mode0,	"mode0"},
+    {Ieee1394Camera::Trigger_Mode1,	"mode1"},
+    {Ieee1394Camera::Trigger_Mode2,	"mode2"},
+    {Ieee1394Camera::Trigger_Mode3,	"mode3"},
+    {Ieee1394Camera::Trigger_Mode4,	"mode4"},
+    {Ieee1394Camera::Trigger_Mode5,	"mode5"},
+    {Ieee1394Camera::Trigger_Mode14,	"mode14"},
+};
 
 struct Feature
 {
@@ -109,46 +123,31 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
     Ieee1394Camera::Format	current_format = camera.getFormat();
     Ieee1394Camera::FrameRate	current_rate   = camera.getFrameRate();
 
-    for (size_t i = 0; i < NFORMATS; ++i)
+    for (const auto& format : formats)
     {
-	u_int	inq = camera.inquireFrameRate(formats[i].format);
+      // Create submenu items for setting frame rate.	    
+	u_int	inq = camera.inquireFrameRate(format.format);
 	CmdDefs	rateCmds;
+	for (const auto& frameRate : frameRates)
+	    if (inq & frameRate.frameRate)
+		rateCmds.push_back(CmdDef(
+				       C_MenuItem, frameRate.name,
+				       frameRate.frameRate,
+				       (current_format == format.format) &&
+				       (current_rate == frameRate.frameRate)));
 	
-	for (size_t j = 0; j < NRATES; ++j)
-	{
-	    if (inq & frameRates[j].frameRate)
-	    {
-	      // Create submenu items for setting frame rate.
-		rateCmds.push_back(CmdDef());
-		CmdDef&	rateCmd = rateCmds.back();
-		
-		rateCmd.type = C_MenuItem;
-		rateCmd.name = frameRates[j].name;
-		rateCmd.id   = frameRates[j].frameRate;
-		rateCmd.val  = ((current_format == formats[i].format) &&
-				(current_rate   == frameRates[j].frameRate));
-	    }
-	}
-	
+      // Create menu items for setting format.	
 	if (!rateCmds.empty())
-	{
-	  // Create menu items for setting format.
-	    cmds.push_back(CmdDef());
-	    CmdDef&	cmd = cmds.back();
-
-	    cmd.type	= C_MenuItem;
-	    cmd.name	= formats[i].name;
-	    cmd.id	= formats[i].format;
-	    cmd.subcmds = rateCmds;
-	}
+	    cmds.push_back(CmdDef(C_MenuItem, format.name,
+				  format.format, current_format, rateCmds));
     }
 
     return cmds;
 }
 
 template <> void
-CmdSVC_impl<Ieee1394CameraArray>::addCmds(const camera_type& camera,
-					  CmdDefs& cmds)
+CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
+						 CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
     
@@ -161,12 +160,18 @@ CmdSVC_impl<Ieee1394CameraArray>::addCmds(const camera_type& camera,
 	{
 	    if (feature.id == Ieee1394Camera::TRIGGER_MODE)
 	    {
-		cmds.push_back(CmdDef(C_Label, feature.name, feature.id));
+		cmds.push_back(CmdDef(C_MenuButton, feature.name, feature.id));
 		CmdDef&	cmd = cmds.back();
 	    
 		cmd.attrs = CA_NoBorder;
 		cmd.gridx = 0;
 		cmd.gridy = y;
+		
+		for (const auto& triggerMode : triggerModes)
+		    if (inq & triggerMode.triggerMode)
+			cmd.subcmds.push_back(CmdDef(C_MenuItem,
+						     triggerMode.name,
+						     triggerMode.triggerMode));
 	    }
 	    else if (inq & Ieee1394Camera::Manual)
 	    {

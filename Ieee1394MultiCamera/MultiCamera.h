@@ -87,13 +87,16 @@ MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     static int	n = 0;
     std::cerr << "MultiCamera::onExecute: " << n++ << std::endl;
 #endif
-    exec(_cameras, &camera_type::snap);		// invalid for MacOS
-    for (size_t i = 0; i < _cameras.size(); ++i)
+  //if (_cameras.size() && _cameras[0]->inContinuousShot())
     {
-	_cameras[i]->captureRaw(_images[i].data.get_buffer());
-	_images[i].tm = getTime(*_cameras[i]);
+	exec(_cameras, &camera_type::snap);		// invalid for MacOS
+	for (size_t i = 0; i < _cameras.size(); ++i)
+	{
+	    _cameras[i]->captureRaw(_images[i].data.get_buffer());
+	    _images[i].tm = getTime(*_cameras[i]);
+	}
+	_imagesOut.write();
     }
-    _imagesOut.write();
 
     return RTC::RTC_OK;
 }
