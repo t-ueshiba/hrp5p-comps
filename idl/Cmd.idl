@@ -14,8 +14,8 @@ interface Controller
 {
     string	getCmds()						;
     
-    void	getValues(out   Values vals)				;
-    void	setValues(inout Values vals)				;
+    void	setValues(in unsigned long id, in  Values vals)		;
+    Values	getValues(in unsigned long id)				;
 };
 
 };
