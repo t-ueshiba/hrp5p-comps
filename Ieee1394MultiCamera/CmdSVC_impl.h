@@ -23,7 +23,6 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
   private:
     typedef typename CAMERAS::camera_type	camera_type;
     typedef Cmd::Values				Values;
-    typedef Cmd::Values_out			Values_out;
     
     enum
     {
@@ -43,10 +42,8 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     static CmdDefs	createFormatCmds(const camera_type& camera)	;
     static void		addFeatureCmds(const camera_type& camera,
 				       CmdDefs& cmds)			;
-    void		getFormat(Values_out vals)		const	;
-    void		setFormat(Values& vals)				;
-    void		getFeatureValue(Values_out vals)	const	;
-    void		setFeatureValue(Values& vals)			;
+    void		getFormat(CmdId id, Values& vals)	const	;
+    void		setFormat(CmdId id, const Values& vals)		;
     
   private:
     CAMERAS&	_cameras;
@@ -103,7 +100,7 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	_n = vals[0];
 	break;
       default:
-	handleCameraFeatures(_cameras, id, vals[0], _n);
+	setCameraFeatureValue(_cameras, id, vals[0], _n);
 	break;
     }
 }
@@ -112,9 +109,9 @@ template <class CAMERAS> Cmd::Values*
 CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): id = " << id << std::endl;
+    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): id = " << id;
 #endif
-    Cmd::Values	vals;
+    Values	vals;
     
     switch (id)
     {
@@ -130,11 +127,17 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 	vals[0] = _n;
 	break;
       default:
-      //getFeatureValue(id, vals);
+	vals.length(1);
+	vals[0] = getCameraFeatureValue(_cameras, id, _n);
 	break;
     }
-
-    return new Cmd::Values(vals);
+#ifdef DEBUG
+    std::cerr << ", vals =";
+    for (CORBA::ULong i = 0; i < vals.length(); ++i)
+	std::cerr << ' ' << vals[i];
+    std::cerr << std::endl;
+#endif
+    return new Values(vals);
 }
 
 template <class CAMERAS> typename TU::v::CmdDefs
@@ -147,31 +150,25 @@ CmdSVC_impl<CAMERAS>::createCmds() const
     for (size_t i = 0; i < _cameras.size(); ++i)
 	cameraChoiceCmds.push_back(CmdDef(C_RadioButton,
 					  std::string("cam-") + char('0' + i),
-					  i, 0, noSub, 0, 1, 1, 1, CA_None,
+					  i, noSub, 0, 1, 1, 1, CA_None,
 					  i, 0, 1, 1, 0));
-    cameraChoiceCmds.push_back(CmdDef(C_RadioButton, "all", _cameras.size(), 0,
+    cameraChoiceCmds.push_back(CmdDef(C_RadioButton, "all", _cameras.size(),
 				      noSub, 0, 1, 1, 1, CA_None,
 				      _cameras.size(), 0, 1, 1, 0));
 
     CmdDefs	cmds =
     {
-	{C_ToggleButton, "Continuous shot", c_ContinuousShot, 0, noSub,
+	{C_ToggleButton, "Continuous shot", c_ContinuousShot, noSub,
 	 0, 1, 1, 1, CA_None, 0, 0, 1, 1, 0},
-	{C_MenuButton, "Format", c_Format, 0, createFormatCmds(*_cameras[0]),
+	{C_Button, "Format", c_Format, createFormatCmds(*_cameras[0]),
 	 0, 1, 1, 1, CA_None, 0, 1, 1, 1, 0},
-	{C_ChoiceFrame,  "", c_CameraChoice, int(_cameras.size()),
-	 cameraChoiceCmds, 0, int(_cameras.size()), 1, 1, CA_None,
-	 0, 2, 1, 1, 0},
+	{C_GroupBox,  "", c_CameraChoice, cameraChoiceCmds,
+	 0, int(_cameras.size()), 1, 1, CA_None, 0, 2, 1, 1, 0},
     };
 
     addFeatureCmds(*_cameras[0], cmds);
 
     return cmds;
-}
-
-template <class CAMERAS> void
-CmdSVC_impl<CAMERAS>::getFeatureValue(Values_out vals) const
-{
 }
     
 }

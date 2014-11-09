@@ -1,8 +1,8 @@
 /*
  *  $Id$
  */
-#ifndef MULTICAMERA_H
-#define MULTICAMERA_H
+#ifndef __TU_MULTICAMERA_H
+#define __TU_MULTICAMERA_H
 
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -74,8 +74,6 @@ MultiCamera<CAMERAS>::onActivated(RTC::UniqueId ec_id)
     _images.length(_cameras.size());
     for (size_t i = 0; i < _cameras.size(); ++i)
 	_images[i].data.length(setImageHeader(*_cameras[i], _images[i]));
-
-    exec(_cameras, &camera_type::continuousShot);
     
     return RTC::RTC_OK;
 }
@@ -83,11 +81,12 @@ MultiCamera<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 {
-#ifdef DEBUG
+  //#ifdef DEBUG
+#if 0
     static int	n = 0;
     std::cerr << "MultiCamera::onExecute: " << n++ << std::endl;
 #endif
-  //if (_cameras.size() && _cameras[0]->inContinuousShot())
+    if (_cameras.size() && _cameras[0]->inContinuousShot())
     {
 	exec(_cameras, &camera_type::snap);		// invalid for MacOS
 	for (size_t i = 0; i < _cameras.size(); ++i)
@@ -149,4 +148,4 @@ MultiCamera<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
 }
 #endif
 }
-#endif // MULTICAMERA_H
+#endif	// !__TU_MULTICAMERA_H

@@ -120,9 +120,6 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
 {
     CmdDefs	cmds;
     
-    Ieee1394Camera::Format	current_format = camera.getFormat();
-    Ieee1394Camera::FrameRate	current_rate   = camera.getFrameRate();
-
     for (const auto& format : formats)
     {
       // Create submenu items for setting frame rate.	    
@@ -130,16 +127,13 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
 	CmdDefs	rateCmds;
 	for (const auto& frameRate : frameRates)
 	    if (inq & frameRate.frameRate)
-		rateCmds.push_back(CmdDef(
-				       C_MenuItem, frameRate.name,
-				       frameRate.frameRate,
-				       (current_format == format.format) &&
-				       (current_rate == frameRate.frameRate)));
+		rateCmds.push_back(CmdDef(C_MenuItem, frameRate.name,
+					  frameRate.frameRate));
 	
       // Create menu items for setting format.	
 	if (!rateCmds.empty())
 	    cmds.push_back(CmdDef(C_MenuItem, format.name,
-				  format.format, current_format, rateCmds));
+				  format.format, rateCmds));
     }
 
     return cmds;
@@ -160,7 +154,7 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 	{
 	    if (feature.id == Ieee1394Camera::TRIGGER_MODE)
 	    {
-		cmds.push_back(CmdDef(C_MenuButton, feature.name, feature.id));
+		cmds.push_back(CmdDef(C_Button, feature.name, feature.id));
 		CmdDef&	cmd = cmds.back();
 	    
 		cmd.attrs = CA_NoBorder;
@@ -191,15 +185,11 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 
 		    u_int	min, max;
 		    camera.getMinMax(feature.id, min, max);
-		    cmd.min  = min;
-		    cmd.max  = max;
+		    cmd.min = min;
+		    cmd.max = max;
 		    
 		    if (feature.id == Ieee1394Camera::WHITE_BALANCE)
 		    {
-			u_int	ub, vr;
-			camera.getWhiteBalance(ub, vr);
-			cmd.val = ub;
-			
 			cmds.push_back(CmdDef());
 			CmdDef&	vrCmd = cmds.back();
 			++i;	// skip feature
@@ -207,15 +197,13 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 			
 			vrCmd.type  = C_Slider;
 			vrCmd.name  = features[i].name;
-			vrCmd.id    = features[i].id + 0x02;
-			vrCmd.val   = vr;
+			vrCmd.id    = features[i].id
+				    + IEEE1394CAMERA_OFFSET_VR;
 			vrCmd.min   = min;
 			vrCmd.max   = max;
 			vrCmd.gridx = 0;
 			vrCmd.gridy = y;
 		    }
-		    else
-			cmd.val = camera.getValue(feature.id);
 		} // (inq & Ieee1394Camera::ReadOut)
 		else
 		{
@@ -228,8 +216,7 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 		{
 		    cmds.push_back(CmdDef(C_ToggleButton, "On",
 					  feature.id
-					  + IEEE1394CAMERA_OFFSET_ONOFF,
-					  camera.isTurnedOn(feature.id)));
+					  + IEEE1394CAMERA_OFFSET_ONOFF));
 		    CmdDef&	onOffCmd = cmds.back();
 
 		    onOffCmd.gridx = x++;
@@ -240,8 +227,7 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 		{
 		    cmds.push_back(CmdDef(C_ToggleButton, "Auto",
 					  feature.id
-					  + IEEE1394CAMERA_OFFSET_AUTO,
-					  camera.isAuto(feature.id)));
+					  + IEEE1394CAMERA_OFFSET_AUTO));
 		    CmdDef&	autoCmd = cmds.back();
 
 		    autoCmd.gridx = x;

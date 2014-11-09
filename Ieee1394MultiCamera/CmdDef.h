@@ -21,20 +21,16 @@ enum CmdType
 {
     C_Null,
     
-    C_Button,			// Button
-    C_ChoiceFrame,		// Choice frame
-    C_ChoiceMenuButton,		// A choice menu button
-    C_Frame,			// General purpose frame
-    C_Icon,			// A display only Icon
     C_Label,			// Regular text label
+    C_Button,			// Button
+    C_ToggleButton,		// A toggle button
+    C_GroupBox,			// A set of radio buttons or check boxes
+    C_RadioButton,		// Radio button (exclusive)
+    C_CheckBox,			// Check box (non-exclusive)
     C_List,			// List of items (scrollable)
-    C_Menu,			// Menu
-    C_MenuButton,		// Menu button
     C_MenuItem,			// Menu item
-    C_RadioButton,		// Radio button
     C_Slider,			// Slider to enter value
     C_TextIn,			// Text input field
-    C_ToggleButton,		// A toggle button
 };
 
 enum CmdAttributes
@@ -106,18 +102,18 @@ const CmdId	M_Default	= 32157;
 ************************************************************************/
 struct CmdDef;
 typedef std::vector<CmdDef>	CmdDefs;
-
+    
 struct CmdDef
 {
     typedef int		value_type;
 
     CmdDef(CmdType type_=C_Null, const std::string& name_="",
-	   CmdId id_=0, value_type val_=0, CmdDefs subcmds_=CmdDefs(),
+	   CmdId id_=0, CmdDefs subcmds_=CmdDefs(),
 	   value_type min_=0, value_type max_=1,
 	   value_type step_=1, u_int div_=1, u_int attrs_=CA_None,
 	   size_t gridx_=0, size_t gridy_=0,
 	   size_t gridWidth_=1, size_t gridHeight_=1, size_t size_=0)
-	:type(type_), name(name_), id(id_), val(val_), subcmds(subcmds_),
+	:type(type_), name(name_), id(id_), subcmds(subcmds_),
 	 min(min_), max(max_), step(step_), div(div_), attrs(attrs_),
 	 gridx(gridx_), gridy(gridy_),
 	 gridWidth(gridWidth_), gridHeight(gridHeight_), size(size_)	{}
@@ -128,7 +124,6 @@ struct CmdDef
 	ar & BOOST_SERIALIZATION_NVP(type);
 	ar & BOOST_SERIALIZATION_NVP(name);
 	ar & BOOST_SERIALIZATION_NVP(id);
-	ar & BOOST_SERIALIZATION_NVP(val);
 	ar & BOOST_SERIALIZATION_NVP(min);
 	ar & BOOST_SERIALIZATION_NVP(max);
 	ar & BOOST_SERIALIZATION_NVP(step);
@@ -145,7 +140,6 @@ struct CmdDef
     CmdType	type;
     std::string	name;
     CmdId	id;
-    value_type	val;
     CmdDefs	subcmds;
     value_type	min;
     value_type	max;
@@ -177,16 +171,15 @@ operator <<(std::ostream& out, const CmdDefs& cmds)
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDef& cmd)
 {
-    out << cmd.name << '[' << cmd.id << "]: ";
+    out << cmd.name << ": " << cmd.id << "\t[";
     if (cmd.div == 1)
-	out << cmd.val << " [" << cmd.min << ',' << cmd.max << ':' << cmd.step;
+	out << cmd.min << ',' << cmd.max << ':' << cmd.step;
     else
-	out << float(cmd.val) /float(cmd.div) << " ["
-	    << float(cmd.min) /float(cmd.div) << ","
+	out << float(cmd.min) /float(cmd.div) << ','
 	    << float(cmd.max) /float(cmd.div) << ':'
 	    << float(cmd.step)/float(cmd.div);
-    return out << "]@"  << cmd.gridWidth << 'x' << cmd.gridHeight
-	       << '+'   << cmd.gridx	 << '+' << cmd.gridy
+    return out << "]@" << cmd.gridWidth << 'x' << cmd.gridHeight
+	       << '+'  << cmd.gridx	<< '+' << cmd.gridy
 	       << ", subcmds=" << cmd.subcmds; 
 }
 
