@@ -36,9 +36,6 @@ CmdSVC_impl<V4L2CameraArray>::createFormatCmds(const camera_type& camera)
 	    s << frameSize;
 	    fsizeCmd.name = s.str();
 	    fsizeCmd.id   = cmd.subcmds.size() - 1;
-	    fsizeCmd.val  = (camera.pixelFormat() == pixelFormat	&&
-			     frameSize.width .involves(camera.width())  &&
-			     frameSize.height.involves(camera.height()));
 	}
     }
 
@@ -50,7 +47,8 @@ CmdSVC_impl<V4L2CameraArray>::createFormatCmds(const camera_type& camera)
 }
 
 template <> void
-CmdSVC_impl<V4L2CameraArray>::addCmds(const camera_type& camera, CmdDefs& cmds)
+CmdSVC_impl<V4L2CameraArray>::addFeatureCmds(const camera_type& camera,
+					     CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
 
@@ -61,7 +59,6 @@ CmdSVC_impl<V4L2CameraArray>::addCmds(const camera_type& camera, CmdDefs& cmds)
 	
 	cmd.name  = camera.getName(feature);
 	cmd.id	  = feature;
-	cmd.val   = camera.getValue(feature);
 	cmd.gridy = y;
 	
 	V4L2Camera::MenuItemRange
@@ -70,21 +67,20 @@ CmdSVC_impl<V4L2CameraArray>::addCmds(const camera_type& camera, CmdDefs& cmds)
 	if (menuItems.first == menuItems.second)
 	{
 	    int	min, max, step;
+
 	    camera.getMinMaxStep(feature, min, max, step);
+	    cmd.min  = min;
+	    cmd.max  = max;
+	    cmd.step = step;
 
 	    if (min == 0 && max == 1)
 		cmd.type = C_ToggleButton;
 	    else
-	    {
 		cmd.type = C_Slider;
-		cmd.min  = min;
-		cmd.max  = max;
-		cmd.step = step;
-	    }
 	}
 	else
 	{
-	    cmd.type = C_ChoiceMenuButton;
+	    cmd.type = C_Button;
 
 	    int	i = 0;
 	    BOOST_FOREACH (const V4L2Camera::MenuItem& menuItem, menuItems)
@@ -94,7 +90,6 @@ CmdSVC_impl<V4L2CameraArray>::addCmds(const camera_type& camera, CmdDefs& cmds)
 
 		choiceCmd.name = menuItem.name;
 		choiceCmd.id   = menuItem.index;
-		choiceCmd.val  = (i == cmd.val);
 
 		++i;
 	    }

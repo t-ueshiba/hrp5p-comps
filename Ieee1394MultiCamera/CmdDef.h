@@ -19,17 +19,15 @@ namespace v
 {
 enum CmdType
 {
-    C_Null,
-    
     C_Label,			// Regular text label
     C_Button,			// Button
     C_ToggleButton,		// A toggle button
     C_GroupBox,			// A set of radio buttons or check boxes
     C_RadioButton,		// Radio button (exclusive)
     C_CheckBox,			// Check box (non-exclusive)
-    C_List,			// List of items (scrollable)
     C_MenuItem,			// Menu item
     C_Slider,			// Slider to enter value
+    C_List,			// List of items (scrollable)
     C_TextIn,			// Text input field
 };
 
@@ -107,7 +105,7 @@ struct CmdDef
 {
     typedef int		value_type;
 
-    CmdDef(CmdType type_=C_Null, const std::string& name_="",
+    CmdDef(CmdType type_=C_Label, const std::string& name_="",
 	   CmdId id_=0, CmdDefs subcmds_=CmdDefs(),
 	   value_type min_=0, value_type max_=1,
 	   value_type step_=1, u_int div_=1, u_int attrs_=CA_None,
@@ -171,7 +169,7 @@ operator <<(std::ostream& out, const CmdDefs& cmds)
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDef& cmd)
 {
-    out << cmd.name << ": " << cmd.id << "\t[";
+    out << cmd.name << ": " << cmd.id << " [";
     if (cmd.div == 1)
 	out << cmd.min << ',' << cmd.max << ':' << cmd.step;
     else

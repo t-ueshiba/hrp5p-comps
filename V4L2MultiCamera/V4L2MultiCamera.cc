@@ -50,7 +50,7 @@ namespace TU
 *  class MultiCamera<TU::Ieee1394CameraArray>				*
 ************************************************************************/
 template <>
-MultiCamera<TU::V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
+MultiCamera<V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
@@ -62,7 +62,7 @@ MultiCamera<TU::V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
 }
 
 template <> RTC::ReturnCode_t
-MultiCamera<TU::V4L2CameraArray>::onInitialize()
+MultiCamera<V4L2CameraArray>::onInitialize()
 {
 #ifdef DEBUG
     std::cerr << "MultiCamera::onInitialize" << std::endl;
@@ -81,7 +81,7 @@ MultiCamera<TU::V4L2CameraArray>::onInitialize()
     {
 	std::ifstream	in(_cameraConfig.c_str());
 	if (!in)
-	    throw std::runtime_error("MultiCamera<TU::V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+	    throw std::runtime_error("MultiCamera<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
 
 	in >> _cameras;
     }
@@ -96,21 +96,21 @@ MultiCamera<TU::V4L2CameraArray>::onInitialize()
 }
 
 template <> size_t
-MultiCamera<TU::V4L2CameraArray>::setImageHeader(const camera_type& camera,
-						 Img::TimedImage& image)
+MultiCamera<V4L2CameraArray>::setImageHeader(const camera_type& camera,
+					     Img::TimedImage& image)
 {
     image.width  = camera.width();
     image.height = camera.height();
 
     switch (camera.pixelFormat())
     {
-      case TU::V4L2Camera::GREY:
+      case V4L2Camera::GREY:
 	image.format = Img::MONO_8;
 	return image.width * image.height;
-      case TU::V4L2Camera::YUYV:
+      case V4L2Camera::YUYV:
 	image.format = Img::YUV_422;
 	return image.width * image.height * 2;
-      case TU::V4L2Camera::RGB24:
+      case V4L2Camera::RGB24:
 	image.format = Img::RGB_24;
 	return image.width * image.height * 3;
       default:
@@ -121,7 +121,7 @@ MultiCamera<TU::V4L2CameraArray>::setImageHeader(const camera_type& camera,
 }
 
 template <> RTC::Time
-MultiCamera<TU::V4L2CameraArray>::getTime(const camera_type& camera) const
+MultiCamera<V4L2CameraArray>::getTime(const camera_type& camera) const
 {
     u_int64_t	usec = camera.arrivaltime();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),

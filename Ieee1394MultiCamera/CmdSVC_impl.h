@@ -38,7 +38,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     Cmd::Values*	getValues(CORBA::ULong id)			;
 
   private:
-    CmdDefs		createCmds()				const	;
+    CmdDefs		createCmds()					;
     static CmdDefs	createFormatCmds(const camera_type& camera)	;
     static void		addFeatureCmds(const camera_type& camera,
 				       CmdDefs& cmds)			;
@@ -117,7 +117,7 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
     {
       case c_ContinuousShot:
 	vals.length(1);
-	vals[0] = (_cameras.size() ? _cameras[0]->inContinuousShot() : 0);
+	vals[0] = exec(_cameras, &camera_type::inContinuousShot);
 	break;
       case c_Format:
       //getFormat(id, vals);
@@ -141,10 +141,12 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 }
 
 template <class CAMERAS> typename TU::v::CmdDefs
-CmdSVC_impl<CAMERAS>::createCmds() const
+CmdSVC_impl<CAMERAS>::createCmds()
 {
     if (!_cameras.size())
 	return CmdDefs();
+
+    _n = _cameras.size();	// 全カメラ同時操作モード
 
     CmdDefs	cameraChoiceCmds;
     for (size_t i = 0; i < _cameras.size(); ++i)
