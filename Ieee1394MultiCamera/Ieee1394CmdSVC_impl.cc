@@ -257,15 +257,16 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 }
 
 template <> void
-CmdSVC_impl<Ieee1394CameraArray>::getFormat(Values& vals) const
+CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
+					    Values& vals)
 {
-    if (_cameras.size() == 0)
+    if (cameras.size() == 0)
     {
 	vals.length(0);
 	return;
     }
 
-    Ieee1394Camera::Format	format = _cameras[0]->getFormat();
+    Ieee1394Camera::Format	format = cameras[0]->getFormat();
     switch (format)
     {
       case Ieee1394Camera::Format_7_0:
@@ -278,7 +279,7 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(Values& vals) const
       case Ieee1394Camera::Format_7_7:
       {
 	Ieee1394Camera::Format_7_Info
-	    info = _cameras[0]->getFormat_7_Info(format);
+	    info = cameras[0]->getFormat_7_Info(format);
 	vals.length(5);
 	vals[0] = info.u0;
 	vals[1] = info.v0;
@@ -291,7 +292,7 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(Values& vals) const
       default:
 	vals.length(2);
 	vals[0] = format;
-	vals[1] = _cameras[0]->getFrameRate();
+	vals[1] = cameras[0]->getFrameRate();
 	break;
     }
 }

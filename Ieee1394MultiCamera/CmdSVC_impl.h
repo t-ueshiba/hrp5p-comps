@@ -11,6 +11,8 @@
 
 namespace TU
 {
+template <class CAMERAS>	class MultiCamera;
+
 namespace v
 {
 /************************************************************************
@@ -30,7 +32,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     };
     
   public:
-			CmdSVC_impl(CAMERAS& cameras)			;
+			CmdSVC_impl(MultiCamera<CAMERAS>& rtc)		;
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
@@ -38,20 +40,20 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     Cmd::Values*	getValues(CORBA::ULong id)			;
 
   private:
-    CmdDefs		createCmds()					;
+    CmdDefs		createCmds(const CAMERAS& cameras)		;
     static CmdDefs	createFormatCmds(const camera_type& camera)	;
     static void		addFeatureCmds(const camera_type& camera,
 				       CmdDefs& cmds)			;
-    void		getFormat(Values& vals)			const	;
+    static void		getFormat(const CAMERAS& cameras, Values& vals)	;
     
   private:
-    CAMERAS&	_cameras;
-    size_t	_n;		// currently selected camera #
+    MultiCamera<CAMERAS>&	_rtc;
+    size_t			_n;	// currently selected camera #
 };
 
 template <class CAMERAS>
-CmdSVC_impl<CAMERAS>::CmdSVC_impl(CAMERAS& cameras)
-    :_cameras(cameras), _n(_cameras.size())
+CmdSVC_impl<CAMERAS>::CmdSVC_impl(MultiCamera<CAMERAS>& rtc)
+    :_rtc(rtc), _n(0)
 {
 }
 
@@ -68,7 +70,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
 #endif
     std::ostringstream			oss;
     boost::archive::xml_oarchive	oar(oss);
-    CmdDefs				cmds = createCmds();
+    CmdDefs				cmds = createCmds(_rtc.cameras());
     oar << BOOST_SERIALIZATION_NVP(cmds);
     
     return CORBA::string_dup(oss.str().c_str());
@@ -88,18 +90,18 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
     {
       case c_ContinuousShot:
 	if (vals[0])
-	    exec(_cameras, &camera_type::continuousShot);
+	    _rtc.continuousShot();
 	else
-	    exec(_cameras, &camera_type::stopContinuousShot);
+	    _rtc.stopContinuousShot();
 	break;
       case c_Format:
-	setCameraFormat(_cameras, vals[0], vals[1]);
+	_rtc.setFormat(vals[0], vals[1]);
 	break;
       case c_CameraChoice:
 	_n = vals[0];
 	break;
       default:
-	setCameraFeatureValue(_cameras, id, vals[0], _n);
+	_rtc.setFeatureValue(id, vals[0], _n);
 	break;
     }
 }
@@ -116,10 +118,10 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
     {
       case c_ContinuousShot:
 	vals.length(1);
-	vals[0] = exec(_cameras, &camera_type::inContinuousShot);
+	vals[0] = exec(_rtc.cameras(), &camera_type::inContinuousShot);
 	break;
       case c_Format:
-	getFormat(vals);
+	getFormat(_rtc.cameras(), vals);
 	break;
       case c_CameraChoice:
 	vals.length(1);
@@ -127,7 +129,7 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 	break;
       default:
 	vals.length(1);
-	vals[0] = getCameraFeatureValue(_cameras, id, _n);
+	vals[0] = getFeatureValue(_rtc.cameras(), id, _n);
 	break;
     }
 #ifdef DEBUG
@@ -140,34 +142,34 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 }
 
 template <class CAMERAS> typename TU::v::CmdDefs
-CmdSVC_impl<CAMERAS>::createCmds()
+CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
 {
-    if (!_cameras.size())
+    if (!cameras.size())
 	return CmdDefs();
 
-    _n = _cameras.size();	// 全カメラ同時操作モード
+    _n = cameras.size();	// 全カメラ同時操作モード
 
     CmdDefs	cameraChoiceCmds;
-    for (size_t i = 0; i < _cameras.size(); ++i)
+    for (size_t i = 0; i < cameras.size(); ++i)
 	cameraChoiceCmds.push_back(CmdDef(C_RadioButton,
 					  std::string("cam-") + char('0' + i),
 					  i, noSub, 0, 1, 1, 1, CA_None,
 					  i, 0, 1, 1, 0));
-    cameraChoiceCmds.push_back(CmdDef(C_RadioButton, "all", _cameras.size(),
+    cameraChoiceCmds.push_back(CmdDef(C_RadioButton, "all", cameras.size(),
 				      noSub, 0, 1, 1, 1, CA_None,
-				      _cameras.size(), 0, 1, 1, 0));
+				      cameras.size(), 0, 1, 1, 0));
 
     CmdDefs	cmds =
     {
 	{C_ToggleButton, "Continuous shot", c_ContinuousShot, noSub,
 	 0, 1, 1, 1, CA_None, 0, 0, 1, 1, 0},
-	{C_Button, "Format", c_Format, createFormatCmds(*_cameras[0]),
+	{C_Button, "Format", c_Format, createFormatCmds(*cameras[0]),
 	 0, 1, 1, 1, CA_None, 0, 1, 1, 1, 0},
 	{C_GroupBox,  "", c_CameraChoice, cameraChoiceCmds,
-	 0, int(_cameras.size()), 1, 1, CA_None, 0, 2, 1, 1, 0},
+	 0, int(cameras.size()), 1, 1, CA_None, 0, 2, 1, 1, 0},
     };
 
-    addFeatureCmds(*_cameras[0], cmds);
+    addFeatureCmds(*cameras[0], cmds);
 
     return cmds;
 }

@@ -99,5 +99,33 @@ CmdSVC_impl<V4L2CameraArray>::addFeatureCmds(const camera_type& camera,
     }
 }
     
+template <> void
+CmdSVC_impl<V4L2CameraArray>::getFormat(const V4L2CameraArray& cameras,
+					Values& vals)
+{
+    if (cameras.size() == 0)
+	return;
+
+    const V4L2Camera&		camera = *cameras[0];
+    V4L2Camera::PixelFormat	pixelFormat = camera.pixelFormat();
+    int				i = 0;
+    
+    BOOST_FOREACH (const V4L2Camera::FrameSize& frameSize,
+		   camera.availableFrameSizes(pixelFormat))
+    {
+	if (frameSize.width.involves(camera.width()) &&
+	    frameSize.height.involves(camera.height()))
+	{
+	    vals.length(2);
+	    vals[0] = pixelFormat;
+	    vals[1] = i;
+
+	    return;
+	}
+
+	++i;
+    }
+}
+
 }
 }

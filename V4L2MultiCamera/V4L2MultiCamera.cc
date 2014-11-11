@@ -53,10 +53,11 @@ template <>
 MultiCamera<V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
+     _mutex(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
      _images(),
      _imagesOut("TimedImages", _images),
-     _command(_cameras),
+     _command(*this),
      _commandPort("Command")
 {
 }

@@ -12,6 +12,7 @@
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
+#include <coil/Guard.h>
 #include "Img.hh"
 #include "CmdSVC_impl.h"
 
@@ -44,14 +45,22 @@ class MultiCamera : public RTC::DataFlowComponentBase
   //virtual RTC::ReturnCode_t	onReset(RTC::UniqueId ec_id)		;
   //virtual RTC::ReturnCode_t	onStateUpdate(RTC::UniqueId ec_id)	;
   //virtual RTC::ReturnCode_t	onRateChanged(RTC::UniqueId ec_id)	;
+
+    const CAMERAS&	cameras()				const	;
+    void		continuousShot()				;
+    void		stopContinuousShot()				;
+    void		setFormat(u_int id, int val)			;
+    void		setFeatureValue(u_int id, int val, size_t n)	;
     
   private:
     static size_t	setImageHeader(const camera_type& camera,
 				       Img::TimedImage& image)		;
     RTC::Time		getTime(const camera_type& camera)	const	;
+    void		allocateImages()				;
     
   private:
     CAMERAS				_cameras;
+    mutable coil::Mutex			_mutex;
     std::string				_cameraConfig;	// config var.
     int					_useTimestamp;	// config var.
     Img::TimedImages			_images;	// out data
@@ -71,9 +80,7 @@ MultiCamera<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCamera::onActivated" << std::endl;
 #endif
-    _images.length(_cameras.size());
-    for (size_t i = 0; i < _cameras.size(); ++i)
-	_images[i].data.length(setImageHeader(*_cameras[i], _images[i]));
+    allocateImages();
     
     return RTC::RTC_OK;
 }
@@ -86,6 +93,8 @@ MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     static int	n = 0;
     std::cerr << "MultiCamera::onExecute: " << n++ << std::endl;
 #endif
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    
     if (_cameras.size() && _cameras[0]->inContinuousShot())
     {
 	exec(_cameras, &camera_type::snap);		// invalid for MacOS
@@ -147,5 +156,49 @@ MultiCamera<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 #endif
+
+template <class CAMERAS> inline const CAMERAS&
+MultiCamera<CAMERAS>::cameras() const
+{
+    return _cameras;
+}
+
+template <class CAMERAS> inline void
+MultiCamera<CAMERAS>::continuousShot()
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    exec(_cameras, &camera_type::continuousShot);
+}
+    
+template <class CAMERAS> inline void
+MultiCamera<CAMERAS>::stopContinuousShot()
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    exec(_cameras, &camera_type::stopContinuousShot);
+}
+
+template <class CAMERAS> inline void
+MultiCamera<CAMERAS>::setFormat(u_int id, int val)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    TU::setFormat(_cameras, id, val);
+    allocateImages();
+}
+    
+template <class CAMERAS> inline void
+MultiCamera<CAMERAS>::setFeatureValue(u_int id, int val, size_t n)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    TU::setFeatureValue(_cameras, id, val, n);
+}
+    
+template <class CAMERAS> void
+MultiCamera<CAMERAS>::allocateImages()
+{
+    _images.length(_cameras.size());
+    for (size_t i = 0; i < _cameras.size(); ++i)
+	_images[i].data.length(setImageHeader(*_cameras[i], _images[i]));
+}
+
 }
 #endif	// !__TU_MULTICAMERA_H

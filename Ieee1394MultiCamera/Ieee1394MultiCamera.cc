@@ -55,11 +55,12 @@ template <>
 MultiCamera<Ieee1394CameraArray>::MultiCamera(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
+     _mutex(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
      _useTimestamp(DEFAULT_USE_TIMESTAMP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
-     _command(_cameras),
+     _command(*this),
      _commandPort("Command")
 {
 }
