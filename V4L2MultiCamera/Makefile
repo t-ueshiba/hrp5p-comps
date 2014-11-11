@@ -16,7 +16,7 @@ CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
 CFLAGS		= -g
 NVCCFLAGS	= -g
 ifneq ($(findstring icpc,$(CXX)),)
-  CFLAGS	= -g #-O3
+  CFLAGS	= -O3
   NVCCFLAGS	= -O			# must < -O2
   CPPFLAGS     += -DSSE3
 endif
@@ -56,14 +56,10 @@ EXTHDRS		= ../Ieee1394MultiCamera/Cmd.hh \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
 HDRS		=
-SRCS		= V4L2Camera.cc \
-		V4L2CameraUtility.cc \
-		V4L2CmdSVC_impl.cc \
+SRCS		= V4L2CmdSVC_impl.cc \
 		V4L2MultiCamera.cc \
 		V4L2MultiCameraComp.cc
-OBJS		= V4L2Camera.o \
-		V4L2CameraUtility.o \
-		V4L2CmdSVC_impl.o \
+OBJS		= V4L2CmdSVC_impl.o \
 		V4L2MultiCamera.o \
 		V4L2MultiCameraComp.o
 
@@ -72,20 +68,6 @@ include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
-V4L2Camera.o: /usr/local/include/TU/V4L2++.h \
-	/usr/local/include/TU/Image++.h /usr/local/include/TU/types.h \
-	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h
-V4L2CameraUtility.o: /usr/local/include/TU/V4L2CameraArray.h \
-	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
-	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h
 V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \

@@ -49,7 +49,8 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/mmInstructions.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
-HDRS		= CmdDef.h \
+HDRS		= CamSVC_impl.h \
+		CmdDef.h \
 		CmdSVC_impl.h \
 		MultiCamera.h
 SRCS		= Ieee1394CmdSVC_impl.cc \
