@@ -4,8 +4,6 @@
 #ifndef __TU_CMD_IDL
 #define __TU_CMD_IDL
 
-#include <BasicDataType.idl>
-
 module Cmd
 {
 typedef sequence<long>	Values;
@@ -14,10 +12,10 @@ interface Controller
 {
     string	getCmds()						;
     
-    void	setValues(in unsigned long id, in  Values vals)		;
+    boolean	setValues(in unsigned long id, in Values vals)		;
     Values	getValues(in unsigned long id)				;
 };
 
 };
 
-#endif	/* __TU_CAM_IDL	*/
+#endif	/* !__TU_CMD_IDL	*/

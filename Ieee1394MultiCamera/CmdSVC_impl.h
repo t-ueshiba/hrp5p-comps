@@ -36,7 +36,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
-    void		setValues(CORBA::ULong id, const Values& vals)	;
+    CORBA::Boolean	setValues(CORBA::ULong id, const Values& vals)	;
     Cmd::Values*	getValues(CORBA::ULong id)			;
 
   private:
@@ -76,7 +76,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
     return CORBA::string_dup(oss.str().c_str());
 }
 
-template <class CAMERAS> void
+template <class CAMERAS> CORBA::Boolean
 CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 {
 #ifdef DEBUG
@@ -86,6 +86,8 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	std::cerr << ' ' << vals[i];
     std::cerr << std::endl;
 #endif
+    CORBA::Boolean	ret = false;
+    
     switch (id)
     {
       case c_ContinuousShot:
@@ -99,11 +101,14 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	break;
       case c_CameraChoice:
 	_n = vals[0];
+	ret = true;
 	break;
       default:
 	_rtc.setFeatureValue(id, vals[0], _n);
 	break;
     }
+
+    return ret;
 }
 
 template <class CAMERAS> Cmd::Values*

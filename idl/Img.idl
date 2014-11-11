@@ -28,4 +28,4 @@ typedef sequence<TimedImage>	TimedImages;
 
 };
 
-#endif	/* __TU_IMG_IDL	*/
+#endif	/* !__TU_IMG_IDL	*/
