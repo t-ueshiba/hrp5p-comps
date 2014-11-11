@@ -68,6 +68,15 @@ static FrameRate frameRates[] =
     {Ieee1394Camera::FrameRate_x,	"custom frame rate"}
 };
 
+static CmdDefs	roiCmds =
+{
+    {C_Slider, "u0",		0},
+    {C_Slider, "v0",		1},
+    {C_Slider, "width",		2},
+    {C_Slider, "height",	3},
+    {C_Button, "pixel format",	4}
+};
+
 struct TriggerMode
 {
     Ieee1394Camera::TriggerMode	triggerMode;
@@ -127,8 +136,11 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
 	CmdDefs	rateCmds;
 	for (const auto& frameRate : frameRates)
 	    if (inq & frameRate.frameRate)
-		rateCmds.push_back(CmdDef(C_MenuItem, frameRate.name,
-					  frameRate.frameRate));
+	      /*if (frameRate.frameRate == Ieee1394Camera::FrameRate_x)
+		    rateCmds = roiCmds;
+		    else*/
+		    rateCmds.push_back(CmdDef(C_MenuItem, frameRate.name,
+					      frameRate.frameRate));
 	
       // Create menu items for setting format.	
 	if (!rateCmds.empty())
@@ -152,13 +164,14 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 	
 	if (inq & Ieee1394Camera::Presence)
 	{
+	    size_t	x = 0;
+	    
 	    if (feature.id == Ieee1394Camera::TRIGGER_MODE)
 	    {
 		cmds.push_back(CmdDef(C_Button, feature.name, feature.id));
 		CmdDef&	cmd = cmds.back();
 	    
-		cmd.attrs = CA_NoBorder;
-		cmd.gridx = 0;
+		cmd.gridx = x++;
 		cmd.gridy = y;
 		
 		for (const auto& triggerMode : triggerModes)
@@ -171,7 +184,6 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 	    {
 		cmds.push_back(CmdDef());
 		CmdDef&	cmd = cmds.back();
-		size_t	x   = 0;
 
 		cmd.name  = feature.name;
 		cmd.id	  = feature.id;
@@ -211,32 +223,76 @@ CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
 		    cmd.type  = C_Label;
 		    cmd.attrs = CA_NoBorder;
 		} // !(inq & Ieee1394Camera::ReadOut)
-
-		if (inq & Ieee1394Camera::OnOff)
-		{
-		    cmds.push_back(CmdDef(C_ToggleButton, "On",
-					  feature.id
-					  + IEEE1394CAMERA_OFFSET_ONOFF));
-		    CmdDef&	onOffCmd = cmds.back();
-
-		    onOffCmd.gridx = x++;
-		    onOffCmd.gridy = y;
-		}
-
-		if (inq & Ieee1394Camera::Auto)
-		{
-		    cmds.push_back(CmdDef(C_ToggleButton, "Auto",
-					  feature.id
-					  + IEEE1394CAMERA_OFFSET_AUTO));
-		    CmdDef&	autoCmd = cmds.back();
-
-		    autoCmd.gridx = x;
-		    autoCmd.gridy = y;
-		}
 	    } // (inq & Ieee1394Camera::Manual)
 
+	    if (inq & Ieee1394Camera::OnOff)
+	    {
+		cmds.push_back(CmdDef(C_ToggleButton, "On",
+				      feature.id
+				      + IEEE1394CAMERA_OFFSET_ONOFF));
+		CmdDef&	onOffCmd = cmds.back();
+
+		onOffCmd.gridx = x++;
+		onOffCmd.gridy = y;
+	    }
+
+	    if (
+		(inq & Ieee1394Camera::Auto))
+	    {
+		cmds.push_back(CmdDef(C_ToggleButton,
+				      (feature.id ==
+				       Ieee1394Camera::TRIGGER_MODE ?
+				       "Polarity(+)" : "Auto"),
+				      feature.id
+				      + IEEE1394CAMERA_OFFSET_AUTO));
+		CmdDef&	autoCmd = cmds.back();
+
+		autoCmd.gridx = x;
+		autoCmd.gridy = y;
+	    }
+		
 	    ++y;
 	} // (inq & Ieee1394Camera::Presence)
+    }
+}
+
+template <> void
+CmdSVC_impl<Ieee1394CameraArray>::getFormat(Values& vals) const
+{
+    if (_cameras.size() == 0)
+    {
+	vals.length(0);
+	return;
+    }
+
+    Ieee1394Camera::Format	format = _cameras[0]->getFormat();
+    switch (format)
+    {
+      case Ieee1394Camera::Format_7_0:
+      case Ieee1394Camera::Format_7_1:
+      case Ieee1394Camera::Format_7_2:
+      case Ieee1394Camera::Format_7_3:
+      case Ieee1394Camera::Format_7_4:
+      case Ieee1394Camera::Format_7_5:
+      case Ieee1394Camera::Format_7_6:
+      case Ieee1394Camera::Format_7_7:
+      {
+	Ieee1394Camera::Format_7_Info
+	    info = _cameras[0]->getFormat_7_Info(format);
+	vals.length(5);
+	vals[0] = info.u0;
+	vals[1] = info.v0;
+	vals[2] = info.width;
+	vals[3] = info.height;
+	vals[4] = info.pixelFormat;
+      }
+	break;
+	
+      default:
+	vals.length(2);
+	vals[0] = format;
+	vals[1] = _cameras[0]->getFrameRate();
+	break;
     }
 }
 

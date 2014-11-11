@@ -42,8 +42,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     static CmdDefs	createFormatCmds(const camera_type& camera)	;
     static void		addFeatureCmds(const camera_type& camera,
 				       CmdDefs& cmds)			;
-    void		getFormat(CmdId id, Values& vals)	const	;
-    void		setFormat(CmdId id, const Values& vals)		;
+    void		getFormat(Values& vals)			const	;
     
   private:
     CAMERAS&	_cameras;
@@ -94,7 +93,7 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	    exec(_cameras, &camera_type::stopContinuousShot);
 	break;
       case c_Format:
-      //setFormat(vals);
+	setCameraFormat(_cameras, vals[0], vals[1]);
 	break;
       case c_CameraChoice:
 	_n = vals[0];
@@ -120,7 +119,7 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 	vals[0] = exec(_cameras, &camera_type::inContinuousShot);
 	break;
       case c_Format:
-      //getFormat(id, vals);
+	getFormat(vals);
 	break;
       case c_CameraChoice:
 	vals.length(1);
