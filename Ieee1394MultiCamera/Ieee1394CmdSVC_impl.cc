@@ -17,7 +17,7 @@ struct Format
     const char*			name;
     
 };
-static Format formats[] =
+static const Format formats[] =
 {
     {Ieee1394Camera::YUV444_160x120,	"160x120-YUV(4:4:4)"},
     {Ieee1394Camera::YUV422_320x240,	"320x240-YUV(4:2:2)"},
@@ -57,7 +57,7 @@ struct FrameRate
     Ieee1394Camera::FrameRate	frameRate;
     const char*			name;
 };
-static FrameRate frameRates[] =
+static const FrameRate frameRates[] =
 {
     {Ieee1394Camera::FrameRate_1_875,	"1.875fps"},
     {Ieee1394Camera::FrameRate_3_75,	"3.75fps"},
@@ -68,13 +68,24 @@ static FrameRate frameRates[] =
     {Ieee1394Camera::FrameRate_x,	"custom frame rate"}
 };
 
-static CmdDefs	roiCmds =
+struct PixelFormat
 {
-    {C_Slider, "u0",		0},
-    {C_Slider, "v0",		1},
-    {C_Slider, "width",		2},
-    {C_Slider, "height",	3},
-    {C_Button, "pixel format",	4}
+    Ieee1394Camera::PixelFormat	pixelFormat;
+    const char*			name;
+};
+static const PixelFormat pixelFormats[] =
+{
+    {Ieee1394Camera::MONO_8,		"Y(mono)"},
+    {Ieee1394Camera::YUV_411,		"YUV(4:1:1)"},
+    {Ieee1394Camera::YUV_422,		"YUV(4:2:2)"},
+    {Ieee1394Camera::YUV_444,		"YUV(4:4:4)"},
+    {Ieee1394Camera::RGB_24,		"RGB"},
+    {Ieee1394Camera::MONO_16,		"Y(mono16)"},
+    {Ieee1394Camera::RGB_48,		"RGB(color48)"},
+    {Ieee1394Camera::SIGNED_MONO_16,	"Y(signed mono16)"},
+    {Ieee1394Camera::SIGNED_RGB_48,	"RGB(signed color48)"},
+    {Ieee1394Camera::RAW_8,		"RAW(raw8)"},
+    {Ieee1394Camera::RAW_16,		"RAW(raw16)"}
 };
 
 struct TriggerMode
@@ -82,7 +93,7 @@ struct TriggerMode
     Ieee1394Camera::TriggerMode	triggerMode;
     const char*			name;
 };
-static TriggerMode triggerModes[] =
+static const TriggerMode triggerModes[] =
 {
     {Ieee1394Camera::Trigger_Mode0,	"mode0"},
     {Ieee1394Camera::Trigger_Mode1,	"mode1"},
@@ -97,9 +108,8 @@ struct Feature
 {
     Ieee1394Camera::Feature	id;
     const char*			name;
-    int				prop[3];
 };
-static Feature	features[] =
+static const Feature features[] =
 {
     {Ieee1394Camera::TRIGGER_MODE,	"Trigger mode"	 },
     {Ieee1394Camera::BRIGHTNESS,	"Brightness"	 },
@@ -136,12 +146,60 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
 	CmdDefs	rateCmds;
 	for (const auto& frameRate : frameRates)
 	    if (inq & frameRate.frameRate)
-	      /*if (frameRate.frameRate == Ieee1394Camera::FrameRate_x)
-		    rateCmds = roiCmds;
-		    else*/
-		    rateCmds.push_back(CmdDef(C_MenuItem, frameRate.name,
-					      frameRate.frameRate));
-	
+	    {
+		rateCmds.push_back(CmdDef(C_MenuItem, frameRate.name,
+					  frameRate.frameRate));
+
+		switch (format.format)
+		{
+		  case Ieee1394Camera::Format_7_0:
+		  case Ieee1394Camera::Format_7_1:
+		  case Ieee1394Camera::Format_7_2:
+		  case Ieee1394Camera::Format_7_3:
+		  case Ieee1394Camera::Format_7_4:
+		  case Ieee1394Camera::Format_7_5:
+		  case Ieee1394Camera::Format_7_6:
+		  case Ieee1394Camera::Format_7_7:
+		  {
+		    Ieee1394Camera::Format_7_Info
+				info = camera.getFormat_7_Info(format.format);
+		    CmdDefs&	roiCmds = rateCmds.back().subcmds;
+		    roiCmds.push_back(
+				CmdDef(C_Slider, "u0", c_U0, noSub,
+				       0, info.maxWidth - 1, info.unitU0, 1,
+				       CA_None, 0, 0));
+		    roiCmds.push_back(
+				CmdDef(C_Slider, "v0", c_V0, noSub,
+				       0, info.maxHeight - 1, info.unitV0, 1,
+				       CA_None, 0, 1));
+		    roiCmds.push_back(
+				CmdDef(C_Slider, "width", c_Width, noSub,
+				       0, info.maxWidth, info.unitWidth, 1,
+				       CA_None, 0, 2));
+		    roiCmds.push_back(
+				CmdDef(C_Slider, "height", c_Height, noSub,
+				       0, info.maxHeight, info.unitHeight, 1,
+				       CA_None, 0, 3));
+		    roiCmds.push_back(
+				CmdDef(C_Button,
+				       "pixel format", c_PixelFormat, noSub,
+				       0, 0, 0, 1, CA_None, 0, 4));
+
+		    CmdDefs&	pixFmtCmds = roiCmds.back().subcmds;
+		    for (const auto& pixelFormat : pixelFormats)
+			if (info.availablePixelFormats &
+			    pixelFormat.pixelFormat)
+			{
+			    pixFmtCmds.push_back(
+					   CmdDef(C_MenuItem,
+						  pixelFormat.name,
+						  pixelFormat.pixelFormat));
+			}
+		  }
+		    break;
+		} // switch (format.format)
+	    } // (inq & frameRate.frameRate)
+    
       // Create menu items for setting format.	
 	if (!rateCmds.empty())
 	    cmds.push_back(CmdDef(C_MenuItem, format.name,
@@ -152,8 +210,8 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
 }
 
 template <> void
-CmdSVC_impl<Ieee1394CameraArray>::addFeatureCmds(const camera_type& camera,
-						 CmdDefs& cmds)
+CmdSVC_impl<Ieee1394CameraArray>::addExtraCmds(const camera_type& camera,
+					       CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
     
@@ -280,12 +338,15 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
       {
 	Ieee1394Camera::Format_7_Info
 	    info = cameras[0]->getFormat_7_Info(format);
-	vals.length(5);
-	vals[0] = info.u0;
-	vals[1] = info.v0;
-	vals[2] = info.width;
-	vals[3] = info.height;
-	vals[4] = info.pixelFormat;
+
+	vals.length(7);
+	vals[0] = format;
+	vals[1] = cameras[0]->getFrameRate();
+	vals[2] = info.u0;
+	vals[3] = info.v0;
+	vals[4] = info.width;
+	vals[5] = info.height;
+	vals[6] = info.pixelFormat;
       }
 	break;
 	

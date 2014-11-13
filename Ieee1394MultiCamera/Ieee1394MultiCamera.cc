@@ -144,4 +144,33 @@ MultiCamera<Ieee1394CameraArray>::getTime(const camera_type& camera) const
     return time;
 }
 
+template <> inline void
+MultiCamera<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
+    if (vals.length() == 2)
+    {
+	TU::setFormat(_cameras, vals[0], vals[1]);
+	allocateImages();
+    }
+    else if (vals.length() == 7)
+    {
+	Ieee1394Camera::Format
+	    format7     = Ieee1394Camera::uintToFormat(vals[0]);
+	Ieee1394Camera::FrameRate
+	    frameRate   = Ieee1394Camera::uintToFrameRate(vals[1]);
+	Ieee1394Camera::PixelFormat
+	    pixelFormat = Ieee1394Camera::uintToPixelFormat(vals[6]);
+	
+	for (size_t i = 0; i < _cameras.size(); ++i)
+	    _cameras[i]->setFormat_7_ROI(format7,
+					 vals[2], vals[3], vals[4], vals[5])
+			.setFormat_7_PixelFormat(format7, pixelFormat)
+			.setFormatAndFrameRate(format7, frameRate);
+	
+	allocateImages();
+    }
+}
+    
 }

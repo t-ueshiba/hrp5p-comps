@@ -49,7 +49,7 @@ class MultiCamera : public RTC::DataFlowComponentBase
     const CAMERAS&	cameras()				const	;
     void		continuousShot()				;
     void		stopContinuousShot()				;
-    void		setFormat(u_int id, int val)			;
+    void		setFormat(const Cmd::Values& vals)		;
     void		setFeatureValue(u_int id, int val, size_t n)	;
     
   private:
@@ -177,14 +177,6 @@ MultiCamera<CAMERAS>::stopContinuousShot()
     exec(_cameras, &camera_type::stopContinuousShot);
 }
 
-template <class CAMERAS> inline void
-MultiCamera<CAMERAS>::setFormat(u_int id, int val)
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    TU::setFormat(_cameras, id, val);
-    allocateImages();
-}
-    
 template <class CAMERAS> inline void
 MultiCamera<CAMERAS>::setFeatureValue(u_int id, int val, size_t n)
 {

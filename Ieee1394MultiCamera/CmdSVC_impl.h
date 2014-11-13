@@ -28,7 +28,8 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     
     enum
     {
-	c_ContinuousShot, c_Format, c_CameraChoice,
+	c_ContinuousShot, c_Format, c_CameraSelection,
+	c_U0, c_V0, c_Width, c_Height, c_PixelFormat,
     };
     
   public:
@@ -42,8 +43,8 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
   private:
     CmdDefs		createCmds(const CAMERAS& cameras)		;
     static CmdDefs	createFormatCmds(const camera_type& camera)	;
-    static void		addFeatureCmds(const camera_type& camera,
-				       CmdDefs& cmds)			;
+    static void		addExtraCmds(const camera_type& camera,
+				     CmdDefs& cmds)			;
     static void		getFormat(const CAMERAS& cameras, Values& vals)	;
     
   private:
@@ -86,7 +87,7 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	std::cerr << ' ' << vals[i];
     std::cerr << std::endl;
 #endif
-    CORBA::Boolean	ret = false;
+    CORBA::Boolean	refresh = false;
     
     switch (id)
     {
@@ -97,18 +98,18 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	    _rtc.stopContinuousShot();
 	break;
       case c_Format:
-	_rtc.setFormat(vals[0], vals[1]);
+	_rtc.setFormat(vals);
 	break;
-      case c_CameraChoice:
+      case c_CameraSelection:
 	_n = vals[0];
-	ret = true;
+	refresh = true;
 	break;
       default:
 	_rtc.setFeatureValue(id, vals[0], _n);
 	break;
     }
 
-    return ret;
+    return refresh;
 }
 
 template <class CAMERAS> Cmd::Values*
@@ -128,7 +129,7 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
       case c_Format:
 	getFormat(_rtc.cameras(), vals);
 	break;
-      case c_CameraChoice:
+      case c_CameraSelection:
 	vals.length(1);
 	vals[0] = _n;
 	break;
@@ -149,32 +150,38 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 template <class CAMERAS> typename TU::v::CmdDefs
 CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
 {
+    CmdDefs	cmds;
+    
     if (!cameras.size())
-	return CmdDefs();
+	return cmds;
 
     _n = cameras.size();	// 全カメラ同時操作モード
 
-    CmdDefs	cameraChoiceCmds;
+  // カメラ画像出力のon/offコマンドの生成
+    cmds.push_back(CmdDef(C_ToggleButton, "Continuous shot", c_ContinuousShot,
+			  noSub, 0, 1, 1, 1, CA_None, 0, 0));
+
+  // カメラ画像フォーマットの選択コマンドの生成
+    cmds.push_back(CmdDef(C_Button, "Format", c_Format,
+			  createFormatCmds(*cameras[0]),
+			  0, 1, 1, 1, CA_None, 0, 1));
+
+  // 操作対象カメラの選択コマンドの生成
+    CmdDefs	cameraSelectionCmds;
     for (size_t i = 0; i < cameras.size(); ++i)
-	cameraChoiceCmds.push_back(CmdDef(C_RadioButton,
-					  std::string("cam-") + char('0' + i),
-					  i, noSub, 0, 1, 1, 1, CA_None,
-					  i, 0, 1, 1, 0));
-    cameraChoiceCmds.push_back(CmdDef(C_RadioButton, "all", cameras.size(),
-				      noSub, 0, 1, 1, 1, CA_None,
-				      cameras.size(), 0, 1, 1, 0));
+	cameraSelectionCmds.push_back(
+				CmdDef(C_RadioButton,
+				       std::string("cam-") + char('0' + i), i,
+				       noSub, 0, 1, 1, 1, CA_None, i));
+    cameraSelectionCmds.push_back(CmdDef(C_RadioButton, "all", cameras.size(),
+					 noSub, 0, 1, 1, 1, CA_None,
+					 cameras.size()));
+    cmds.push_back(CmdDef(C_GroupBox, "Camera selection", c_CameraSelection,
+			  cameraSelectionCmds,
+			  0, int(cameras.size()), 1, 1, CA_None, 0, 2));
 
-    CmdDefs	cmds =
-    {
-	{C_ToggleButton, "Continuous shot", c_ContinuousShot, noSub,
-	 0, 1, 1, 1, CA_None, 0, 0, 1, 1, 0},
-	{C_Button, "Format", c_Format, createFormatCmds(*cameras[0]),
-	 0, 1, 1, 1, CA_None, 0, 1, 1, 1, 0},
-	{C_GroupBox,  "", c_CameraChoice, cameraChoiceCmds,
-	 0, int(cameras.size()), 1, 1, CA_None, 0, 2, 1, 1, 0},
-    };
-
-    addFeatureCmds(*cameras[0], cmds);
+  // その他のコマンドの生成
+    addExtraCmds(*cameras[0], cmds);
 
     return cmds;
 }
