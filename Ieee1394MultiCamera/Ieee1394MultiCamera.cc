@@ -149,23 +149,23 @@ MultiCamera<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
 
-    if (vals.length() == 2)
+    if (vals.length() == 3)
     {
-	TU::setFormat(_cameras, vals[0], vals[1]);
+	TU::setFormat(_cameras, vals[1], vals[2]);
 	allocateImages();
     }
-    else if (vals.length() == 7)
+    else if (vals.length() == 8)
     {
 	Ieee1394Camera::Format
-	    format7     = Ieee1394Camera::uintToFormat(vals[0]);
+	    format7     = Ieee1394Camera::uintToFormat(vals[1]);
 	Ieee1394Camera::FrameRate
-	    frameRate   = Ieee1394Camera::uintToFrameRate(vals[1]);
+	    frameRate   = Ieee1394Camera::uintToFrameRate(vals[2]);
 	Ieee1394Camera::PixelFormat
-	    pixelFormat = Ieee1394Camera::uintToPixelFormat(vals[6]);
+	    pixelFormat = Ieee1394Camera::uintToPixelFormat(vals[7]);
 	
 	for (size_t i = 0; i < _cameras.size(); ++i)
 	    _cameras[i]->setFormat_7_ROI(format7,
-					 vals[2], vals[3], vals[4], vals[5])
+					 vals[3], vals[4], vals[5], vals[6])
 			.setFormat_7_PixelFormat(format7, pixelFormat)
 			.setFormatAndFrameRate(format7, frameRate);
 	

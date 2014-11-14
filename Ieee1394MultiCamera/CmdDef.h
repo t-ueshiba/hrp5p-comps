@@ -100,6 +100,7 @@ const CmdId	M_Default	= 32157;
 ************************************************************************/
 struct CmdDef;
 typedef std::vector<CmdDef>	CmdDefs;
+typedef std::vector<int>	Vals;
     
 struct CmdDef
 {

@@ -37,15 +37,16 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
-    CORBA::Boolean	setValues(CORBA::ULong id, const Values& vals)	;
-    Cmd::Values*	getValues(CORBA::ULong id)			;
+    CORBA::Boolean	setValues(const Values& vals)			;
+    Cmd::Values*	getValues(const Values& ids)			;
 
   private:
     CmdDefs		createCmds(const CAMERAS& cameras)		;
-    static CmdDefs	createFormatCmds(const camera_type& camera)	;
+    static CmdDefs	createFormatCmds(camera_type& camera)		;
     static void		addExtraCmds(const camera_type& camera,
 				     CmdDefs& cmds)			;
-    static void		getFormat(const CAMERAS& cameras, Values& vals)	;
+    static void		getFormat(const CAMERAS& cameras,
+				  const Values& ids, Values& vals)	;
     
   private:
     MultiCamera<CAMERAS>&	_rtc;
@@ -78,21 +79,20 @@ CmdSVC_impl<CAMERAS>::getCmds()
 }
 
 template <class CAMERAS> CORBA::Boolean
-CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
+CmdSVC_impl<CAMERAS>::setValues(const Values& vals)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::setValues(): id = " << id
-	      << ", vals =";
+    std::cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
 	std::cerr << ' ' << vals[i];
     std::cerr << std::endl;
 #endif
     CORBA::Boolean	refresh = false;
     
-    switch (id)
+    switch (vals[0])
     {
       case c_ContinuousShot:
-	if (vals[0])
+	if (vals[1])
 	    _rtc.continuousShot();
 	else
 	    _rtc.stopContinuousShot();
@@ -101,11 +101,11 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 	_rtc.setFormat(vals);
 	break;
       case c_CameraSelection:
-	_n = vals[0];
+	_n = vals[1];
 	refresh = true;
 	break;
       default:
-	_rtc.setFeatureValue(id, vals[0], _n);
+	_rtc.setFeatureValue(vals[0], vals[1], _n);
 	break;
     }
 
@@ -113,21 +113,23 @@ CmdSVC_impl<CAMERAS>::setValues(CORBA::ULong id, const Values& vals)
 }
 
 template <class CAMERAS> Cmd::Values*
-CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
+CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): id = " << id;
+    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
+    for (CORBA::ULong i = 0; i < ids.length(); ++i)
+	std::cerr << ' ' << ids[i];
 #endif
     Values	vals;
     
-    switch (id)
+    switch (ids[0])
     {
       case c_ContinuousShot:
 	vals.length(1);
 	vals[0] = exec(_rtc.cameras(), &camera_type::inContinuousShot);
 	break;
       case c_Format:
-	getFormat(_rtc.cameras(), vals);
+	getFormat(_rtc.cameras(), ids, vals);
 	break;
       case c_CameraSelection:
 	vals.length(1);
@@ -135,7 +137,7 @@ CmdSVC_impl<CAMERAS>::getValues(CORBA::ULong id)
 	break;
       default:
 	vals.length(1);
-	vals[0] = getFeatureValue(_rtc.cameras(), id, _n);
+	vals[0] = getFeatureValue(_rtc.cameras(), ids[0], _n);
 	break;
     }
 #ifdef DEBUG
@@ -171,7 +173,7 @@ CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
     for (size_t i = 0; i < cameras.size(); ++i)
 	cameraSelectionCmds.push_back(
 				CmdDef(C_RadioButton,
-				       std::string("cam-") + char('0' + i), i,
+				       std::string(1, char('0' + i)), i,
 				       noSub, 0, 1, 1, 1, CA_None, i));
     cameraSelectionCmds.push_back(CmdDef(C_RadioButton, "all", cameras.size(),
 					 noSub, 0, 1, 1, 1, CA_None,

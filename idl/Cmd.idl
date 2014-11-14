@@ -12,8 +12,8 @@ interface Controller
 {
     string	getCmds()						;
     
-    boolean	setValues(in unsigned long id, in Values vals)		;
-    Values	getValues(in unsigned long id)				;
+    boolean	setValues(in Values vals)				;
+    Values	getValues(in Values ids)				;
 };
 
 };

@@ -135,7 +135,7 @@ static const size_t	NFEATURES = sizeof(features) / sizeof(features[0]);
 *  class CmdSVC_impl<Ieee1394CameraArray>				*
 ************************************************************************/
 template <> CmdDefs
-CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(const camera_type& camera)
+CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(camera_type& camera)
 {
     CmdDefs	cmds;
     
@@ -316,7 +316,7 @@ CmdSVC_impl<Ieee1394CameraArray>::addExtraCmds(const camera_type& camera,
 
 template <> void
 CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
-					    Values& vals)
+					    const Values& ids, Values& vals)
 {
     if (cameras.size() == 0)
     {
@@ -324,7 +324,15 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
 	return;
     }
 
-    Ieee1394Camera::Format	format = cameras[0]->getFormat();
+    Ieee1394Camera::Format
+	format = (ids.length() <= 1 ?
+		  cameras[0]->getFormat() :
+		  Ieee1394Camera::uintToFormat(ids[1]));
+    Ieee1394Camera::FrameRate
+	frameRate = (ids.length() <= 2 ?
+		     cameras[0]->getFrameRate() :
+		     Ieee1394Camera::uintToFrameRate(ids[2]));
+    
     switch (format)
     {
       case Ieee1394Camera::Format_7_0:
@@ -338,10 +346,9 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
       {
 	Ieee1394Camera::Format_7_Info
 	    info = cameras[0]->getFormat_7_Info(format);
-
 	vals.length(7);
 	vals[0] = format;
-	vals[1] = cameras[0]->getFrameRate();
+	vals[1] = frameRate;
 	vals[2] = info.u0;
 	vals[3] = info.v0;
 	vals[4] = info.width;
@@ -353,7 +360,7 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
       default:
 	vals.length(2);
 	vals[0] = format;
-	vals[1] = cameras[0]->getFrameRate();
+	vals[1] = frameRate;
 	break;
     }
 }
