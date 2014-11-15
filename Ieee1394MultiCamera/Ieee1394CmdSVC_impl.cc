@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include "TU/Ieee1394CameraArray.h"
-#include "CmdSVC_impl.h"
+#include "MultiCamera.h"
 
 namespace TU
 {
@@ -133,7 +133,7 @@ static const Feature features[] =
 *  class CmdSVC_impl<Ieee1394CameraArray>				*
 ************************************************************************/
 template <> CmdDefs
-CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(camera_type& camera)
+CmdSVC_impl<Ieee1394CameraArray>::createFormatItems(camera_type& camera)
 {
     CmdDefs	cmds;
     
@@ -205,7 +205,7 @@ CmdSVC_impl<Ieee1394CameraArray>::createFormatCmds(camera_type& camera)
 }
 
 template <> void
-CmdSVC_impl<Ieee1394CameraArray>::addExtraCmds(const camera_type& camera,
+CmdSVC_impl<Ieee1394CameraArray>::addOtherCmds(const camera_type& camera,
 					       CmdDefs& cmds)
 {
     const size_t	NFEATURES = sizeof(features) / sizeof(features[0]);
@@ -310,15 +310,14 @@ CmdSVC_impl<Ieee1394CameraArray>::addExtraCmds(const camera_type& camera,
     }
 }
 
-template <> void
-CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
-					    const Values& ids, Values& vals)
+template <> Cmd::Values
+CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Values& ids) const
 {
+    const Ieee1394CameraArray&	cameras = _rtc.cameras();
+    Values			vals;
+    
     if (cameras.size() == 0)
-    {
-	vals.length(0);
-	return;
-    }
+	return vals;
 
     if (ids.length() == 1)
     {
@@ -358,6 +357,18 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Ieee1394CameraArray& cameras,
 	    break;
 	}
     }
+
+    return vals;
+}
+
+template <> Cmd::Values
+CmdSVC_impl<Ieee1394CameraArray>::getOtherValues(const Values& ids) const
+{
+    Values	vals;
+    vals.length(1);
+    vals[0] = TU::getFeatureValue(_rtc.cameras(), ids[0], _n);
+
+    return vals;
 }
 
 }

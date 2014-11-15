@@ -132,17 +132,18 @@ MultiCamera<V4L2CameraArray>::getTime(const camera_type& camera) const
 }
 
 template <> inline void
-MultiCamera<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
+MultiCamera<V4L2CameraArray>::setOtherValues(const Cmd::Values& vals, size_t n)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
-
     if (vals[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+    {
 	for (size_t i = 0; i < _cameras.size(); ++i)
 	    _cameras[i]->setROI(vals[1], vals[2], vals[3], vals[4]);
+	allocateImages();
+    }
     else
-	TU::setFormat(_cameras, vals[0], vals[1]);
-
-    allocateImages();
+	TU::setFeatureValue(_cameras, vals[0], vals[1], n);
 }
+    
 
 }

@@ -3,7 +3,7 @@
  */
 #include <boost/foreach.hpp>
 #include "TU/V4L2CameraArray.h"
-#include "CmdSVC_impl.h"
+#include "MultiCamera.h"
 
 namespace TU
 {
@@ -13,7 +13,7 @@ namespace v
 *  class CmdSVC_impl<V4L2CameraArray>					*
 ************************************************************************/
 template <> CmdDefs
-CmdSVC_impl<V4L2CameraArray>::createFormatCmds(const camera_type& camera)
+CmdSVC_impl<V4L2CameraArray>::createFormatItems(camera_type& camera)
 {
     CmdDefs	cmds;
 
@@ -36,30 +36,34 @@ CmdSVC_impl<V4L2CameraArray>::createFormatCmds(const camera_type& camera)
 	}
     }
 
-  // ROIを指定する項目を作る．
-    cmds.push_back(CmdDef(C_MenuItem,
-			  "set ROI", V4L2Camera::UNKNOWN_PIXEL_FORMAT));
-    size_t	minU0, minV0, maxWidth, maxHeight;
-    camera.getROILimits(minU0, minV0, maxWidth, maxHeight);
-    CmdDefs&	roiCmds = cmds.back().subcmds;
-    roiCmds.push_back(CmdDef(C_Slider,
-			     "u0", c_U0, noSub, minU0, maxWidth  - minU0 - 1));
-    roiCmds.push_back(CmdDef(C_Slider,
-			     "v0", c_V0, noSub, minV0, maxHeight - minV0 - 1));
-    roiCmds.push_back(CmdDef(C_Slider,
-			     "width",  c_Width,  noSub, 0, maxWidth));
-    roiCmds.push_back(CmdDef(C_Slider,
-			     "height", c_Height, noSub, 0, maxHeight));
-    
     return cmds;
 }
 
 template <> void
-CmdSVC_impl<V4L2CameraArray>::addExtraCmds(const camera_type& camera,
+CmdSVC_impl<V4L2CameraArray>::addOtherCmds(const camera_type& camera,
 					   CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
 
+  // ROIを指定するコマンドを作る．
+    cmds.push_back(CmdDef(C_Button,
+			  "set ROI", V4L2Camera::UNKNOWN_PIXEL_FORMAT, noSub,
+			  0, 0, 0, 1, CA_None, 0, y++));
+    size_t	minU0, minV0, maxWidth, maxHeight;
+    camera.getROILimits(minU0, minV0, maxWidth, maxHeight);
+    CmdDefs&	roiCmds = cmds.back().subcmds;
+    roiCmds.push_back(CmdDef(C_Slider, "u0", c_U0, noSub,
+			     minU0, maxWidth  - minU0 - 1, 1, 1, CA_None,
+			     0, 0));
+    roiCmds.push_back(CmdDef(C_Slider, "v0", c_V0, noSub,
+			     minV0, maxHeight - minV0 - 1, 1, 1, CA_None,
+			     0, 1));
+    roiCmds.push_back(CmdDef(C_Slider, "width", c_Width, noSub,
+			     0, maxWidth, 1, 1, CA_None, 0, 2));
+    roiCmds.push_back(CmdDef(C_Slider, "height", c_Height, noSub,
+			     0, maxHeight, 1, 1, CA_None, 0, 3));
+    
+  // featureを指定するコマンドを作る．
     BOOST_FOREACH (V4L2Camera::Feature feature, camera.availableFeatures())
     {
 	cmds.push_back(CmdDef());
@@ -99,15 +103,14 @@ CmdSVC_impl<V4L2CameraArray>::addExtraCmds(const camera_type& camera,
     }
 }
     
-template <> void
-CmdSVC_impl<V4L2CameraArray>::getFormat(const V4L2CameraArray& cameras,
-					Values& vals)
+template <> Cmd::Values
+CmdSVC_impl<V4L2CameraArray>::getFormat(const Values& ids) const
 {
+    const V4L2CameraArray&	cameras = _rtc.cameras();
+    Values			vals;
+    
     if (cameras.size() == 0)
-    {
-	vals.length(0);
-	return;
-    }
+	return vals;
 
     const V4L2Camera&		camera = *cameras[0];
     V4L2Camera::PixelFormat	pixelFormat = camera.pixelFormat();
@@ -118,22 +121,46 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const V4L2CameraArray& cameras,
 	if (frameSize.width.involves(camera.width()) &&
 	    frameSize.height.involves(camera.height()))
 	{
-	    vals.length(6);
+	    vals.length(2);
 	    vals[0] = pixelFormat;
 	    vals[1] = i;
 
-	    size_t	u0, v0, width, height;
-	    camera.getROI(u0, v0, width, height);
-	    vals[2] = u0;
-	    vals[3] = v0;
-	    vals[4] = width;
-	    vals[5] = height;
-	    
-	    return;
+	    break;
 	}
 
 	++i;
     }
+
+    return vals;
+}
+
+template <> Cmd::Values
+CmdSVC_impl<V4L2CameraArray>::getOtherValues(const Values& ids) const
+{
+    const V4L2CameraArray&	cameras = _rtc.cameras();
+    Values			vals;
+    
+    if (cameras.size() == 0)
+	return vals;
+
+    if (ids[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+    {
+	size_t	u0, v0, width, height;
+	cameras[0]->getROI(u0, v0, width, height);
+
+	vals.length(4);
+	vals[0] = u0;
+	vals[1] = v0;
+	vals[2] = width;
+	vals[3] = height;
+    }
+    else
+    {
+	vals.length(1);
+	vals[0] = TU::getFeatureValue(cameras, ids[0], _n);
+    }
+
+    return vals;
 }
 
 }

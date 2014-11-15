@@ -41,12 +41,12 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     Cmd::Values*	getValues(const Values& ids)			;
 
   private:
-    CmdDefs		createCmds(const CAMERAS& cameras)		;
-    static CmdDefs	createFormatCmds(camera_type& camera)		;
-    static void		addExtraCmds(const camera_type& camera,
+    CmdDefs		createCmds()					;
+    static CmdDefs	createFormatItems(camera_type& camera)		;
+    static void		addOtherCmds(const camera_type& camera,
 				     CmdDefs& cmds)			;
-    static void		getFormat(const CAMERAS& cameras,
-				  const Values& ids, Values& vals)	;
+    Values		getFormat(const Values& ids)		const	;
+    Values		getOtherValues(const Values& ids)	const	;
     
   private:
     MultiCamera<CAMERAS>&	_rtc;
@@ -72,7 +72,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
 #endif
     std::ostringstream			oss;
     boost::archive::xml_oarchive	oar(oss);
-    CmdDefs				cmds = createCmds(_rtc.cameras());
+    CmdDefs				cmds = createCmds();
     oar << BOOST_SERIALIZATION_NVP(cmds);
     
     return CORBA::string_dup(oss.str().c_str());
@@ -107,7 +107,7 @@ CmdSVC_impl<CAMERAS>::setValues(const Values& vals)
 	refresh = true;
 	break;
       default:
-	_rtc.setFeatureValue(vals[0], vals[1], _n);
+	_rtc.setOtherValues(vals, _n);
 	break;
     }
 
@@ -133,15 +133,14 @@ CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
 	vals[0] = exec(_rtc.cameras(), &camera_type::inContinuousShot);
 	break;
       case c_Format:
-	getFormat(_rtc.cameras(), ids, vals);
+	vals = getFormat(ids);
 	break;
       case c_CameraSelection:
 	vals.length(1);
 	vals[0] = _n;
 	break;
       default:
-	vals.length(1);
-	vals[0] = getFeatureValue(_rtc.cameras(), ids[0], _n);
+	vals = getOtherValues(ids);
 	break;
     }
 #ifdef DEBUG
@@ -153,10 +152,11 @@ CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
     return new Values(vals);
 }
 
-template <class CAMERAS> typename TU::v::CmdDefs
-CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
+template <class CAMERAS> CmdDefs
+CmdSVC_impl<CAMERAS>::createCmds()
 {
-    CmdDefs	cmds;
+    const CAMERAS&	cameras = _rtc.cameras();
+    CmdDefs		cmds;
     
     if (!cameras.size())
 	return cmds;
@@ -169,7 +169,7 @@ CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
 
   // カメラ画像フォーマット選択コマンドの生成
     cmds.push_back(CmdDef(C_Button, "Format", c_Format,
-			  createFormatCmds(*cameras[0]),
+			  createFormatItems(*cameras[0]),
 			  0, 1, 1, 1, CA_None, 0, 1));
 
   // 操作対象カメラ選択コマンドの生成
@@ -187,11 +187,11 @@ CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
 			  0, int(cameras.size()), 1, 1, CA_None, 0, 2));
 
   // その他のコマンドの生成
-    addExtraCmds(*cameras[0], cmds);
+    addOtherCmds(*cameras[0], cmds);
 
     return cmds;
 }
-    
+
 }
 }
 #endif // CMDSVC_IMPL_H

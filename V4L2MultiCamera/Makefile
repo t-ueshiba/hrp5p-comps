@@ -75,6 +75,7 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
+	../Ieee1394MultiCamera/MultiCamera.h ../Ieee1394MultiCamera/Img.hh \
 	../Ieee1394MultiCamera/CmdSVC_impl.h ../Ieee1394MultiCamera/Cmd.hh \
 	../Ieee1394MultiCamera/CmdDef.h
 V4L2MultiCamera.o: /usr/local/include/TU/V4L2CameraArray.h \
