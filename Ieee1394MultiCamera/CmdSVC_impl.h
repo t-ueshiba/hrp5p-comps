@@ -82,10 +82,12 @@ template <class CAMERAS> CORBA::Boolean
 CmdSVC_impl<CAMERAS>::setValues(const Values& vals)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
+    using namespace	std;
+    
+    cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	std::cerr << ' ' << vals[i];
-    std::cerr << std::endl;
+	cerr << ' ' << vals[i];
+    cerr << endl;
 #endif
     CORBA::Boolean	refresh = false;
     
@@ -116,9 +118,11 @@ template <class CAMERAS> Cmd::Values*
 CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
 {
 #ifdef DEBUG
-    std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
+    using namespace	std;
+    
+    cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
     for (CORBA::ULong i = 0; i < ids.length(); ++i)
-	std::cerr << ' ' << ids[i];
+	cerr << ' ' << ids[i];
 #endif
     Values	vals;
     
@@ -141,10 +145,10 @@ CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
 	break;
     }
 #ifdef DEBUG
-    std::cerr << ", vals =";
+    cerr << ", vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	std::cerr << ' ' << vals[i];
-    std::cerr << std::endl;
+	cerr << ' ' << vals[i];
+    cerr << endl;
 #endif
     return new Values(vals);
 }
@@ -159,16 +163,16 @@ CmdSVC_impl<CAMERAS>::createCmds(const CAMERAS& cameras)
 
     _n = cameras.size();	// 全カメラ同時操作モード
 
-  // カメラ画像出力のon/offコマンドの生成
+  // カメラ画像出力on/offコマンドの生成
     cmds.push_back(CmdDef(C_ToggleButton, "Continuous shot", c_ContinuousShot,
 			  noSub, 0, 1, 1, 1, CA_None, 0, 0));
 
-  // カメラ画像フォーマットの選択コマンドの生成
+  // カメラ画像フォーマット選択コマンドの生成
     cmds.push_back(CmdDef(C_Button, "Format", c_Format,
 			  createFormatCmds(*cameras[0]),
 			  0, 1, 1, 1, CA_None, 0, 1));
 
-  // 操作対象カメラの選択コマンドの生成
+  // 操作対象カメラ選択コマンドの生成
     CmdDefs	cameraSelectionCmds;
     for (size_t i = 0; i < cameras.size(); ++i)
 	cameraSelectionCmds.push_back(
