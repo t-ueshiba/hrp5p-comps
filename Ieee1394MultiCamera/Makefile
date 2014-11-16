@@ -30,7 +30,7 @@ endif
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
-LIBDIR		= $(PREFIX)/lib
+LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
 INCDIR		= $(PREFIX)/include
 
 #########################
@@ -52,17 +52,17 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 HDRS		= CamSVC_impl.h \
 		CmdDef.h \
 		CmdSVC_impl.h \
-		MultiCamera.h
+		MultiCameraRTC.h
 SRCS		= Ieee1394CmdSVC_impl.cc \
-		Ieee1394MultiCamera.cc \
-		Ieee1394MultiCameraComp.cc
+		Ieee1394MultiCameraComp.cc \
+		Ieee1394MultiCameraRTC.cc
 OBJS		= Ieee1394CmdSVC_impl.o \
-		Ieee1394MultiCamera.o \
-		Ieee1394MultiCameraComp.o
+		Ieee1394MultiCameraComp.o \
+		Ieee1394MultiCameraRTC.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
-include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
+#include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
 Ieee1394CmdSVC_impl.o: /usr/local/include/TU/Ieee1394CameraArray.h \
@@ -71,11 +71,13 @@ Ieee1394CmdSVC_impl.o: /usr/local/include/TU/Ieee1394CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h CmdSVC_impl.h CmdDef.h
-Ieee1394MultiCamera.o: /usr/local/include/TU/Ieee1394CameraArray.h \
+	/usr/local/include/TU/Minimize.h MultiCameraRTC.h CmdSVC_impl.h \
+	CmdDef.h
+Ieee1394MultiCameraRTC.o: /usr/local/include/TU/Ieee1394CameraArray.h \
 	/usr/local/include/TU/Ieee1394++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/Minimize.h MultiCamera.h CmdSVC_impl.h CmdDef.h
+	/usr/local/include/TU/Minimize.h MultiCameraRTC.h CmdSVC_impl.h \
+	CmdDef.h

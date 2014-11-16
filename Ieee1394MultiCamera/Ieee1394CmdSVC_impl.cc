@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include "TU/Ieee1394CameraArray.h"
-#include "MultiCamera.h"
+#include "MultiCameraRTC.h"
 
 namespace TU
 {

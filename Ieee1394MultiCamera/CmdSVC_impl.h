@@ -11,7 +11,7 @@
 
 namespace TU
 {
-template <class CAMERAS>	class MultiCamera;
+template <class CAMERAS>	class MultiCameraRTC;
 
 namespace v
 {
@@ -33,7 +33,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     };
     
   public:
-			CmdSVC_impl(MultiCamera<CAMERAS>& rtc)		;
+			CmdSVC_impl(MultiCameraRTC<CAMERAS>& rtc)	;
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
@@ -49,12 +49,12 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     Values		getOtherValues(const Values& ids)	const	;
     
   private:
-    MultiCamera<CAMERAS>&	_rtc;
+    MultiCameraRTC<CAMERAS>&	_rtc;
     size_t			_n;	// currently selected camera #
 };
 
 template <class CAMERAS>
-CmdSVC_impl<CAMERAS>::CmdSVC_impl(MultiCamera<CAMERAS>& rtc)
+CmdSVC_impl<CAMERAS>::CmdSVC_impl(MultiCameraRTC<CAMERAS>& rtc)
     :_rtc(rtc), _n(0)
 {
 }

@@ -14,15 +14,16 @@
 
 extern "C"
 {
-DLL_EXPORT void	Ieee1394MultiCameraInit(RTC::Manager* manager)		;
+DLL_EXPORT void	Ieee1394MultiCameraRTCInit(RTC::Manager* manager)	;
 }
 
 void
 MyModuleInit(RTC::Manager* manager)
 {
-    Ieee1394MultiCameraInit(manager);
+    Ieee1394MultiCameraRTCInit(manager);
 
-    RTC::RtcBase*	comp = manager->createComponent("Ieee1394MultiCamera");
+    RTC::RtcBase*	comp = manager
+			     ->createComponent("Ieee1394MultiCameraRTC");
     if (comp == 0)
     {
 	std::cerr << "Component create failed." << std::endl;
