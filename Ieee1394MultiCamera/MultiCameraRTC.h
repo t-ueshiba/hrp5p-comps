@@ -19,17 +19,17 @@
 namespace TU
 {
 /************************************************************************
-*  class MultiCamera<CAMERAS>						*
+*  class MultiCameraRTC<CAMERAS>					*
 ************************************************************************/
 template <class CAMERAS>
-class MultiCamera : public RTC::DataFlowComponentBase
+class MultiCameraRTC : public RTC::DataFlowComponentBase
 {
   private:
     typedef typename CAMERAS::camera_type	camera_type;
 
   public:
-    MultiCamera(RTC::Manager* manager)					;
-    ~MultiCamera()							;
+    MultiCameraRTC(RTC::Manager* manager)				;
+    ~MultiCameraRTC()							;
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
@@ -71,12 +71,12 @@ class MultiCamera : public RTC::DataFlowComponentBase
 };
 
 template <class CAMERAS>
-MultiCamera<CAMERAS>::~MultiCamera()
+MultiCameraRTC<CAMERAS>::~MultiCameraRTC()
 {
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onActivated(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCamera::onActivated" << std::endl;
@@ -87,7 +87,7 @@ MultiCamera<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 {
   //#ifdef DEBUG
 #if 0
@@ -111,7 +111,7 @@ MultiCamera<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCamera::onDeactivated" << std::endl;
@@ -122,7 +122,7 @@ MultiCamera<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onAborting(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCamera::onAborting" << std::endl;
@@ -134,7 +134,7 @@ MultiCamera<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 
 #ifdef DEBUG
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onFinalize()
+MultiCameraRTC<CAMERAS>::onFinalize()
 {
     std::cerr << "MultiCmaera::onFinalize" << std::endl;
 
@@ -142,7 +142,7 @@ MultiCamera<CAMERAS>::onFinalize()
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onStartup(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onStartup(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiCamera::onStartup" << std::endl;
 
@@ -150,7 +150,7 @@ MultiCamera<CAMERAS>::onStartup(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCamera<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
+MultiCameraRTC<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiCamera::onShutdown" << std::endl;
 
@@ -159,27 +159,27 @@ MultiCamera<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
 #endif
 
 template <class CAMERAS> inline const CAMERAS&
-MultiCamera<CAMERAS>::cameras() const
+MultiCameraRTC<CAMERAS>::cameras() const
 {
     return _cameras;
 }
 
 template <class CAMERAS> inline void
-MultiCamera<CAMERAS>::continuousShot()
+MultiCameraRTC<CAMERAS>::continuousShot()
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     exec(_cameras, &camera_type::continuousShot);
 }
     
 template <class CAMERAS> inline void
-MultiCamera<CAMERAS>::stopContinuousShot()
+MultiCameraRTC<CAMERAS>::stopContinuousShot()
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     exec(_cameras, &camera_type::stopContinuousShot);
 }
 
 template <class CAMERAS> inline void
-MultiCamera<CAMERAS>::setFormat(const Cmd::Values& vals)
+MultiCameraRTC<CAMERAS>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     TU::setFormat(_cameras, vals[1], vals[2]);
@@ -187,14 +187,14 @@ MultiCamera<CAMERAS>::setFormat(const Cmd::Values& vals)
 }
     
 template <class CAMERAS> inline void
-MultiCamera<CAMERAS>::setOtherValues(const Cmd::Values& vals, size_t n)
+MultiCameraRTC<CAMERAS>::setOtherValues(const Cmd::Values& vals, size_t n)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     TU::setFeatureValue(_cameras, vals[0], vals[1], n);
 }
     
 template <class CAMERAS> void
-MultiCamera<CAMERAS>::allocateImages()
+MultiCameraRTC<CAMERAS>::allocateImages()
 {
     _images.length(_cameras.size());
     for (size_t i = 0; i < _cameras.size(); ++i)
