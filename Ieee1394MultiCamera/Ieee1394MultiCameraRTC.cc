@@ -3,7 +3,7 @@
  */
 #include <fstream>
 #include "TU/Ieee1394CameraArray.h"
-#include "MultiCamera.h"
+#include "MultiCameraRTC.h"
 
 /************************************************************************
 *  static data								*
@@ -14,7 +14,7 @@
 // Module specification
 static const char* ieee1394multicamera_spec[] =
 {
-    "implementation_id",	"Ieee1394MultiCamera",
+    "implementation_id",	"Ieee1394MultiCameraRTC",
     "type_name",		"Ieee1394MultiCamera",
     "description",		"Controlling multiple IEEE1394 cameras",
     "version",			"1.0.0",
@@ -36,23 +36,23 @@ static const char* ieee1394multicamera_spec[] =
 extern "C"
 {
 void
-Ieee1394MultiCameraInit(RTC::Manager* manager)
+Ieee1394MultiCameraRTCInit(RTC::Manager* manager)
 {
     coil::Properties	profile(ieee1394multicamera_spec);
     manager->registerFactory(
 		 profile,
-		 RTC::Create<TU::MultiCamera<TU::Ieee1394CameraArray> >,
-		 RTC::Delete<TU::MultiCamera<TU::Ieee1394CameraArray> >);
+		 RTC::Create<TU::MultiCameraRTC<TU::Ieee1394CameraArray> >,
+		 RTC::Delete<TU::MultiCameraRTC<TU::Ieee1394CameraArray> >);
 }
 };
 
 namespace TU
 {
 /************************************************************************
-*  class MultiCamera<Ieee1394CameraArray>				*
+*  class MultiCameraRTC<Ieee1394CameraArray>				*
 ************************************************************************/
 template <>
-MultiCamera<Ieee1394CameraArray>::MultiCamera(RTC::Manager* manager)
+MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _mutex(),
@@ -66,7 +66,7 @@ MultiCamera<Ieee1394CameraArray>::MultiCamera(RTC::Manager* manager)
 }
 
 template <> RTC::ReturnCode_t
-MultiCamera<Ieee1394CameraArray>::onInitialize()
+MultiCameraRTC<Ieee1394CameraArray>::onInitialize()
 {
 #ifdef DEBUG
     std::cerr << "MultiCamera::onInitialize" << std::endl;
@@ -86,7 +86,7 @@ MultiCamera<Ieee1394CameraArray>::onInitialize()
     {
 	std::ifstream	in(_cameraConfig.c_str());
 	if (!in)
-	    throw std::runtime_error("MultiCamera<Ieee1394CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+	    throw std::runtime_error("MultiCameraRTC<Ieee1394CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
 
 	in >> _cameras;	// 設定ファイルに従ってカメラを生成・セットアップ
 
@@ -104,8 +104,8 @@ MultiCamera<Ieee1394CameraArray>::onInitialize()
 }
 
 template <> size_t
-MultiCamera<Ieee1394CameraArray>::setImageHeader(const camera_type& camera,
-						 Img::TimedImage& image)
+MultiCameraRTC<Ieee1394CameraArray>::setImageHeader(const camera_type& camera,
+						    Img::TimedImage& image)
 {
     image.width  = camera.width();
     image.height = camera.height();
@@ -135,7 +135,7 @@ MultiCamera<Ieee1394CameraArray>::setImageHeader(const camera_type& camera,
 }
 
 template <> RTC::Time
-MultiCamera<Ieee1394CameraArray>::getTime(const camera_type& camera) const
+MultiCameraRTC<Ieee1394CameraArray>::getTime(const camera_type& camera) const
 {
     u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
 				      : camera.arrivaltime());
@@ -145,7 +145,7 @@ MultiCamera<Ieee1394CameraArray>::getTime(const camera_type& camera) const
 }
 
 template <> inline void
-MultiCamera<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
+MultiCameraRTC<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
 
