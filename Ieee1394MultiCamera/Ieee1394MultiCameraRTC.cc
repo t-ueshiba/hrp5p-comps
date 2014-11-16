@@ -69,7 +69,7 @@ template <> RTC::ReturnCode_t
 MultiCameraRTC<Ieee1394CameraArray>::onInitialize()
 {
 #ifdef DEBUG
-    std::cerr << "MultiCamera::onInitialize" << std::endl;
+    std::cerr << "MultiCameraRTC::onInitialize" << std::endl;
 #endif
   // コンフィギュレーションのセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);

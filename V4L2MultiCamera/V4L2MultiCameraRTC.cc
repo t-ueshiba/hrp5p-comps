@@ -3,7 +3,7 @@
  */
 #include <fstream>
 #include "TU/V4L2CameraArray.h"
-#include "MultiCamera.h"
+#include "MultiCameraRTC.h"
 
 /************************************************************************
 *  static data								*
@@ -13,7 +13,7 @@
 // Module specification
 static const char* v4l2multicamera_spec[] =
 {
-    "implementation_id",	"V4L2MultiCamera",
+    "implementation_id",	"V4L2MultiCameraRTC",
     "type_name",		"V4L2MultiCamera",
     "description",		"Controlling multiple V4L2 cameras",
     "version",			"1.0.0",
@@ -34,23 +34,23 @@ static const char* v4l2multicamera_spec[] =
 extern "C"
 {
 void
-V4L2MultiCameraInit(RTC::Manager* manager)
+V4L2MultiCameraRTCInit(RTC::Manager* manager)
 {
     coil::Properties	profile(v4l2multicamera_spec);
     manager->registerFactory(
 		 profile,
-		 RTC::Create<TU::MultiCamera<TU::V4L2CameraArray> >,
-		 RTC::Delete<TU::MultiCamera<TU::V4L2CameraArray> >);
+		 RTC::Create<TU::MultiCameraRTC<TU::V4L2CameraArray> >,
+		 RTC::Delete<TU::MultiCameraRTC<TU::V4L2CameraArray> >);
 }
 };
 
 namespace TU
 {
 /************************************************************************
-*  class MultiCamera<TU::Ieee1394CameraArray>				*
+*  class MultiCameraRTC<V4L2CameraArray>				*
 ************************************************************************/
 template <>
-MultiCamera<V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
+MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _mutex(),
@@ -63,10 +63,10 @@ MultiCamera<V4L2CameraArray>::MultiCamera(RTC::Manager* manager)
 }
 
 template <> RTC::ReturnCode_t
-MultiCamera<V4L2CameraArray>::onInitialize()
+MultiCameraRTC<V4L2CameraArray>::onInitialize()
 {
 #ifdef DEBUG
-    std::cerr << "MultiCamera::onInitialize" << std::endl;
+    std::cerr << "MultiCameraRTC::onInitialize" << std::endl;
 #endif
   // コンフィグレーションをセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
@@ -82,7 +82,7 @@ MultiCamera<V4L2CameraArray>::onInitialize()
     {
 	std::ifstream	in(_cameraConfig.c_str());
 	if (!in)
-	    throw std::runtime_error("MultiCamera<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+	    throw std::runtime_error("MultiCameraRTC<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
 
 	in >> _cameras;
     }
@@ -97,8 +97,8 @@ MultiCamera<V4L2CameraArray>::onInitialize()
 }
 
 template <> size_t
-MultiCamera<V4L2CameraArray>::setImageHeader(const camera_type& camera,
-					     Img::TimedImage& image)
+MultiCameraRTC<V4L2CameraArray>::setImageHeader(const camera_type& camera,
+						Img::TimedImage& image)
 {
     image.width  = camera.width();
     image.height = camera.height();
@@ -122,7 +122,7 @@ MultiCamera<V4L2CameraArray>::setImageHeader(const camera_type& camera,
 }
 
 template <> RTC::Time
-MultiCamera<V4L2CameraArray>::getTime(const camera_type& camera) const
+MultiCameraRTC<V4L2CameraArray>::getTime(const camera_type& camera) const
 {
     u_int64_t	usec = camera.arrivaltime();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
@@ -132,7 +132,8 @@ MultiCamera<V4L2CameraArray>::getTime(const camera_type& camera) const
 }
 
 template <> inline void
-MultiCamera<V4L2CameraArray>::setOtherValues(const Cmd::Values& vals, size_t n)
+MultiCameraRTC<V4L2CameraArray>::setOtherValues(const Cmd::Values& vals,
+						size_t n)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     if (vals[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)

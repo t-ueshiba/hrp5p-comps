@@ -11,19 +11,18 @@
 #include <iostream>
 #include <string>
 #include <stdlib.h>
-#include "MultiCamera.h"
 
 extern "C"
 {
-DLL_EXPORT void	V4L2MultiCameraInit(RTC::Manager* manager)		;
+DLL_EXPORT void	V4L2MultiCameraRTCInit(RTC::Manager* manager)		;
 }
 
 void
 MyModuleInit(RTC::Manager* manager)
 {
-    V4L2MultiCameraInit(manager);
+    V4L2MultiCameraRTCInit(manager);
 
-    RTC::RtcBase*	comp = manager->createComponent("V4L2MultiCamera");
+    RTC::RtcBase*	comp = manager->createComponent("V4L2MultiCameraRTC");
     if (comp == 0)
     {
 	std::cerr << "Component create failed." << std::endl;

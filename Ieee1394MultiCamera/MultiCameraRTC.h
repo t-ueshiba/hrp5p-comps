@@ -79,7 +79,7 @@ template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "MultiCamera::onActivated" << std::endl;
+    std::cerr << "MultiCameraRTC::onActivated" << std::endl;
 #endif
     allocateImages();
     
@@ -92,7 +92,7 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
   //#ifdef DEBUG
 #if 0
     static int	n = 0;
-    std::cerr << "MultiCamera::onExecute: " << n++ << std::endl;
+    std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
 #endif
     coil::Guard<coil::Mutex>	guard(_mutex);
     
@@ -114,7 +114,7 @@ template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "MultiCamera::onDeactivated" << std::endl;
+    std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
 #endif
     exec(_cameras, &camera_type::stopContinuousShot);
     
@@ -125,7 +125,7 @@ template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "MultiCamera::onAborting" << std::endl;
+    std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
     exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
 
@@ -136,7 +136,7 @@ MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onFinalize()
 {
-    std::cerr << "MultiCmaera::onFinalize" << std::endl;
+    std::cerr << "MultiCameraRTC::onFinalize" << std::endl;
 
     return RTC::RTC_OK;
 }
@@ -144,7 +144,7 @@ MultiCameraRTC<CAMERAS>::onFinalize()
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onStartup(RTC::UniqueId ec_id)
 {
-    std::cerr << "MultiCamera::onStartup" << std::endl;
+    std::cerr << "MultiCameraRTC::onStartup" << std::endl;
 
     return RTC::RTC_OK;
 }
@@ -152,7 +152,7 @@ MultiCameraRTC<CAMERAS>::onStartup(RTC::UniqueId ec_id)
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
 {
-    std::cerr << "MultiCamera::onShutdown" << std::endl;
+    std::cerr << "MultiCameraRTC::onShutdown" << std::endl;
 
     return RTC::RTC_OK;
 }

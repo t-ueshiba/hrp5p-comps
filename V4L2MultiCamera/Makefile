@@ -30,7 +30,7 @@ endif
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
-LIBDIR		= $(PREFIX)/lib
+LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
 INCDIR		= $(PREFIX)/include
 
 #########################
@@ -41,7 +41,7 @@ EXTHDRS		= ../Ieee1394MultiCamera/Cmd.hh \
 		../Ieee1394MultiCamera/CmdDef.h \
 		../Ieee1394MultiCamera/CmdSVC_impl.h \
 		../Ieee1394MultiCamera/Img.hh \
-		../Ieee1394MultiCamera/MultiCamera.h \
+		../Ieee1394MultiCamera/MultiCameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \
 		/usr/local/include/TU/Image++.h \
@@ -57,11 +57,11 @@ EXTHDRS		= ../Ieee1394MultiCamera/Cmd.hh \
 		/usr/local/include/TU/types.h
 HDRS		=
 SRCS		= V4L2CmdSVC_impl.cc \
-		V4L2MultiCamera.cc \
-		V4L2MultiCameraComp.cc
+		V4L2MultiCameraComp.cc \
+		V4L2MultiCameraRTC.cc
 OBJS		= V4L2CmdSVC_impl.o \
-		V4L2MultiCamera.o \
-		V4L2MultiCameraComp.o
+		V4L2MultiCameraComp.o \
+		V4L2MultiCameraRTC.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
@@ -75,20 +75,16 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../Ieee1394MultiCamera/MultiCamera.h ../Ieee1394MultiCamera/Img.hh \
+	../Ieee1394MultiCamera/MultiCameraRTC.h ../Ieee1394MultiCamera/Img.hh \
 	../Ieee1394MultiCamera/CmdSVC_impl.h ../Ieee1394MultiCamera/Cmd.hh \
 	../Ieee1394MultiCamera/CmdDef.h
-V4L2MultiCamera.o: /usr/local/include/TU/V4L2CameraArray.h \
+V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
 	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../Ieee1394MultiCamera/MultiCamera.h ../Ieee1394MultiCamera/Img.hh \
+	../Ieee1394MultiCamera/MultiCameraRTC.h ../Ieee1394MultiCamera/Img.hh \
 	../Ieee1394MultiCamera/CmdSVC_impl.h ../Ieee1394MultiCamera/Cmd.hh \
 	../Ieee1394MultiCamera/CmdDef.h
-V4L2MultiCameraComp.o: ../Ieee1394MultiCamera/MultiCamera.h \
-	../Ieee1394MultiCamera/Img.hh ../Ieee1394MultiCamera/CmdSVC_impl.h \
-	../Ieee1394MultiCamera/Cmd.hh ../Ieee1394MultiCamera/CmdDef.h \
-	/usr/local/include/TU/types.h
