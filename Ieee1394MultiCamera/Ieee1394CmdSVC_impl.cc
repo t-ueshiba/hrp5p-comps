@@ -311,10 +311,10 @@ CmdSVC_impl<Ieee1394CameraArray>::addOtherCmds(const camera_type& camera,
 }
 
 template <> Cmd::Values
-CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Values& ids) const
+CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Cmd::Values& ids) const
 {
     const Ieee1394CameraArray&	cameras = _rtc.cameras();
-    Values			vals;
+    Cmd::Values			vals;
     
     if (cameras.size() == 0)
 	return vals;
@@ -362,9 +362,9 @@ CmdSVC_impl<Ieee1394CameraArray>::getFormat(const Values& ids) const
 }
 
 template <> Cmd::Values
-CmdSVC_impl<Ieee1394CameraArray>::getOtherValues(const Values& ids) const
+CmdSVC_impl<Ieee1394CameraArray>::getOtherValues(const Cmd::Values& ids) const
 {
-    Values	vals;
+    Cmd::Values	vals;
     vals.length(1);
     vals[0] = TU::getFeatureValue(_rtc.cameras(), ids[0], _n);
 

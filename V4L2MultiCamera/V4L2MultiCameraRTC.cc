@@ -80,11 +80,23 @@ MultiCameraRTC<V4L2CameraArray>::onInitialize()
     
     try
     {
+      // 設定ファイルを読み込んでカメラを生成・セットアップ
 	std::ifstream	in(_cameraConfig.c_str());
 	if (!in)
 	    throw std::runtime_error("MultiCameraRTC<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
 
 	in >> _cameras;
+	in.close();
+
+      // キャリブレーションを読み込み
+	in.open(_cameras.calibFile().c_str());
+	if (in)
+	{
+	    _calibs.resize(_cameras.size());
+
+	    for (auto& calib : _calibs)
+		in >> calib.P >> calib.d1 >> calib.d2;
+	}
     }
     catch (std::exception& err)
     {

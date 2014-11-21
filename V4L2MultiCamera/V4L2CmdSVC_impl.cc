@@ -104,10 +104,10 @@ CmdSVC_impl<V4L2CameraArray>::addOtherCmds(const camera_type& camera,
 }
     
 template <> Cmd::Values
-CmdSVC_impl<V4L2CameraArray>::getFormat(const Values& ids) const
+CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids) const
 {
     const V4L2CameraArray&	cameras = _rtc.cameras();
-    Values			vals;
+    Cmd::Values			vals;
     
     if (cameras.size() == 0)
 	return vals;
@@ -135,10 +135,10 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Values& ids) const
 }
 
 template <> Cmd::Values
-CmdSVC_impl<V4L2CameraArray>::getOtherValues(const Values& ids) const
+CmdSVC_impl<V4L2CameraArray>::getOtherValues(const Cmd::Values& ids) const
 {
     const V4L2CameraArray&	cameras = _rtc.cameras();
-    Values			vals;
+    Cmd::Values			vals;
     
     if (cameras.size() == 0)
 	return vals;

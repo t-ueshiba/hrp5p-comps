@@ -24,12 +24,11 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 {
   private:
     typedef typename CAMERAS::camera_type	camera_type;
-    typedef Cmd::Values				Values;
     
     enum
     {
 	c_ContinuousShot, c_Format, c_CameraSelection,
-	c_U0, c_V0, c_Width, c_Height, c_PixelFormat,
+	c_U0, c_V0, c_Width, c_Height, c_PixelFormat, c_Calib,
     };
     
   public:
@@ -37,16 +36,17 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     virtual		~CmdSVC_impl()					;
 
     char*		getCmds()					;
-    CORBA::Boolean	setValues(const Values& vals)			;
-    Cmd::Values*	getValues(const Values& ids)			;
-
+    CORBA::Boolean	setValues(const Cmd::Values& vals)		;
+    Cmd::Values*	getValues(const Cmd::Values& ids)		;
+    Cmd::DValues*	getDValues(const Cmd::Values& ids)		;
+    
   private:
     CmdDefs		createCmds()					;
     static CmdDefs	createFormatItems(camera_type& camera)		;
     static void		addOtherCmds(const camera_type& camera,
 				     CmdDefs& cmds)			;
-    Values		getFormat(const Values& ids)		const	;
-    Values		getOtherValues(const Values& ids)	const	;
+    Cmd::Values		getFormat(const Cmd::Values& ids)	const	;
+    Cmd::Values		getOtherValues(const Cmd::Values& ids)	const	;
     
   private:
     MultiCameraRTC<CAMERAS>&	_rtc;
@@ -79,7 +79,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
 }
 
 template <class CAMERAS> CORBA::Boolean
-CmdSVC_impl<CAMERAS>::setValues(const Values& vals)
+CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 {
 #ifdef DEBUG
     using namespace	std;
@@ -115,7 +115,7 @@ CmdSVC_impl<CAMERAS>::setValues(const Values& vals)
 }
 
 template <class CAMERAS> Cmd::Values*
-CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
+CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
 {
 #ifdef DEBUG
     using namespace	std;
@@ -124,7 +124,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
     for (CORBA::ULong i = 0; i < ids.length(); ++i)
 	cerr << ' ' << ids[i];
 #endif
-    Values	vals;
+    Cmd::Values	vals;
     
     switch (ids[0])
     {
@@ -149,9 +149,31 @@ CmdSVC_impl<CAMERAS>::getValues(const Values& ids)
 	cerr << ' ' << vals[i];
     cerr << endl;
 #endif
-    return new Values(vals);
+    return new Cmd::Values(vals);
 }
 
+template <class CAMERAS> Cmd::DValues*
+CmdSVC_impl<CAMERAS>::getDValues(const Cmd::Values& ids)
+{
+#ifdef DEBUG
+    using namespace	std;
+    
+    cerr << "CmdSVC_impl<CAMERAS>::getDValues(): ids =";
+    for (CORBA::ULong i = 0; i < ids.length(); ++i)
+	cerr << ' ' << ids[i];
+#endif
+    Cmd::DValues	vals;
+
+    switch (ids[0])
+    {
+      case c_Calib:
+	_rtc.getCalib(ids[1], vals);
+	break;
+    }
+    
+    return new Cmd::DValues(vals);
+}
+    
 template <class CAMERAS> CmdDefs
 CmdSVC_impl<CAMERAS>::createCmds()
 {

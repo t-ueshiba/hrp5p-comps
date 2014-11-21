@@ -13,6 +13,7 @@
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include <coil/Guard.h>
+#include "TU/Vector++.h"
 #include "Img.hh"
 #include "CmdSVC_impl.h"
 
@@ -26,7 +27,12 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 {
   private:
     typedef typename CAMERAS::camera_type	camera_type;
-
+    struct Calib
+    {
+	Matrix34d	P;
+	double		d1, d2;
+    };
+    
   public:
     MultiCameraRTC(RTC::Manager* manager)				;
     ~MultiCameraRTC()							;
@@ -52,6 +58,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     void		setFormat(const Cmd::Values& vals)		;
     void		setOtherValues(const Cmd::Values& vals,
 				       size_t n)			;
+    void		getCalib(size_t n, Cmd::DValues& calib)	const	;
     
   private:
     static size_t	setImageHeader(const camera_type& camera,
@@ -61,8 +68,10 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     
   private:
     CAMERAS				_cameras;
+    Array<Calib>			_calibs;
     mutable coil::Mutex			_mutex;
     std::string				_cameraConfig;	// config var.
+    std::string				_cameraCalib;	// config var.
     int					_useTimestamp;	// config var.
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
@@ -191,6 +200,24 @@ MultiCameraRTC<CAMERAS>::setOtherValues(const Cmd::Values& vals, size_t n)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     TU::setFeatureValue(_cameras, vals[0], vals[1], n);
+}
+
+template <class CAMERAS> void
+MultiCameraRTC<CAMERAS>::getCalib(size_t n, Cmd::DValues& vals) const
+{
+    if (n < _calibs.size())
+    {
+	const auto&	calib = _calibs[n];
+	
+	vals.length(calib.P.nrow() * calib.P.ncol() + 2);
+
+	size_t	k = 0;
+	for (const auto& row : calib.P)
+	    for (const auto& p : row)
+		vals[k++] = p;
+	vals[k++] = calib.d1;
+	vals[k]   = calib.d2;
+    }
 }
     
 template <class CAMERAS> void
