@@ -68,6 +68,11 @@ MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
 }
 
+template <> void
+MultiCameraRTC<V4L2CameraArray>::initializeTime()
+{
+}
+    
 template <> RTC::Time
 MultiCameraRTC<V4L2CameraArray>::getTime(const camera_type& camera) const
 {
