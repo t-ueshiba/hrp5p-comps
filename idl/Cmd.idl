@@ -7,7 +7,6 @@
 module Cmd
 {
 typedef sequence<long>		Values;
-typedef sequence<double>	DValues;
     
 interface Controller
 {
@@ -15,7 +14,6 @@ interface Controller
     
     boolean	setValues(in Values vals)				;
     Values	getValues(in Values ids)				;
-    DValues	getDValues(in Values ids)				;
 };
 
 };

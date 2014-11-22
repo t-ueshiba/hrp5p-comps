@@ -26,12 +26,18 @@ template <class CAMERAS>
 class MultiCameraRTC : public RTC::DataFlowComponentBase
 {
   private:
-    typedef typename CAMERAS::camera_type	camera_type;
     struct Calib
     {
+	Calib()	:u0(0), v0(0), width(0), height(0), d1(0), d2(0)
+					{ P[0][0] = P[1][1] = P[2][2] = 1; }
+
+	size_t		u0, v0;
+	size_t		width, height;
 	Matrix34d	P;
 	double		d1, d2;
     };
+
+    typedef typename CAMERAS::camera_type	camera_type;
     
   public:
     MultiCameraRTC(RTC::Manager* manager)				;
@@ -39,8 +45,8 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
-    virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
+    virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
 #ifdef DEBUG
     virtual RTC::ReturnCode_t	onFinalize()				;
@@ -58,13 +64,17 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     void		setFormat(const Cmd::Values& vals)		;
     void		setOtherValues(const Cmd::Values& vals,
 				       size_t n)			;
-    void		getCalib(size_t n, Cmd::DValues& calib)	const	;
     
   private:
-    static size_t	setImageHeader(const camera_type& camera,
-				       Img::TimedImage& image)		;
+    void		initializeConfigurations()			;
+    void		initializeTime()				;
     RTC::Time		getTime(const camera_type& camera)	const	;
     void		allocateImages()				;
+    static size_t	setImageHeader(const camera_type& camera,
+				       const Calib& calib,
+				       Img::TimedImage& image)		;
+    static size_t	setPixelFormat(const camera_type& camera,
+				       Img::TimedImage& image)		;
     
   private:
     CAMERAS				_cameras;
@@ -85,12 +95,75 @@ MultiCameraRTC<CAMERAS>::~MultiCameraRTC()
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
+MultiCameraRTC<CAMERAS>::onInitialize()
+{
+#ifdef DEBUG
+    std::cerr << "MultiCameraRTC::onInitialize" << std::endl;
+#endif
+  // コンフィグレーションをセットアップ
+    initializeConfigurations();
+    
+  // データポートをセットアップ
+    addOutPort("TimedImages", _imagesOut);
+
+  // サービスプロバイダとサービスポートをセットアップ
+    _commandPort.registerProvider("Command", "Cmd::Controller", _command);
+    addPort(_commandPort);
+    
+    try
+    {
+      // 設定ファイルを読み込んでカメラを生成・セットアップ
+	std::ifstream	in(_cameraConfig.c_str());
+	if (!in)
+	    throw std::runtime_error("MultiCameraRTC<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
+
+	in >> _cameras;
+	in.close();
+
+      // キャリブレーションを読み込み
+	_calibs.resize(_cameras.size());
+	in.open(_cameras.calibFile().c_str());
+	if (in)
+	{
+	    for (size_t n = 0; n < _calibs.size(); ++n)
+	    {
+		_calibs[n].width  = _cameras[n]->width();
+		_calibs[n].height = _cameras[n]->height();
+		in >> _calibs[n].P >> _calibs[n].d1 >> _calibs[n].d2;
+	    }
+	}
+
+      // 撮影時刻の記録を初期化
+	initializeTime();
+    }
+    catch (std::exception& err)
+    {
+	std::cerr << err.what() << std::endl;
+	
+	return RTC::RTC_ERROR;
+    }
+
+    return RTC::RTC_OK;
+}
+
+template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onActivated" << std::endl;
 #endif
     allocateImages();
+    
+    return RTC::RTC_OK;
+}
+
+template <class CAMERAS> RTC::ReturnCode_t
+MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
+{
+#ifdef DEBUG
+    std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
+#endif
+    stopContinuousShot();
     
     return RTC::RTC_OK;
 }
@@ -103,10 +176,10 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     static int	n = 0;
     std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
 #endif
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    
     if (_cameras.size() && _cameras[0]->inContinuousShot())
     {
+	coil::Guard<coil::Mutex>	guard(_mutex);
+    
 	exec(_cameras, &camera_type::snap);		// invalid for MacOS
 	for (size_t i = 0; i < _cameras.size(); ++i)
 	{
@@ -120,23 +193,12 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
-{
-#ifdef DEBUG
-    std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
-#endif
-    exec(_cameras, &camera_type::stopContinuousShot);
-    
-    return RTC::RTC_OK;
-}
-
-template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
-    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
+    stopContinuousShot();	// 連続撮影を終了
 
     return RTC::RTC_OK;
 }
@@ -203,30 +265,30 @@ MultiCameraRTC<CAMERAS>::setOtherValues(const Cmd::Values& vals, size_t n)
 }
 
 template <class CAMERAS> void
-MultiCameraRTC<CAMERAS>::getCalib(size_t n, Cmd::DValues& vals) const
-{
-    if (n < _calibs.size())
-    {
-	const auto&	calib = _calibs[n];
-	
-	vals.length(calib.P.nrow() * calib.P.ncol() + 2);
-
-	size_t	k = 0;
-	for (const auto& row : calib.P)
-	    for (const auto& p : row)
-		vals[k++] = p;
-	vals[k++] = calib.d1;
-	vals[k]   = calib.d2;
-    }
-}
-    
-template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::allocateImages()
 {
     _images.length(_cameras.size());
     for (size_t i = 0; i < _cameras.size(); ++i)
-	_images[i].data.length(setImageHeader(*_cameras[i], _images[i]));
+	_images[i].data.length(setImageHeader(*_cameras[i], _calibs[i],
+					      _images[i]));
 }
 
+template <class CAMERAS> size_t
+MultiCameraRTC<CAMERAS>::setImageHeader(const camera_type& camera,
+					const Calib& calib,
+					Img::TimedImage& image)
+{
+    image.width  = camera.width();
+    image.height = camera.height();
+
+    for (size_t i = 0; i < calib.P.nrow(); ++i)
+	for (size_t j = 0; j < calib.P.ncol(); ++j)
+	    image.P[i][j] = calib.P[i][j];
+    image.d1 = calib.d1;
+    image.d2 = calib.d2;
+
+    return setPixelFormat(camera, image);
+}
+        
 }
 #endif	// !__TU_MULTICAMERA_H

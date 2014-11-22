@@ -62,75 +62,10 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 {
 }
 
-template <> RTC::ReturnCode_t
-MultiCameraRTC<V4L2CameraArray>::onInitialize()
+template <> void
+MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 {
-#ifdef DEBUG
-    std::cerr << "MultiCameraRTC::onInitialize" << std::endl;
-#endif
-  // コンフィグレーションをセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
-
-  // データポートをセットアップ
-    addOutPort("TimedImages", _imagesOut);
-
-  // サービスプロバイダとサービスポートをセットアップ
-    _commandPort.registerProvider("Command", "Cmd::Controller", _command);
-    addPort(_commandPort);
-    
-    try
-    {
-      // 設定ファイルを読み込んでカメラを生成・セットアップ
-	std::ifstream	in(_cameraConfig.c_str());
-	if (!in)
-	    throw std::runtime_error("MultiCameraRTC<V4L2CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
-
-	in >> _cameras;
-	in.close();
-
-      // キャリブレーションを読み込み
-	in.open(_cameras.calibFile().c_str());
-	if (in)
-	{
-	    _calibs.resize(_cameras.size());
-
-	    for (auto& calib : _calibs)
-		in >> calib.P >> calib.d1 >> calib.d2;
-	}
-    }
-    catch (std::exception& err)
-    {
-	std::cerr << err.what() << std::endl;
-	
-	return RTC::RTC_ERROR;
-    }
-
-    return RTC::RTC_OK;
-}
-
-template <> size_t
-MultiCameraRTC<V4L2CameraArray>::setImageHeader(const camera_type& camera,
-						Img::TimedImage& image)
-{
-    image.width  = camera.width();
-    image.height = camera.height();
-
-    switch (camera.pixelFormat())
-    {
-      case V4L2Camera::GREY:
-	image.format = Img::MONO_8;
-	return image.width * image.height;
-      case V4L2Camera::YUYV:
-	image.format = Img::YUV_422;
-	return image.width * image.height * 2;
-      case V4L2Camera::RGB24:
-	image.format = Img::RGB_24;
-	return image.width * image.height * 3;
-      default:
-	throw std::runtime_error("Unsupported pixel format!!");
-    }
-
-    return 0;
 }
 
 template <> RTC::Time
@@ -158,5 +93,26 @@ MultiCameraRTC<V4L2CameraArray>::setOtherValues(const Cmd::Values& vals,
 	TU::setFeatureValue(_cameras, vals[0], vals[1], n);
 }
     
+template <> size_t
+MultiCameraRTC<V4L2CameraArray>::setPixelFormat(const camera_type& camera,
+						Img::TimedImage& image)
+{
+    switch (camera.pixelFormat())
+    {
+      case V4L2Camera::GREY:
+	image.format = Img::MONO_8;
+	return image.width * image.height;
+      case V4L2Camera::YUYV:
+	image.format = Img::YUV_422;
+	return image.width * image.height * 2;
+      case V4L2Camera::RGB24:
+	image.format = Img::RGB_24;
+	return image.width * image.height * 3;
+      default:
+	throw std::runtime_error("Unsupported pixel format!!");
+    }
+
+    return 0;
+}
 
 }

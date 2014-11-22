@@ -65,85 +65,19 @@ MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 {
 }
 
-template <> RTC::ReturnCode_t
-MultiCameraRTC<Ieee1394CameraArray>::onInitialize()
+template <> void
+MultiCameraRTC<Ieee1394CameraArray>::initializeConfigurations()
 {
-#ifdef DEBUG
-    std::cerr << "MultiCameraRTC::onInitialize" << std::endl;
-#endif
   // コンフィギュレーションのセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
     bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
-
-  // データポートをセットアップ
-    addOutPort("TimedImages", _imagesOut);
-
-  // サービスプロバイダとサービスポートをセットアップ
-    _commandPort.registerProvider("Command", "Cmd::Controller", _command);
-    addPort(_commandPort);
-
-    try
-    {
-      // 設定ファイルを読み込んでカメラを生成・セットアップ
-	std::ifstream	in(_cameraConfig.c_str());
-	if (!in)
-	    throw std::runtime_error("MultiCameraRTC<Ieee1394CameraArray>::onInitialize(): failed to open " + _cameraConfig + " !");
-
-	in >> _cameras;
-	in.close();
-
-      // キャリブレーションを読み込み
-	in.open(_cameras.calibFile().c_str());
-	if (in)
-	{
-	    _calibs.resize(_cameras.size());
-
-	    for (auto& calib : _calibs)
-		in >> calib.P >> calib.d1 >> calib.d2;
-	}
-
-	if (_useTimestamp)
-	    exec(_cameras, &camera_type::embedTimestamp);
-    }
-    catch (std::exception& err)
-    {
-	std::cerr << err.what() << std::endl;
-	
-	return RTC::RTC_ERROR;
-    }
-
-    return RTC::RTC_OK;
 }
 
-template <> size_t
-MultiCameraRTC<Ieee1394CameraArray>::setImageHeader(const camera_type& camera,
-						    Img::TimedImage& image)
+template <> void
+MultiCameraRTC<Ieee1394CameraArray>::initializeTime()
 {
-    image.width  = camera.width();
-    image.height = camera.height();
-
-    switch (camera.pixelFormat())
-    {
-      case Ieee1394Camera::MONO_8:
-	image.format = Img::MONO_8;
-	return image.width * image.height;
-      case Ieee1394Camera::YUV_411:
-	image.format = Img::YUV_411;
-	return image.width * image.height * 3 / 2;
-      case Ieee1394Camera::YUV_422:
-	image.format = Img::YUV_422;
-	return image.width * image.height * 2;
-      case Ieee1394Camera::YUV_444:
-	image.format = Img::YUV_444;
-	return image.width * image.height * 3;
-      case Ieee1394Camera::RGB_24:
-	image.format = Img::RGB_24;
-	return image.width * image.height * 3;
-      default:
-	throw std::runtime_error("Unsupported pixel format!!");
-    }
-
-    return 0;
+    if (_useTimestamp)
+	exec(_cameras, &camera_type::embedTimestamp);
 }
 
 template <> RTC::Time
@@ -184,4 +118,32 @@ MultiCameraRTC<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
     }
 }
     
+template <> size_t
+MultiCameraRTC<Ieee1394CameraArray>::setPixelFormat(const camera_type& camera,
+						    Img::TimedImage& image)
+{
+    switch (camera.pixelFormat())
+    {
+      case Ieee1394Camera::MONO_8:
+	image.format = Img::MONO_8;
+	return image.width * image.height;
+      case Ieee1394Camera::YUV_411:
+	image.format = Img::YUV_411;
+	return image.width * image.height * 3 / 2;
+      case Ieee1394Camera::YUV_422:
+	image.format = Img::YUV_422;
+	return image.width * image.height * 2;
+      case Ieee1394Camera::YUV_444:
+	image.format = Img::YUV_444;
+	return image.width * image.height * 3;
+      case Ieee1394Camera::RGB_24:
+	image.format = Img::RGB_24;
+	return image.width * image.height * 3;
+      default:
+	throw std::runtime_error("Unsupported pixel format!!");
+    }
+
+    return 0;
+}
+
 }
