@@ -163,7 +163,7 @@ MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
 #endif
-    stopContinuousShot();
+    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
     
     return RTC::RTC_OK;
 }
@@ -176,10 +176,10 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     static int	n = 0;
     std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
 #endif
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    
     if (_cameras.size() && _cameras[0]->inContinuousShot())
     {
-	coil::Guard<coil::Mutex>	guard(_mutex);
-    
 	exec(_cameras, &camera_type::snap);		// invalid for MacOS
 	for (size_t i = 0; i < _cameras.size(); ++i)
 	{
@@ -198,7 +198,7 @@ MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
-    stopContinuousShot();	// 連続撮影を終了
+    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
 
     return RTC::RTC_OK;
 }
