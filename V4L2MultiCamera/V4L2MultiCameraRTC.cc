@@ -9,22 +9,24 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/V4L2Camera.conf"
+#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/V4L2Camera.calib"
 
 // Module specification
 static const char* v4l2multicamera_spec[] =
 {
-    "implementation_id",	"V4L2MultiCameraRTC",
-    "type_name",		"V4L2MultiCamera",
-    "description",		"Controlling multiple V4L2 cameras",
-    "version",			"1.0.0",
-    "vendor",			"t.ueshiba@aist.go.jp",
-    "category",			"sensor",
-    "activity_type",		"SPORADIC",
-    "kind",			"DataFlowComponent",
-    "max_instance",		"0",
-    "language",			"C++",
-    "lang_type",		"compile",
+    "implementation_id",		"V4L2MultiCameraRTC",
+    "type_name",			"V4L2MultiCamera",
+    "description",			"Controlling V4L2 cameras",
+    "version",				"1.0.0",
+    "vendor",				"t.ueshiba@aist.go.jp",
+    "category",				"sensor",
+    "activity_type",			"SPORADIC",
+    "kind",				"DataFlowComponent",
+    "max_instance",			"0",
+    "language",				"C++",
+    "lang_type",			"compile",
     "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
+    "conf.default.str_cameraCalib",	DEFAULT_CAMERA_CALIB,
     ""
 };
 
@@ -55,6 +57,7 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _cameras(),
      _mutex(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
+     _cameraCalib(DEFAULT_CAMERA_CALIB),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
@@ -66,6 +69,7 @@ template <> void
 MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
+    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
 }
 
 template <> void

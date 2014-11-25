@@ -15,19 +15,19 @@
 // Module specification
 static const char* ieee1394multicamera_spec[] =
 {
-    "implementation_id",	"Ieee1394MultiCameraRTC",
-    "type_name",		"Ieee1394MultiCamera",
-    "description",		"Controlling multiple IEEE1394 cameras",
-    "version",			"1.0.0",
-    "vendor",			"t.ueshiba@aist.go.jp",
-    "category",			"sensor",
-    "activity_type",		"PERIODIC",
-    "kind",			"DataFlowComponent",
-    "max_instance",		"1",
-    "language",			"C++",
-    "lang_type",		"compile",
+    "implementation_id",		"Ieee1394MultiCameraRTC",
+    "type_name",			"Ieee1394MultiCamera",
+    "description",			"Controlling IEEE1394 cameras",
+    "version",				"1.0.0",
+    "vendor",				"t.ueshiba@aist.go.jp",
+    "category",				"sensor",
+    "activity_type",			"PERIODIC",
+    "kind",				"DataFlowComponent",
+    "max_instance",			"1",
+    "language",				"C++",
+    "lang_type",			"compile",
     "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
-    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CALIB,
+    "conf.default.str_cameraCalib",	DEFAULT_CAMERA_CALIB,
     "conf.default.int_useTimestamp",	DEFAULT_USE_TIMESTAMP,
     ""
 };
