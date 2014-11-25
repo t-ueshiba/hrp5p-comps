@@ -9,6 +9,7 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IEEE1394Camera.conf"
+#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/IEEE1394Camera.calib"
 #define DEFAULT_USE_TIMESTAMP	"1"	// "0": arrival time, "1": timestamp
 
 // Module specification
@@ -26,6 +27,7 @@ static const char* ieee1394multicamera_spec[] =
     "language",			"C++",
     "lang_type",		"compile",
     "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
+    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CALIB,
     "conf.default.int_useTimestamp",	DEFAULT_USE_TIMESTAMP,
     ""
 };
@@ -57,6 +59,7 @@ MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _cameras(),
      _mutex(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
+     _cameraCalib(DEFAULT_CAMERA_CALIB),
      _useTimestamp(DEFAULT_USE_TIMESTAMP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
@@ -68,8 +71,8 @@ MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 template <> void
 MultiCameraRTC<Ieee1394CameraArray>::initializeConfigurations()
 {
-  // コンフィギュレーションのセットアップ
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
+    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
     bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
 }
 

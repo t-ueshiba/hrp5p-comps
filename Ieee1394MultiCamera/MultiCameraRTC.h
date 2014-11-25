@@ -122,7 +122,7 @@ MultiCameraRTC<CAMERAS>::onInitialize()
 
       // キャリブレーションを読み込み
 	_calibs.resize(_cameras.size());
-	in.open(_cameras.calibFile().c_str());
+	in.open(_cameraCalib.c_str());
 	if (in)
 	{
 	    for (size_t n = 0; n < _calibs.size(); ++n)

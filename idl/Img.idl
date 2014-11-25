@@ -12,7 +12,7 @@ typedef double	Matrix34d[3][4];
 
 enum PixelFormat
 {
-    MONO_8, YUV_411, YUV_422, YUV_444, RGB_24, UNKNOWN
+    MONO_8, YUV_411, YUV_422, YUV_444, RGB_24, FLT, UNKNOWN
 };
 
 struct TimedImage
