@@ -11,7 +11,7 @@ VPATH		= ../idl
 
 IDLS		= Img.idl Cmd.idl
 
-INCDIRS		= -I. -I$(PREFIX)/include -I../Ieee1394MultiCamera
+INCDIRS		= -I. -I$(PREFIX)/include -I../IIDCMultiCamera
 CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
 CFLAGS		= -g
 NVCCFLAGS	= -g
@@ -37,11 +37,11 @@ INCDIR		= $(PREFIX)/include
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../Ieee1394MultiCamera/Cmd.hh \
-		../Ieee1394MultiCamera/CmdDef.h \
-		../Ieee1394MultiCamera/CmdSVC_impl.h \
-		../Ieee1394MultiCamera/Img.hh \
-		../Ieee1394MultiCamera/MultiCameraRTC.h \
+EXTHDRS		= ../IIDCMultiCamera/Cmd.hh \
+		../IIDCMultiCamera/CmdDef.h \
+		../IIDCMultiCamera/CmdSVC_impl.h \
+		../IIDCMultiCamera/Img.hh \
+		../IIDCMultiCamera/MultiCameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \
 		/usr/local/include/TU/Image++.h \
@@ -52,7 +52,7 @@ EXTHDRS		= ../Ieee1394MultiCamera/Cmd.hh \
 		/usr/local/include/TU/functional.h \
 		/usr/local/include/TU/io.h \
 		/usr/local/include/TU/iterator.h \
-		/usr/local/include/TU/mmInstructions.h \
+		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
 HDRS		=
@@ -72,19 +72,19 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../Ieee1394MultiCamera/MultiCameraRTC.h ../Ieee1394MultiCamera/Img.hh \
-	../Ieee1394MultiCamera/CmdSVC_impl.h ../Ieee1394MultiCamera/Cmd.hh \
-	../Ieee1394MultiCamera/CmdDef.h
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
+	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../Ieee1394MultiCamera/MultiCameraRTC.h ../Ieee1394MultiCamera/Img.hh \
-	../Ieee1394MultiCamera/CmdSVC_impl.h ../Ieee1394MultiCamera/Cmd.hh \
-	../Ieee1394MultiCamera/CmdDef.h
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
+	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/CmdDef.h

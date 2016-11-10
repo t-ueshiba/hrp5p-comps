@@ -1,6 +1,6 @@
 // -*- C++ -*-
 /*!
- * @file Ieee1394MultiCameraComp.cpp
+ * @file IIDCMultiCameraComp.cpp
  * @brief Standalone component
  * @date $Date$
  *
@@ -14,16 +14,16 @@
 
 extern "C"
 {
-DLL_EXPORT void	Ieee1394MultiCameraRTCInit(RTC::Manager* manager)	;
+DLL_EXPORT void	IIDCMultiCameraRTCInit(RTC::Manager* manager)	;
 }
 
 void
 MyModuleInit(RTC::Manager* manager)
 {
-    Ieee1394MultiCameraRTCInit(manager);
+    IIDCMultiCameraRTCInit(manager);
 
     RTC::RtcBase*	comp = manager
-			     ->createComponent("Ieee1394MultiCameraRTC");
+			     ->createComponent("IIDCMultiCameraRTC");
     if (comp == 0)
     {
 	std::cerr << "Component create failed." << std::endl;

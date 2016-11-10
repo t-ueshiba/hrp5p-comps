@@ -59,8 +59,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
   //virtual RTC::ReturnCode_t	onRateChanged(RTC::UniqueId ec_id)	;
 
     const CAMERAS&	cameras()				const	;
-    void		continuousShot()				;
-    void		stopContinuousShot()				;
+    void		continuousShot(bool enable)			;
     void		setFormat(const Cmd::Values& vals)		;
     void		setOtherValues(const Cmd::Values& vals,
 				       size_t n)			;
@@ -163,7 +162,7 @@ MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
 #endif
-    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
+    exec(_cameras, &camera_type::continuousShot, false);	// 連続撮影を終了
     
     return RTC::RTC_OK;
 }
@@ -198,7 +197,7 @@ MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
-    exec(_cameras, &camera_type::stopContinuousShot);	// 連続撮影を終了
+    exec(_cameras, &camera_type::continuousShot, false);	// 連続撮影を終了
 
     return RTC::RTC_OK;
 }
@@ -236,19 +235,12 @@ MultiCameraRTC<CAMERAS>::cameras() const
 }
 
 template <class CAMERAS> inline void
-MultiCameraRTC<CAMERAS>::continuousShot()
+MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
-    exec(_cameras, &camera_type::continuousShot);
+    exec(_cameras, &camera_type::continuousShot, enable);
 }
     
-template <class CAMERAS> inline void
-MultiCameraRTC<CAMERAS>::stopContinuousShot()
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    exec(_cameras, &camera_type::stopContinuousShot);
-}
-
 template <class CAMERAS> inline void
 MultiCameraRTC<CAMERAS>::setFormat(const Cmd::Values& vals)
 {

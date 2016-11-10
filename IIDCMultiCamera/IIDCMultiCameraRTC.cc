@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include <fstream>
-#include "TU/Ieee1394CameraArray.h"
+#include "TU/IIDCCameraArray.h"
 #include "MultiCameraRTC.h"
 
 /************************************************************************
@@ -15,8 +15,8 @@
 // Module specification
 static const char* ieee1394multicamera_spec[] =
 {
-    "implementation_id",		"Ieee1394MultiCameraRTC",
-    "type_name",			"Ieee1394MultiCamera",
+    "implementation_id",		"IIDCMultiCameraRTC",
+    "type_name",			"IIDCMultiCamera",
     "description",			"Controlling IEEE1394 cameras",
     "version",				"1.0.0",
     "vendor",				"t.ueshiba@aist.go.jp",
@@ -38,23 +38,23 @@ static const char* ieee1394multicamera_spec[] =
 extern "C"
 {
 void
-Ieee1394MultiCameraRTCInit(RTC::Manager* manager)
+IIDCMultiCameraRTCInit(RTC::Manager* manager)
 {
     coil::Properties	profile(ieee1394multicamera_spec);
     manager->registerFactory(
 		 profile,
-		 RTC::Create<TU::MultiCameraRTC<TU::Ieee1394CameraArray> >,
-		 RTC::Delete<TU::MultiCameraRTC<TU::Ieee1394CameraArray> >);
+		 RTC::Create<TU::MultiCameraRTC<TU::IIDCCameraArray> >,
+		 RTC::Delete<TU::MultiCameraRTC<TU::IIDCCameraArray> >);
 }
 };
 
 namespace TU
 {
 /************************************************************************
-*  class MultiCameraRTC<Ieee1394CameraArray>				*
+*  class MultiCameraRTC<IIDCCameraArray>				*
 ************************************************************************/
 template <>
-MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
+MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _mutex(),
@@ -69,7 +69,7 @@ MultiCameraRTC<Ieee1394CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 }
 
 template <> void
-MultiCameraRTC<Ieee1394CameraArray>::initializeConfigurations()
+MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
     bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
@@ -77,24 +77,24 @@ MultiCameraRTC<Ieee1394CameraArray>::initializeConfigurations()
 }
 
 template <> void
-MultiCameraRTC<Ieee1394CameraArray>::initializeTime()
+MultiCameraRTC<IIDCCameraArray>::initializeTime()
 {
-    if (_useTimestamp)
-	exec(_cameras, &camera_type::embedTimestamp);
+    exec(_cameras, &camera_type::embedTimestamp, bool(_useTimestamp));
 }
 
 template <> RTC::Time
-MultiCameraRTC<Ieee1394CameraArray>::getTime(const camera_type& camera) const
+MultiCameraRTC<IIDCCameraArray>::getTime(const camera_type& camera) const
 {
-    u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
-				      : camera.arrivaltime());
+  //u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
+  //				      : camera.arrivaltime());
+    u_int64_t	usec = camera.getTimestamp();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
 			CORBA::ULong((usec % 1000000) * 1000)};
     return time;
 }
 
 template <> inline void
-MultiCameraRTC<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
+MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
 
@@ -105,41 +105,41 @@ MultiCameraRTC<Ieee1394CameraArray>::setFormat(const Cmd::Values& vals)
     }
     else if (vals.length() == 7)
     {
-	Ieee1394Camera::Format
-	    format7     = Ieee1394Camera::uintToFormat(vals[1]);
-	Ieee1394Camera::PixelFormat
-	    pixelFormat = Ieee1394Camera::uintToPixelFormat(vals[6]);
+	IIDCCamera::Format
+	    format7     = IIDCCamera::uintToFormat(vals[1]);
+	IIDCCamera::PixelFormat
+	    pixelFormat = IIDCCamera::uintToPixelFormat(vals[6]);
 	
 	for (size_t i = 0; i < _cameras.size(); ++i)
 	    _cameras[i]->setFormat_7_ROI(format7,
 					 vals[2], vals[3], vals[4], vals[5])
 			.setFormat_7_PixelFormat(format7, pixelFormat)
 			.setFormatAndFrameRate(format7,
-					       Ieee1394Camera::FrameRate_x);
+					       IIDCCamera::FrameRate_x);
 	
 	allocateImages();
     }
 }
     
 template <> size_t
-MultiCameraRTC<Ieee1394CameraArray>::setPixelFormat(const camera_type& camera,
-						    Img::TimedImage& image)
+MultiCameraRTC<IIDCCameraArray>::setPixelFormat(const camera_type& camera,
+						Img::TimedImage& image)
 {
     switch (camera.pixelFormat())
     {
-      case Ieee1394Camera::MONO_8:
+      case IIDCCamera::MONO_8:
 	image.format = Img::MONO_8;
 	return image.width * image.height;
-      case Ieee1394Camera::YUV_411:
+      case IIDCCamera::YUV_411:
 	image.format = Img::YUV_411;
 	return image.width * image.height * 3 / 2;
-      case Ieee1394Camera::YUV_422:
+      case IIDCCamera::YUV_422:
 	image.format = Img::YUV_422;
 	return image.width * image.height * 2;
-      case Ieee1394Camera::YUV_444:
+      case IIDCCamera::YUV_444:
 	image.format = Img::YUV_444;
 	return image.width * image.height * 3;
-      case Ieee1394Camera::RGB_24:
+      case IIDCCamera::RGB_24:
 	image.format = Img::RGB_24;
 	return image.width * image.height * 3;
       default:

@@ -93,10 +93,7 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
     switch (vals[0])
     {
       case c_ContinuousShot:
-	if (vals[1])
-	    _rtc.continuousShot();
-	else
-	    _rtc.stopContinuousShot();
+	_rtc.continuousShot(vals[1]);
 	break;
       case c_Format:
 	_rtc.setFormat(vals);

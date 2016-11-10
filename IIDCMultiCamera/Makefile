@@ -20,12 +20,12 @@ ifneq ($(findstring icpc,$(CXX)),)
   NVCCFLAGS	= -O			# must < -O2
   CPPFLAGS     += -DSSE3
 endif
-CCFLAGS		= $(CFLAGS) -std=c++11
 
-LIBS		= -lTUIeee1394++ -lTUTools++ -lraw1394 -lboost_serialization
-ifneq ($(findstring darwin,$(OSTYPE)),)
-  LIBS	       += -framework IOKit -framework CoreFoundation -framework CoreServices
-endif
+LIBS		= -lTUIIDC++ -lTUTools++ \
+		  -lraw1394 -lusb-1.0 -lboost_serialization
+#ifneq ($(findstring darwin,$(OSTYPE)),)
+#  LIBS	       += -framework IOKit -framework CoreFoundation -framework CoreServices
+#endif
 
 LINKER		= $(CXX)
 
@@ -39,45 +39,45 @@ INCDIR		= $(PREFIX)/include
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
 EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \
-		/usr/local/include/TU/Ieee1394++.h \
-		/usr/local/include/TU/Ieee1394CameraArray.h \
+		/usr/local/include/TU/IIDC++.h \
+		/usr/local/include/TU/IIDCCameraArray.h \
 		/usr/local/include/TU/Image++.h \
 		/usr/local/include/TU/Minimize.h \
 		/usr/local/include/TU/Vector++.h \
 		/usr/local/include/TU/functional.h \
 		/usr/local/include/TU/iterator.h \
-		/usr/local/include/TU/mmInstructions.h \
+		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
 HDRS		= CamSVC_impl.h \
 		CmdDef.h \
 		CmdSVC_impl.h \
 		MultiCameraRTC.h
-SRCS		= Ieee1394CmdSVC_impl.cc \
-		Ieee1394MultiCameraComp.cc \
-		Ieee1394MultiCameraRTC.cc
-OBJS		= Ieee1394CmdSVC_impl.o \
-		Ieee1394MultiCameraComp.o \
-		Ieee1394MultiCameraRTC.o
+SRCS		= IIDCCmdSVC_impl.cc \
+		IIDCMultiCameraComp.cc \
+		IIDCMultiCameraRTC.cc
+OBJS		= IIDCCmdSVC_impl.o \
+		IIDCMultiCameraComp.o \
+		IIDCMultiCameraRTC.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
 #include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
-Ieee1394CmdSVC_impl.o: /usr/local/include/TU/Ieee1394CameraArray.h \
-	/usr/local/include/TU/Ieee1394++.h /usr/local/include/TU/Image++.h \
+IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
+	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h MultiCameraRTC.h CmdSVC_impl.h \
 	CmdDef.h
-Ieee1394MultiCameraRTC.o: /usr/local/include/TU/Ieee1394CameraArray.h \
-	/usr/local/include/TU/Ieee1394++.h /usr/local/include/TU/Image++.h \
+IIDCMultiCameraRTC.o: /usr/local/include/TU/IIDCCameraArray.h \
+	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/mmInstructions.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
+	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h MultiCameraRTC.h CmdSVC_impl.h \
 	CmdDef.h
