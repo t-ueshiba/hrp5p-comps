@@ -2,22 +2,22 @@
  *  $Id$
  */
 #include <fstream>
-#include "TU/IIDCCameraArray.h"
+#include "TU/IIDCCameraUtility.h"
 #include "MultiCameraRTC.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IEEE1394Camera.conf"
-#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/IEEE1394Camera.calib"
+#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IIDCCamera.conf"
+#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/IIDCCamera.calib"
 #define DEFAULT_USE_TIMESTAMP	"1"	// "0": arrival time, "1": timestamp
 
 // Module specification
-static const char* ieee1394multicamera_spec[] =
+static const char* iidcmulticamera_spec[] =
 {
     "implementation_id",		"IIDCMultiCameraRTC",
     "type_name",			"IIDCMultiCamera",
-    "description",			"Controlling IEEE1394 cameras",
+    "description",			"Controlling IIDC cameras",
     "version",				"1.0.0",
     "vendor",				"t.ueshiba@aist.go.jp",
     "category",				"sensor",
@@ -40,7 +40,7 @@ extern "C"
 void
 IIDCMultiCameraRTCInit(RTC::Manager* manager)
 {
-    coil::Properties	profile(ieee1394multicamera_spec);
+    coil::Properties	profile(iidcmulticamera_spec);
     manager->registerFactory(
 		 profile,
 		 RTC::Create<TU::MultiCameraRTC<TU::IIDCCameraArray> >,
@@ -79,7 +79,9 @@ MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 template <> void
 MultiCameraRTC<IIDCCameraArray>::initializeTime()
 {
-    exec(_cameras, &camera_type::embedTimestamp, bool(_useTimestamp));
+    std::for_each(std::begin(_cameras), std::end(_cameras),
+		  std::bind(&camera_type::embedTimestamp,
+			    std::placeholders::_1, bool(_useTimestamp)));
 }
 
 template <> RTC::Time
@@ -87,13 +89,13 @@ MultiCameraRTC<IIDCCameraArray>::getTime(const camera_type& camera) const
 {
   //u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
   //				      : camera.arrivaltime());
-    u_int64_t	usec = camera.getTimestamp();
+    auto	usec = camera.getTimestamp();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
 			CORBA::ULong((usec % 1000000) * 1000)};
     return time;
 }
 
-template <> inline void
+template <> void
 MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
@@ -105,18 +107,13 @@ MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
     }
     else if (vals.length() == 7)
     {
-	IIDCCamera::Format
-	    format7     = IIDCCamera::uintToFormat(vals[1]);
-	IIDCCamera::PixelFormat
-	    pixelFormat = IIDCCamera::uintToPixelFormat(vals[6]);
+	const auto	format7	    = IIDCCamera::uintToFormat(vals[1]);
+	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[6]);
 	
-	for (size_t i = 0; i < _cameras.size(); ++i)
-	    _cameras[i]->setFormat_7_ROI(format7,
-					 vals[2], vals[3], vals[4], vals[5])
-			.setFormat_7_PixelFormat(format7, pixelFormat)
-			.setFormatAndFrameRate(format7,
-					       IIDCCamera::FrameRate_x);
-	
+	for (auto& camera : _cameras)
+	    camera.setFormat_7_ROI(format7, vals[2], vals[3], vals[4], vals[5])
+		  .setFormat_7_PixelFormat(format7, pixelFormat)
+		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
 	allocateImages();
     }
 }
