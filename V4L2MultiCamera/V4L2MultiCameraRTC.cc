@@ -51,6 +51,9 @@ namespace TU
 /************************************************************************
 *  class MultiCameraRTC<V4L2CameraArray>				*
 ************************************************************************/
+/*
+ *  public member functions
+ */
 template <>
 MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
@@ -66,6 +69,42 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 }
 
 template <> void
+MultiCameraRTC<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
+    TU::setFormat(_cameras, vals[1], vals[2]);
+    allocateImages();
+}
+    
+template <> bool
+MultiCameraRTC<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
+					    size_t n, bool all)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    
+    if (vals[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+    {
+	for (auto& camera : _cameras)
+	    camera.setROI(vals[1], vals[2], vals[3], vals[4]);
+	allocateImages();
+
+	return true;
+    }
+    else if (all)
+	return TU::setFeature(_cameras, vals[0], vals[1]);
+    else
+    {
+	auto	camera = std::begin(_cameras);
+	std::advance(camera, n);
+	return TU::setFeature(*camera, vals[0], vals[1]);
+    }
+}
+
+/*
+ *  private member functions
+ */
+template <> void
 MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
@@ -73,12 +112,12 @@ MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 }
 
 template <> void
-MultiCameraRTC<V4L2CameraArray>::initializeTime()
+MultiCameraRTC<V4L2CameraArray>::enableTimestamp()
 {
 }
     
 template <> RTC::Time
-MultiCameraRTC<V4L2CameraArray>::getTime(const camera_type& camera) const
+MultiCameraRTC<V4L2CameraArray>::getTimestamp(const camera_type& camera) const
 {
     u_int64_t	usec = camera.arrivaltime();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
@@ -87,23 +126,8 @@ MultiCameraRTC<V4L2CameraArray>::getTime(const camera_type& camera) const
     return time;
 }
 
-template <> inline void
-MultiCameraRTC<V4L2CameraArray>::setOtherValues(const Cmd::Values& vals,
-						size_t n)
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    if (vals[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
-    {
-	for (size_t i = 0; i < _cameras.size(); ++i)
-	    _cameras[i]->setROI(vals[1], vals[2], vals[3], vals[4]);
-	allocateImages();
-    }
-    else
-	TU::setFeatureValue(_cameras, vals[0], vals[1], n);
-}
-    
 template <> size_t
-MultiCameraRTC<V4L2CameraArray>::setPixelFormat(const camera_type& camera,
+MultiCameraRTC<V4L2CameraArray>::setImageFormat(const camera_type& camera,
 						Img::TimedImage& image)
 {
     switch (camera.pixelFormat())

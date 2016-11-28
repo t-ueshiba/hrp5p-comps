@@ -12,21 +12,19 @@ VPATH		= ../idl
 IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include -I../IIDCMultiCamera
-CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
-CFLAGS		= -g
-NVCCFLAGS	= -g
-ifneq ($(findstring icpc,$(CXX)),)
-  CFLAGS	= -O3
-  NVCCFLAGS	= -O			# must < -O2
+CPPFLAGS	= -DNDEBUG #-DHAVE_LIBTUTOOLS__ -DDEBUG
+CFLAGS		= -O3
+NVCCFLAGS	= -O
+ifeq ($(shell arch), armv7l)
+  CPPFLAGS     += -DNEON
+else ifeq ($(shell arch), aarch64)
+  CPPFLAGS     += -DNEON
+else
   CPPFLAGS     += -DSSE3
 endif
-CCFLAGS		= $(CFLAGS) -std=c++0x
+CCFLAGS		= $(CFLAGS)
 
 LIBS		= -lTUV4L2++ -lTUTools++ -lboost_serialization
-ifneq ($(findstring darwin,$(OSTYPE)),)
-  LIBS	       += -framework IOKit -framework CoreFoundation -framework CoreServices
-endif
-
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
@@ -50,7 +48,6 @@ EXTHDRS		= ../IIDCMultiCamera/Cmd.hh \
 		/usr/local/include/TU/V4L2CameraArray.h \
 		/usr/local/include/TU/Vector++.h \
 		/usr/local/include/TU/functional.h \
-		/usr/local/include/TU/io.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/tuple.h \
@@ -63,9 +60,10 @@ OBJS		= V4L2CmdSVC_impl.o \
 		V4L2MultiCameraComp.o \
 		V4L2MultiCameraRTC.o
 
-include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
-#include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
-#include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
+include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
+#include $(PROJECT)/lib/qt.mk		# MOCSRCS, OBJS
+#include $(PROJECT)/lib/cnoid.mk	# CPPFLAGS, LIBS, LIBDIR
+#include $(PROJECT)/lib/lib.mk		# PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
 V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
@@ -74,17 +72,15 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
-	../IIDCMultiCamera/CmdDef.h
+	/usr/local/include/TU/Minimize.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	../IIDCMultiCamera/Img.hh ../IIDCMultiCamera/CmdSVC_impl.h \
+	../IIDCMultiCamera/Cmd.hh ../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/io.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
-	../IIDCMultiCamera/CmdDef.h
+	/usr/local/include/TU/Minimize.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	../IIDCMultiCamera/Img.hh ../IIDCMultiCamera/CmdSVC_impl.h \
+	../IIDCMultiCamera/Cmd.hh ../IIDCMultiCamera/CmdDef.h

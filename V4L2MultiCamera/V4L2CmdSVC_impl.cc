@@ -13,26 +13,25 @@ namespace v
 *  class CmdSVC_impl<V4L2CameraArray>					*
 ************************************************************************/
 template <> CmdDefs
-CmdSVC_impl<V4L2CameraArray>::createFormatItems(camera_type& camera)
+CmdSVC_impl<V4L2CameraArray>::createFormatItems(const camera_type& camera)
 {
     CmdDefs	cmds;
 
-    BOOST_FOREACH (V4L2Camera::PixelFormat pixelFormat,
-		   camera.availablePixelFormats())
+    BOOST_FOREACH (auto pixelFormat, camera.availablePixelFormats())
     {
       // この画素フォーマットに対応するメニュー項目を作る．
-	cmds.push_back(CmdDef(C_MenuItem,
-			      camera.getName(pixelFormat), pixelFormat));
-	CmdDef&	cmd = cmds.back();
+	cmds.push_back(CmdDef(CmdDef::C_MenuItem,
+			      pixelFormat, camera.getName(pixelFormat)));
 
       // この画素フォーマットがサポートする各フレームサイズに対応するメニュー項目を作る．
-	BOOST_FOREACH (const V4L2Camera::FrameSize& frameSize,
+	auto&	subcmds = cmds.back().subcmds;
+	BOOST_FOREACH (const auto& frameSize,
 		       camera.availableFrameSizes(pixelFormat))
 	{
 	    std::ostringstream	s;
 	    s << frameSize;
-	    cmd.subcmds.push_back(CmdDef(C_MenuItem,
-					 s.str(), cmd.subcmds.size()));
+	    subcmds.push_back(CmdDef(CmdDef::C_MenuItem,
+				     subcmds.size(), s.str()));
 	}
     }
 
@@ -40,41 +39,43 @@ CmdSVC_impl<V4L2CameraArray>::createFormatItems(camera_type& camera)
 }
 
 template <> void
-CmdSVC_impl<V4L2CameraArray>::addOtherCmds(const camera_type& camera,
-					   CmdDefs& cmds)
+CmdSVC_impl<V4L2CameraArray>::appendFeatureCmds(const camera_type& camera,
+						CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
 
   // ROIを指定するコマンドを作る．
-    cmds.push_back(CmdDef(C_Button,
-			  "set ROI", V4L2Camera::UNKNOWN_PIXEL_FORMAT, noSub,
-			  0, 0, 0, 1, CA_None, 0, y++));
+    cmds.push_back(CmdDef(CmdDef::C_Button,
+			  V4L2Camera::UNKNOWN_PIXEL_FORMAT, "set ROI",
+			  0, y++, 1, 1, 0, CmdDefs(),
+			  0, 0, 0, 1));
     size_t	minU0, minV0, maxWidth, maxHeight;
     camera.getROILimits(minU0, minV0, maxWidth, maxHeight);
-    CmdDefs&	roiCmds = cmds.back().subcmds;
-    roiCmds.push_back(CmdDef(C_Slider, "u0", c_U0, noSub,
-			     minU0, maxWidth  - minU0 - 1, 1, 1, CA_None,
-			     0, 0));
-    roiCmds.push_back(CmdDef(C_Slider, "v0", c_V0, noSub,
-			     minV0, maxHeight - minV0 - 1, 1, 1, CA_None,
-			     0, 1));
-    roiCmds.push_back(CmdDef(C_Slider, "width", c_Width, noSub,
-			     0, maxWidth, 1, 1, CA_None, 0, 2));
-    roiCmds.push_back(CmdDef(C_Slider, "height", c_Height, noSub,
-			     0, maxHeight, 1, 1, CA_None, 0, 3));
+    auto&	roiCmds = cmds.back().subcmds;
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0, "u0",
+			     0, 0, 1, 1, 0, CmdDefs(),
+			     minU0, maxWidth - 1));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0, "v0",
+			     0, 1, 1, 1, 0, CmdDefs(),
+			     minV0, maxHeight - 1));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Width, "width",
+			     0, 2, 1, 1, 0, CmdDefs(),
+			     0, maxWidth));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Height, "height",
+			     0, 3, 1, 1, 0, CmdDefs(),
+			     0, maxHeight));
     
   // featureを指定するコマンドを作る．
-    BOOST_FOREACH (V4L2Camera::Feature feature, camera.availableFeatures())
+    BOOST_FOREACH (auto feature, camera.availableFeatures())
     {
 	cmds.push_back(CmdDef());
-	CmdDef&	cmd = cmds.back();
+	auto&	cmd = cmds.back();
 	
 	cmd.name  = camera.getName(feature);
 	cmd.id	  = feature;
 	cmd.gridy = y++;
 	
-	V4L2Camera::MenuItemRange
-	    menuItems = camera.availableMenuItems(feature);
+	const auto	menuItems = camera.availableMenuItems(feature);
 
 	if (menuItems.first == menuItems.second)
 	{
@@ -86,18 +87,18 @@ CmdSVC_impl<V4L2CameraArray>::addOtherCmds(const camera_type& camera,
 	    cmd.step = step;
 
 	    if (min == 0 && max == 1)
-		cmd.type = C_ToggleButton;
+		cmd.type = CmdDef::C_ToggleButton;
 	    else
-		cmd.type = C_Slider;
+		cmd.type = CmdDef::C_Slider;
 	}
 	else
 	{
-	    cmd.type = C_Button;
+	    cmd.type = CmdDef::C_Button;
 
-	    BOOST_FOREACH (const V4L2Camera::MenuItem& menuItem, menuItems)
+	    BOOST_FOREACH (const auto& menuItem, menuItems)
 	    {
-		cmd.subcmds.push_back(CmdDef(C_MenuItem,
-					     menuItem.name, menuItem.index));
+		cmd.subcmds.push_back(CmdDef(CmdDef::C_MenuItem,
+					     menuItem.index, menuItem.name));
 	    }
 	}
     }
@@ -106,16 +107,15 @@ CmdSVC_impl<V4L2CameraArray>::addOtherCmds(const camera_type& camera,
 template <> Cmd::Values
 CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids) const
 {
-    const V4L2CameraArray&	cameras = _rtc.cameras();
-    Cmd::Values			vals;
+    Cmd::Values	vals;
     
-    if (cameras.size() == 0)
+    if (size(_rtc.cameras()) == 0)
 	return vals;
 
-    const V4L2Camera&		camera = *cameras[0];
-    V4L2Camera::PixelFormat	pixelFormat = camera.pixelFormat();
-    int				i = 0;
-    BOOST_FOREACH (const V4L2Camera::FrameSize& frameSize,
+    const auto&	camera = *std::begin(_rtc.cameras());
+    const auto	pixelFormat = camera.pixelFormat();
+    int		i = 0;
+    BOOST_FOREACH (const auto& frameSize,
 		   camera.availableFrameSizes(pixelFormat))
     {
 	if (frameSize.width.involves(camera.width()) &&
@@ -134,19 +134,28 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids) const
     return vals;
 }
 
-template <> Cmd::Values
-CmdSVC_impl<V4L2CameraArray>::getOtherValues(const Cmd::Values& ids) const
+template <> bool
+CmdSVC_impl<V4L2CameraArray>::setFeature(const Cmd::Values& vals)
 {
-    const V4L2CameraArray&	cameras = _rtc.cameras();
-    Cmd::Values			vals;
-    
-    if (cameras.size() == 0)
+    _rtc.setFeature(vals, _n, _all);
+
+    return false;	// GUIの更新が必要な属性はなし
+}
+
+template <> Cmd::Values
+CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids) const
+{
+    Cmd::Values	vals;
+
+    if (size(_rtc.cameras()) == 0)
 	return vals;
+
+    auto	camera = std::begin(_rtc.cameras());
 
     if (ids[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
 	size_t	u0, v0, width, height;
-	cameras[0]->getROI(u0, v0, width, height);
+	camera->getROI(u0, v0, width, height);
 
 	vals.length(4);
 	vals[0] = u0;
@@ -156,8 +165,12 @@ CmdSVC_impl<V4L2CameraArray>::getOtherValues(const Cmd::Values& ids) const
     }
     else
     {
+	std::advance(camera, _n);
+
+	int	val;
+	TU::getFeature(*camera, ids[0], val);
 	vals.length(1);
-	vals[0] = TU::getFeatureValue(cameras, ids[0], _n);
+	vals[0] = val;
     }
 
     return vals;
