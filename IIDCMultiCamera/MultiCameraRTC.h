@@ -70,13 +70,13 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     
   private:
     void		initializeConfigurations()			;
-    void		initializeTime()				;
-    RTC::Time		getTime(const camera_type& camera)	const	;
+    void		enableTimestamp()				;
+    RTC::Time		getTimestamp(const camera_type& camera)	const	;
     void		allocateImages()				;
     static size_t	setImageHeader(const camera_type& camera,
 				       const Calib& calib,
 				       Img::TimedImage& image)		;
-    static size_t	setPixelFormat(const camera_type& camera,
+    static size_t	setImageFormat(const camera_type& camera,
 				       Img::TimedImage& image)		;
     
   private:
@@ -92,6 +92,9 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     RTC::CorbaPort			_commandPort;	// service port
 };
 
+/*
+ *  public member functions
+ */
 template <class CAMERAS>
 MultiCameraRTC<CAMERAS>::~MultiCameraRTC()
 {
@@ -142,7 +145,7 @@ MultiCameraRTC<CAMERAS>::onInitialize()
 	}
 
       // 撮影時刻の記録を初期化
-	initializeTime();
+	enableTimestamp();
     }
     catch (std::exception& err)
     {
@@ -196,7 +199,7 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	for (const auto& camera : _cameras)
 	{
 	    camera.captureRaw(_images[i].data.get_buffer());
-	    _images[i].tm = getTime(camera);
+	    _images[i].tm = getTimestamp(camera);
 	    ++i;
 	}
 	_imagesOut.write();
@@ -259,28 +262,9 @@ MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 			    std::placeholders::_1, enable));
 }
 
-template <class CAMERAS> inline void
-MultiCameraRTC<CAMERAS>::setFormat(const Cmd::Values& vals)
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    TU::setFormat(_cameras, vals[1], vals[2]);
-    allocateImages();
-}
-    
-template <class CAMERAS> inline bool
-MultiCameraRTC<CAMERAS>::setFeature(const Cmd::Values& vals, size_t n, bool all)
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    if (all)
-	return TU::setFeature(_cameras, vals[0], vals[1], vals[1]);
-    else
-    {
-	auto	camera = std::begin(_cameras);
-	std::advance(camera, n);
-	return TU::setFeature(*camera, vals[0], vals[1], vals[1]);
-    }
-}
-
+/*
+ *  private member functions
+ */
 template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::allocateImages()
 {
@@ -307,7 +291,7 @@ MultiCameraRTC<CAMERAS>::setImageHeader(const camera_type& camera,
     image.d1 = calib.d1;
     image.d2 = calib.d2;
 
-    return setPixelFormat(camera, image);
+    return setImageFormat(camera, image);
 }
         
 }

@@ -18,17 +18,26 @@ namespace v
 /************************************************************************
 *  class CmdSVC_impl<CAMERAS>						*
 ************************************************************************/
+//! マルチカメラシステムを操作するためのコマンドサービスを表現するクラス
 template <class CAMERAS>
 class CmdSVC_impl : public virtual POA_Cmd::Controller,
 		    public virtual PortableServer::RefCountServantBase
 {
   private:
     typedef typename CAMERAS::value_type	camera_type;
-    
+
+  //! カメラ操作コマンド
     enum
     {
-	c_ContinuousShot, c_Format, c_CameraSelection, c_AllCameras,
-	c_U0, c_V0, c_Width, c_Height, c_PixelFormat,
+	c_ContinuousShot,	//!< 画像ストリームの起動/停止
+	c_Format,		//!< 画像フォーマットの選択
+	c_CameraSelection,	//!< 操作対象カメラの選択
+	c_AllCameras,		//!< 全カメラ一斉操作モード
+	c_U0,			//!< ROIの左上隅横座標
+	c_V0,			//!< ROIの左上隅縦座標
+	c_Width,		//!< ROIの幅
+	c_Height,		//!< ROIの高さ
+	c_PixelFormat,		//!< ROIの画素フォーマット
     };
     
   public:
@@ -228,26 +237,6 @@ template <class CAMERAS> inline bool
 CmdSVC_impl<CAMERAS>::inContinuousShot() const
 {
     return std::begin(_rtc.cameras())->inContinuousShot();
-}
-
-template <class CAMERAS> Cmd::Values
-CmdSVC_impl<CAMERAS>::getFeature(const Cmd::Values& ids) const
-{
-    Cmd::Values	vals;
-    
-    if (size(_rtc.cameras()) == 0)
-	return vals;
-
-    auto	camera = std::begin(_rtc.cameras());
-    std::advance(camera, _n);				// 選択カメラ
-
-    u_int	val;
-    float	fval;
-    TU::getFeature(*camera, ids[0], val, fval);
-    vals.length(1);
-    vals[0] = val;
-
-    return vals;
 }
 
 }

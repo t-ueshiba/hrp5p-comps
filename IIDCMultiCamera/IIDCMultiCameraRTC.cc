@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include <fstream>
-#include "TU/IIDCCameraUtility.h"
+#include "TU/IIDCCameraArray.h"
 #include "MultiCameraRTC.h"
 
 /************************************************************************
@@ -53,6 +53,9 @@ namespace TU
 /************************************************************************
 *  class MultiCameraRTC<IIDCCameraArray>				*
 ************************************************************************/
+/*
+ *  public member functions
+ */
 template <>
 MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
@@ -69,42 +72,12 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
 }
 
 template <> void
-MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
-{
-    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
-    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
-    bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
-}
-
-template <> void
-MultiCameraRTC<IIDCCameraArray>::initializeTime()
-{
-    std::for_each(std::begin(_cameras), std::end(_cameras),
-		  std::bind(&camera_type::embedTimestamp,
-			    std::placeholders::_1, bool(_useTimestamp)));
-}
-
-template <> RTC::Time
-MultiCameraRTC<IIDCCameraArray>::getTime(const camera_type& camera) const
-{
-  //u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
-  //				      : camera.arrivaltime());
-    auto	usec = camera.getTimestamp();
-    RTC::Time	time = {CORBA::ULong( usec / 1000000),
-			CORBA::ULong((usec % 1000000) * 1000)};
-    return time;
-}
-
-template <> void
 MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
 
     if (vals.length() == 3)
-    {
 	TU::setFormat(_cameras, vals[1], vals[2]);
-	allocateImages();
-    }
     else if (vals.length() == 7)
     {
 	const auto	format7	    = IIDCCamera::uintToFormat(vals[1]);
@@ -114,12 +87,59 @@ MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 	    camera.setFormat_7_ROI(format7, vals[2], vals[3], vals[4], vals[5])
 		  .setFormat_7_PixelFormat(format7, pixelFormat)
 		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
-	allocateImages();
     }
+
+    allocateImages();
 }
     
+template <> bool
+MultiCameraRTC<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
+					    size_t n, bool all)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
+    if (all)
+	return TU::setFeature(_cameras, vals[0], vals[1], vals[1]);
+    else
+    {
+	auto	camera = std::begin(_cameras);
+	std::advance(camera, n);
+	return TU::setFeature(*camera, vals[0], vals[1], vals[1]);
+    }
+}
+
+/*
+ *  private member functions
+ */
+template <> void
+MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
+{
+    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
+    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
+    bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
+}
+
+template <> void
+MultiCameraRTC<IIDCCameraArray>::enableTimestamp()
+{
+    std::for_each(std::begin(_cameras), std::end(_cameras),
+		  std::bind(&camera_type::embedTimestamp,
+			    std::placeholders::_1, bool(_useTimestamp)));
+}
+
+template <> RTC::Time
+MultiCameraRTC<IIDCCameraArray>::getTimestamp(const camera_type& camera) const
+{
+  //u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
+  //				      : camera.arrivaltime());
+    auto	usec = camera.getTimestamp();
+    RTC::Time	time = {CORBA::ULong( usec / 1000000),
+			CORBA::ULong((usec % 1000000) * 1000)};
+    return time;
+}
+
 template <> size_t
-MultiCameraRTC<IIDCCameraArray>::setPixelFormat(const camera_type& camera,
+MultiCameraRTC<IIDCCameraArray>::setImageFormat(const camera_type& camera,
 						Img::TimedImage& image)
 {
     switch (camera.pixelFormat())

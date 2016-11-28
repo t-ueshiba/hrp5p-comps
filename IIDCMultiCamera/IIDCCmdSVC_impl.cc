@@ -1,7 +1,7 @@
 /*
  *  $Id$
  */
-#include "TU/IIDCCameraUtility.h"
+#include "TU/IIDCCameraArray.h"
 #include "MultiCameraRTC.h"
 
 namespace TU
@@ -234,6 +234,26 @@ CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
 	    (vals[0] >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS));
 }
 
+template <> Cmd::Values
+CmdSVC_impl<IIDCCameraArray>::getFeature(const Cmd::Values& ids) const
+{
+    Cmd::Values	vals;
+    
+    if (size(_rtc.cameras()) == 0)
+	return vals;
+
+    auto	camera = std::begin(_rtc.cameras());
+    std::advance(camera, _n);				// 選択カメラ
+
+    u_int	val;
+    float	fval;
+    TU::getFeature(*camera, ids[0], val, fval);
+    vals.length(1);
+    vals[0] = val;
+
+    return vals;
+}
+    
 }
 }
 
