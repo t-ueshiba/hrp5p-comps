@@ -14,7 +14,7 @@ MOCHDRS		=
 
 INCDIRS		= -I. -I../IIDCMultiCamera -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG -DDEBUG -DUSE_TBB
-CFLAGS		= -g
+CFLAGS		= -O3
 NVCCFLAGS	= -g
 ifneq ($(findstring icpc,$(CXX)),)
   CFLAGS	= -O3 #-xAVX

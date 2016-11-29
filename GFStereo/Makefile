@@ -15,8 +15,8 @@ MOCHDRS		=
 INCDIRS		= -I. -I../SADStereo -I../IIDCMultiCamera \
 		  -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG -DDEBUG -DUSE_TBB
-CFLAGS		= -g
-NVCCFLAGS	= -g
+CFLAGS		= -O3
+NVCCFLAGS	= -O
 ifneq ($(findstring icpc,$(CXX)),)
   CFLAGS	= -O3 #-xAVX
   NVCCFLAGS	= -O			# must < -O2
