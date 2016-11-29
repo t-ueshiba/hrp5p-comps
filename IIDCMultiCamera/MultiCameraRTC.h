@@ -116,6 +116,15 @@ MultiCameraRTC<CAMERAS>::onInitialize()
     _commandPort.registerProvider("Command", "Cmd::Controller", _command);
     addPort(_commandPort);
     
+    return RTC::RTC_OK;
+}
+
+template <class CAMERAS> RTC::ReturnCode_t
+MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
+{
+#ifdef DEBUG
+    std::cerr << "MultiCameraRTC::onActivated" << std::endl;
+#endif
     try
     {
       // 設定ファイルを読み込んでカメラを生成・セットアップ
@@ -154,15 +163,6 @@ MultiCameraRTC<CAMERAS>::onInitialize()
 	return RTC::RTC_ERROR;
     }
 
-    return RTC::RTC_OK;
-}
-
-template <class CAMERAS> RTC::ReturnCode_t
-MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
-{
-#ifdef DEBUG
-    std::cerr << "MultiCameraRTC::onActivated" << std::endl;
-#endif
     allocateImages();
     
     return RTC::RTC_OK;
@@ -177,6 +177,9 @@ MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
     std::for_each(std::begin(_cameras), std::end(_cameras),
 		  std::bind(&camera_type::continuousShot,
 			    std::placeholders::_1, false));	// 連続撮影を終了
+    std::for_each(std::begin(_cameras), std::end(_cameras),
+		  std::bind(&camera_type::terminate,
+			    std::placeholders::_1));		// デバイスを終了
     
     return RTC::RTC_OK;
 }
