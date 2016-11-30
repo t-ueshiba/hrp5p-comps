@@ -130,31 +130,32 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
       // 設定ファイルを読み込んでカメラを生成・セットアップ
 	std::ifstream	in(_cameraConfig.c_str());
 	if (!in)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onInitialize(): failed to open " + _cameraConfig + " !");
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open " + _cameraConfig + " !");
 
 	in >> _cameras;
 	in.close();
 
 	if (size(_cameras) == 0)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onInitialize(): failed to open cameras from " + _cameraConfig + " !");
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open cameras from " + _cameraConfig + " !");
 	
       // キャリブレーションを読み込み
 	_calibs.resize(size(_cameras));
 	in.open(_cameraCalib.c_str());
-	if (in)
-	{
-	    auto	camera = std::begin(_cameras);
-	    for (auto& calib : _calibs)
-	    {
-		calib.width  = camera->width();
-		calib.height = camera->height();
-		in >> calib.P >> calib.d1 >> calib.d2;
-		++camera;
-	    }
-	}
+	if (!in)
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open " + _cameraCalib + " !");
 
-      // 撮影時刻の記録を初期化
-	enableTimestamp();
+	auto	camera = std::begin(_cameras);
+	for (auto& calib : _calibs)
+	{
+	    calib.width  = camera->width();
+	    calib.height = camera->height();
+	    in >> calib.P >> calib.d1 >> calib.d2;
+	    ++camera;
+	}
+	in.close();
+	
+	enableTimestamp();		// 撮影時刻の記録を初期化
+	continuousShot(true);		// 連続撮影を開始	
     }
     catch (std::exception& err)
     {
@@ -174,12 +175,12 @@ MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onDeactivated" << std::endl;
 #endif
-    std::for_each(std::begin(_cameras), std::end(_cameras),
-		  std::bind(&camera_type::continuousShot,
-			    std::placeholders::_1, false));	// 連続撮影を終了
+    continuousShot(false);		// 連続撮影を終了
+
+  // デバイスを終了
     std::for_each(std::begin(_cameras), std::end(_cameras),
 		  std::bind(&camera_type::terminate,
-			    std::placeholders::_1));		// デバイスを終了
+			    std::placeholders::_1));
     
     return RTC::RTC_OK;
 }
@@ -217,9 +218,7 @@ MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
-    std::for_each(std::begin(_cameras), std::end(_cameras),
-		  std::bind(&camera_type::continuousShot,
-			    std::placeholders::_1, false));	// 連続撮影を終了
+    continuousShot(false);		// 連続撮影を終了
 
     return RTC::RTC_OK;
 }

@@ -17,6 +17,7 @@
 #include "TU/v/CanvasPane.h"
 #include "TU/v/CanvasPaneDC.h"
 #include "Img.hh"
+#include <memory>		// for std::unique_ptr<T>
 
 using namespace	RTC;
 
@@ -66,13 +67,13 @@ class MultiImageViewer : public RTC::DataFlowComponentBase
     ~MultiImageViewer();
 
     virtual RTC::ReturnCode_t	onInitialize()				;
+    virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
 #ifdef DEBUG
     virtual RTC::ReturnCode_t	onFinalize()				;
     virtual RTC::ReturnCode_t	onStartup(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onShutdown(RTC::UniqueId ec_id)		;
-    virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
   //virtual RTC::ReturnCode_t	onError(RTC::UniqueId ec_id)		;
   //virtual RTC::ReturnCode_t	onReset(RTC::UniqueId ec_id)		;
@@ -81,14 +82,14 @@ class MultiImageViewer : public RTC::DataFlowComponentBase
 #endif
     
   protected:
-    Img::TimedImages		_images;
-    InPort<Img::TimedImages>	_imagesIn;
+    Img::TimedImages				_images;
+    InPort<Img::TimedImages>			_imagesIn;
 
   private:
-    int				_argc;
-    TU::v::App			_vapp;
-    TU::v::CmdWindow		_win;
-    TU::Array<KernelBase*>	_kernels;
+    int						_argc;
+    TU::v::App					_vapp;
+    TU::v::CmdWindow				_win;
+    TU::Array<std::unique_ptr<KernelBase> >	_kernels;
 };
 
 template <class T> bool

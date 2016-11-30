@@ -69,15 +69,21 @@ MultiImageViewer::onInitialize()
 }
 
 RTC::ReturnCode_t
+MultiImageViewer::onActivated(RTC::UniqueId ec_id)
+{
+    std::cerr << "MultiImageViewer::onActivated" << std::endl;
+  //_win.show();
+    
+    return RTC::RTC_OK;
+}
+
+RTC::ReturnCode_t
 MultiImageViewer::onDeactivated(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiImageViewer::onDeactivated" << std::endl;
 
-    for (size_t i = 0; i < _kernels.size(); ++i)
-    {
-	delete _kernels[i];
-	_kernels[i] = 0;
-    }
+    for (auto& kernel : _kernels)
+	kernel = nullptr;
 
     _win.hide();
     
@@ -100,41 +106,34 @@ MultiImageViewer::onExecute(RTC::UniqueId ec_id)
 
       // 視点数とカーネル数を一致させる
 	if (_images.length() != _kernels.size())
-	{
-	    for (size_t i = 0; i < _kernels.size(); ++i)
-		delete _kernels[i];
 	    _kernels.resize(_images.length());
-	    _kernels = 0;			// 全ポインタをnullに
-	}
 
       // 各視点毎に画像データを読み込んで表示
 	bool	updated = false;
 	
 	for (size_t i = 0; i < _images.length(); ++i)
 	{
-	    const Img::TimedImage&	image  = _images[i];
-	    KernelBase*&		kernel = _kernels[i];
+	    const auto&	image  = _images[i];
+	    auto&	kernel = _kernels[i];
 
-	    if (kernel == 0 || !kernel->conform(image))
+	    if (kernel == nullptr || !kernel->conform(image))
 	    {
-		delete kernel;
-
 		switch (image.format)
 		{
 		  case Img::MONO_8:
-		    kernel = new Kernel<u_char>(_win, image.format);
+		    kernel.reset(new Kernel<u_char>(_win, image.format));
 		    break;
 		  case Img::YUV_411:
-		    kernel = new Kernel<TU::YUV411>(_win, image.format);
+		    kernel.reset(new Kernel<TU::YUV411>(_win, image.format));
 		    break;
 		  case Img::YUV_422:
-		    kernel = new Kernel<TU::YUV422>(_win, image.format);
+		    kernel.reset(new Kernel<TU::YUV422>(_win, image.format));
 		    break;
 		  case Img::YUV_444:
-		    kernel = new Kernel<TU::YUV444>(_win, image.format);
+		    kernel.reset(new Kernel<TU::YUV444>(_win, image.format));
 		    break;
 		  case Img::RGB_24:
-		    kernel = new Kernel<TU::RGB>(_win, image.format);
+		    kernel.reset(new Kernel<TU::RGB>(_win, image.format));
 		    break;
 		  default:
 		    std::cerr << "Unsupported format!!" << std::endl;
@@ -184,14 +183,6 @@ RTC::ReturnCode_t
 MultiImageViewer::onShutdown(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiImageViewer::onShutdown" << std::endl;
-
-    return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t
-MultiImageViewer::onActivated(RTC::UniqueId ec_id)
-{
-    std::cerr << "MultiImageViewer::onActivated" << std::endl;
 
     return RTC::RTC_OK;
 }
