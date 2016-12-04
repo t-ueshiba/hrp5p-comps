@@ -75,9 +75,9 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     void		allocateImages()				;
     static size_t	setImageHeader(const camera_type& camera,
 				       const Calib& calib,
-				       Img::TimedImage& image)		;
+				       Img::Header& image)		;
     static size_t	setImageFormat(const camera_type& camera,
-				       Img::TimedImage& image)		;
+				       Img::Header& header)		;
     
   private:
     CAMERAS				_cameras;
@@ -199,11 +199,12 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     {
 	std::for_each(std::begin(_cameras), std::end(_cameras),
 		      std::bind(&camera_type::snap, std::placeholders::_1));
-	size_t	i = 0;
+	size_t	i = 0, offset = 0;
 	for (const auto& camera : _cameras)
 	{
-	    camera.captureRaw(_images[i].data.get_buffer());
-	    _images[i].tm = getTimestamp(camera);
+	    camera.captureRaw(_images.data.get_buffer(false) + offset);
+	    _images.headers[i].tm = getTimestamp(camera);
+	    offset += _images.headers[i].size;
 	    ++i;
 	}
 	_imagesOut.write();
@@ -270,30 +271,32 @@ MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::allocateImages()
 {
-    _images.length(size(_cameras));
-    size_t	i = 0;
+    _images.headers.length(size(_cameras));
+
+    size_t	i = 0, total_size = 0;
     for (const auto& camera : _cameras)
     {
-	_images[i].data.length(setImageHeader(camera, _calibs[i], _images[i]));
+	total_size += setImageHeader(camera, _calibs[i], _images.headers[i]);
 	++i;
     }
+    _images.data.length(total_size);
 }
 
 template <class CAMERAS> size_t
 MultiCameraRTC<CAMERAS>::setImageHeader(const camera_type& camera,
 					const Calib& calib,
-					Img::TimedImage& image)
+					Img::Header& header)
 {
-    image.width  = camera.width();
-    image.height = camera.height();
+    header.width  = camera.width();
+    header.height = camera.height();
 
     for (size_t i = 0; i < calib.P.nrow(); ++i)
 	for (size_t j = 0; j < calib.P.ncol(); ++j)
-	    image.P[i][j] = calib.P[i][j];
-    image.d1 = calib.d1;
-    image.d2 = calib.d2;
+	    header.P[i][j] = calib.P[i][j];
+    header.d1 = calib.d1;
+    header.d2 = calib.d2;
 
-    return setImageFormat(camera, image);
+    return setImageFormat(camera, header);
 }
         
 }

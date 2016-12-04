@@ -36,8 +36,9 @@ class MultiImageViewer : public RTC::DataFlowComponentBase
 	     format(fmt)						{}
 	virtual		~KernelBase()					{}
 
-	virtual bool	conform(const Img::TimedImage& image)	const	= 0;
-	virtual void	display(const Img::TimedImage& image)		= 0;
+	virtual bool	conform(const Img::Header& header)	const	= 0;
+	virtual void	display(const Img::Header& header,
+				const void* data)			= 0;
 
       protected:
 	TU::v::CanvasPaneDC	_dc;
@@ -53,8 +54,9 @@ class MultiImageViewer : public RTC::DataFlowComponentBase
 	Kernel(TU::v::Window& win, Img::PixelFormat fmt)
 	    :KernelBase(win, fmt), _image()				{}
 
-	virtual bool	conform(const Img::TimedImage& image)	const	;
-	virtual void	display(const Img::TimedImage& image)		;
+	virtual bool	conform(const Img::Header& header)	const	;
+	virtual void	display(const Img::Header& header,
+				const void* data)			;
 	virtual void	repaintUnderlay()				;
 	virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)	;
 	
@@ -93,17 +95,18 @@ class MultiImageViewer : public RTC::DataFlowComponentBase
 };
 
 template <class T> bool
-MultiImageViewer::Kernel<T>::conform(const Img::TimedImage& image) const
+MultiImageViewer::Kernel<T>::conform(const Img::Header& header) const
 {
-    return ((format == image.format) &&
-	    (_image.width()  == image.width) &&
-	    (_image.height() == image.height));
+    return ((format == header.format) &&
+	    (_image.width()  == header.width) &&
+	    (_image.height() == header.height));
 }
 
 template <class T> void
-MultiImageViewer::Kernel<T>::display(const Img::TimedImage& image)
+MultiImageViewer::Kernel<T>::display(const Img::Header& header,
+				     const void* data)
 {
-    _image.resize((T*)image.data.get_buffer(), image.height, image.width);
+    _image.resize((T*)data, header.height, header.width);
     _dc.setSize(_image.width(), _image.height(), 1);
 
     repaintUnderlay();

@@ -21,8 +21,8 @@ ifneq ($(findstring icpc,$(CXX)),)
   CPPFLAGS     += -DSSE3
 endif
 
-LIBS		= -lTUIIDC++ -lTUTools++ \
-		  -lraw1394 -lusb-1.0 -lboost_serialization
+LIBS		= -lusb-1.0 -lTUIIDC++ -lTUTools++ \
+		  -lraw1394 -lboost_serialization
 #ifneq ($(findstring darwin,$(OSTYPE)),)
 #  LIBS	       += -framework IOKit -framework CoreFoundation -framework CoreServices
 #endif

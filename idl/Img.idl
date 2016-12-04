@@ -15,21 +15,25 @@ enum PixelFormat
     MONO_8, YUV_411, YUV_422, YUV_444, RGB_24, FLT, UNKNOWN
 };
 
-struct TimedImage
+struct Header
 {
     RTC::Time		tm;
 
     PixelFormat		format;
     unsigned long	width;
     unsigned long	height;
+    unsigned long	size;
+
     Matrix34d		P;
     double		d1;
     double		d2;
-
-    sequence<octet>	data;
 };
 
-typedef sequence<TimedImage>	TimedImages;
+struct TimedImages
+{
+    sequence<Header>	headers;
+    sequence<octet>	data;
+};
 
 };
 

@@ -140,30 +140,36 @@ MultiCameraRTC<IIDCCameraArray>::getTimestamp(const camera_type& camera) const
 
 template <> size_t
 MultiCameraRTC<IIDCCameraArray>::setImageFormat(const camera_type& camera,
-						Img::TimedImage& image)
+						Img::Header& header)
 {
     switch (camera.pixelFormat())
     {
       case IIDCCamera::MONO_8:
-	image.format = Img::MONO_8;
-	return image.width * image.height;
+	header.format = Img::MONO_8;
+	header.size = header.width * header.height;
+	break;
       case IIDCCamera::YUV_411:
-	image.format = Img::YUV_411;
-	return image.width * image.height * 3 / 2;
+	header.format = Img::YUV_411;
+	header.size = header.width * header.height * 3 / 2;
+	break;
       case IIDCCamera::YUV_422:
-	image.format = Img::YUV_422;
-	return image.width * image.height * 2;
+	header.format = Img::YUV_422;
+	header.size = header.width * header.height * 2;
+	break;
       case IIDCCamera::YUV_444:
-	image.format = Img::YUV_444;
-	return image.width * image.height * 3;
+	header.format = Img::YUV_444;
+	header.size = header.width * header.height * 3;
+	break;
       case IIDCCamera::RGB_24:
-	image.format = Img::RGB_24;
-	return image.width * image.height * 3;
+	header.format = Img::RGB_24;
+	header.size = header.width * header.height * 3;
+	break;
       default:
 	throw std::runtime_error("Unsupported pixel format!!");
+	break;
     }
 
-    return 0;
+    return header.size;
 }
 
 }
