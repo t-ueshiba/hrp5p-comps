@@ -14,18 +14,25 @@ IDLS		= Img.idl Cmd.idl
 INCDIRS		= -I. -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
 CFLAGS		= -O3
-NVCCFLAGS	= -g
-ifneq ($(findstring icpc,$(CXX)),)
-  CFLAGS	= -O3
-  NVCCFLAGS	= -O			# must < -O2
+NVCCFLAGS	= -O
+ifeq ($(shell arch), armv71)
+  CPPFLAGS     += -DNEON
+else ifeq ($(shell arch), aarch64)
+  CPPFLAGS     += -DNEON
+else
   CPPFLAGS     += -DSSE3
 endif
+CCFLAGS		= $(CFLAGS)
 
 LIBS		= -lusb-1.0 -lTUIIDC++ -lTUTools++ \
 		  -lraw1394 -lboost_serialization
-#ifneq ($(findstring darwin,$(OSTYPE)),)
-#  LIBS	       += -framework IOKit -framework CoreFoundation -framework CoreServices
-#endif
+ifneq ($(findstring darwin,$(OSTYPE)),)
+  LIBS		= -lusb-1.0 -lTUIIDC++ -lTUTools++ \
+		  -lraw1394 -lboost_serialization
+else
+  LIBS		= -lTUIIDC++ -lTUTools++ \
+		  -lraw1394 -lusb-1.0 -lboost_serialization
+endif
 
 LINKER		= $(CXX)
 

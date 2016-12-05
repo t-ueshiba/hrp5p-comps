@@ -19,6 +19,26 @@
 
 namespace TU
 {
+#ifdef DEBUG
+inline void
+countTime()
+{
+    static int		nframes = 0;
+    static timeval	start;
+    
+    if (nframes == 10)
+    {
+	timeval	end;
+	gettimeofday(&end, NULL);
+	double	interval = (end.tv_sec  - start.tv_sec) +
+            (end.tv_usec - start.tv_usec) / 1.0e6;
+	std::cerr << nframes / interval << " frames/sec" << std::endl;
+	nframes = 0;
+    }
+    if (nframes++ == 0)
+	gettimeofday(&start, NULL);
+}
+#endif
 /************************************************************************
 *  class MultiCameraRTC<CAMERAS>					*
 ************************************************************************/
@@ -197,6 +217,9 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
     
     if (std::begin(_cameras)->inContinuousShot())
     {
+#ifdef DEBUG
+	countTime();
+#endif
 	std::for_each(std::begin(_cameras), std::end(_cameras),
 		      std::bind(&camera_type::snap, std::placeholders::_1));
 	size_t	i = 0, offset = 0;
