@@ -128,24 +128,28 @@ MultiCameraRTC<V4L2CameraArray>::getTimestamp(const camera_type& camera) const
 
 template <> size_t
 MultiCameraRTC<V4L2CameraArray>::setImageFormat(const camera_type& camera,
-						Img::TimedImage& image)
+						Img::Header& header)
 {
     switch (camera.pixelFormat())
     {
       case V4L2Camera::GREY:
-	image.format = Img::MONO_8;
-	return image.width * image.height;
+	header.format = Img::MONO_8;
+	header.size = header.width * header.height;
+	break;
       case V4L2Camera::YUYV:
-	image.format = Img::YUV_422;
-	return image.width * image.height * 2;
+	header.format = Img::YUV_422;
+	header.size = header.width * header.height * 2;
+	break;
       case V4L2Camera::RGB24:
-	image.format = Img::RGB_24;
-	return image.width * image.height * 3;
+	header.format = Img::RGB_24;
+	header.size = header.width * header.height * 3;
+	break;
       default:
 	throw std::runtime_error("Unsupported pixel format!!");
+	break;
     }
 
-    return 0;
+    return header.size;
 }
 
 }
