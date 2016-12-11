@@ -8,11 +8,8 @@
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
-//#include <rtm/DataOutPort.h>
 #include <rtm/idl/BasicDataTypeSkel.h>
-//#include <rtm/idl/ExtendedDataTypesSkel.h>
-//#include <rtm/idl/InterfaceDataTypesSkel.h>
-#include "MyCmdWindow.h"
+#include "Img.hh"
 
 namespace TU
 {
@@ -23,7 +20,6 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
 {
   public:
     MultiImageViewerRTC(RTC::Manager* manager)				;
-    ~MultiImageViewerRTC();
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
@@ -39,22 +35,36 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
   //virtual RTC::ReturnCode_t	onStateUpdatedRTC::UniqueId ec_id)	;
   //virtual RTC::ReturnCode_t	onRateChanged(RTC::UniqueId ec_id)	;
 #endif
-    bool	setImages(v::MyCmdWindow& win)				;
-    bool	alive()						const	;
+    bool			isExiting()			const	;
+    bool			getImages(Img::TimedImages& images)	;
     
   protected:
     mutable coil::Mutex			_mutex;
-    bool				_alive;
-    bool				_isNew;
+    bool				_ready;
     Img::TimedImages			_images;
     RTC::InPort<Img::TimedImages>	_imagesIn;
 };
 
 inline bool
-MultiImageViewerRTC::alive() const
+MultiImageViewerRTC::isExiting() const
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
-    return _alive;
+
+    return m_exiting;
+}
+    
+inline bool
+MultiImageViewerRTC::getImages(Img::TimedImages& images)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
+    if (!_ready)
+	return false;
+
+    images = _images;
+    _ready = false;
+    
+    return true;
 }
 
 }	// namespace TU

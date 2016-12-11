@@ -10,7 +10,7 @@
 ************************************************************************/
 #define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IIDCCamera.conf"
 #define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/IIDCCamera.calib"
-#define DEFAULT_USE_TIMESTAMP	"1"	// "0": arrival time, "1": timestamp
+#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
 
 // Module specification
 static const char* iidcmulticamera_spec[] =
@@ -28,7 +28,7 @@ static const char* iidcmulticamera_spec[] =
     "lang_type",			"compile",
     "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
     "conf.default.str_cameraCalib",	DEFAULT_CAMERA_CALIB,
-    "conf.default.int_useTimestamp",	DEFAULT_USE_TIMESTAMP,
+    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
     ""
 };
 
@@ -63,7 +63,7 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _mutex(),
      _cameraConfig(DEFAULT_CAMERA_CONFIG),
      _cameraCalib(DEFAULT_CAMERA_CALIB),
-     _useTimestamp(DEFAULT_USE_TIMESTAMP[0] - '0'),
+     _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
@@ -116,7 +116,7 @@ MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
     bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
-    bindParameter("int_useTimestamp", _useTimestamp, DEFAULT_USE_TIMESTAMP);
+    bindParameter("int_syncedSnap",   _syncedSnap,   DEFAULT_SYNCED_SNAP);
 }
 
 template <> void
@@ -124,14 +124,12 @@ MultiCameraRTC<IIDCCameraArray>::enableTimestamp()
 {
     std::for_each(std::begin(_cameras), std::end(_cameras),
 		  std::bind(&camera_type::embedTimestamp,
-			    std::placeholders::_1, bool(_useTimestamp)));
+			    std::placeholders::_1, true));
 }
 
 template <> RTC::Time
 MultiCameraRTC<IIDCCameraArray>::getTimestamp(const camera_type& camera) const
 {
-  //u_int64_t	usec = (_useTimestamp ? camera.getTimestamp()
-  //				      : camera.arrivaltime());
     auto	usec = camera.getTimestamp();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
 			CORBA::ULong((usec % 1000000) * 1000)};

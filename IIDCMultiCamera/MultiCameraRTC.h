@@ -65,13 +65,13 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
-    virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
+    virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
 #ifdef DEBUG
-    virtual RTC::ReturnCode_t	onFinalize()				;
     virtual RTC::ReturnCode_t	onStartup(RTC::UniqueId ec_id);
     virtual RTC::ReturnCode_t	onShutdown(RTC::UniqueId ec_id);
+    virtual RTC::ReturnCode_t	onFinalize()				;
 #endif
   //virtual RTC::ReturnCode_t	onError(RTC::UniqueId ec_id)		;
   //virtual RTC::ReturnCode_t	onReset(RTC::UniqueId ec_id)		;
@@ -98,6 +98,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 				       Img::Header& image)		;
     static size_t	setImageFormat(const camera_type& camera,
 				       Img::Header& header)		;
+    void		snap()						;
     
   private:
     CAMERAS				_cameras;
@@ -105,7 +106,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     mutable coil::Mutex			_mutex;
     std::string				_cameraConfig;	// config var.
     std::string				_cameraCalib;	// config var.
-    int					_useTimestamp;	// config var.
+    int					_syncedSnap;	// config var.
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
     v::CmdSVC_impl<CAMERAS>		_command;	// service provider
@@ -190,6 +191,41 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
+MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
+{
+  //#ifdef DEBUG
+#if 0
+    static int	n = 0;
+    std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
+#endif
+    coil::Guard<coil::Mutex>	guard(_mutex);
+    
+    if (std::begin(_cameras)->inContinuousShot())
+    {
+#ifdef DEBUG
+	countTime();
+#endif
+	if (_syncedSnap)
+	    syncedSnap(_cameras);
+	else
+	    std::for_each(std::begin(_cameras), std::end(_cameras),
+			  std::bind(&camera_type::snap, std::placeholders::_1));
+	
+	size_t	i = 0, offset = 0;
+	for (const auto& camera : _cameras)
+	{
+	    camera.captureRaw(_images.data.get_buffer(false) + offset);
+	    _images.headers[i].tm = getTimestamp(camera);
+	    offset += _images.headers[i].size;
+	    ++i;
+	}
+	_imagesOut.write();
+    }
+
+    return RTC::RTC_OK;
+}
+
+template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
@@ -206,56 +242,20 @@ MultiCameraRTC<CAMERAS>::onDeactivated(RTC::UniqueId ec_id)
 }
 
 template <class CAMERAS> RTC::ReturnCode_t
-MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
-{
-  //#ifdef DEBUG
-#if 0
-    static int	n = 0;
-    std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
-#endif
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    
-    if (std::begin(_cameras)->inContinuousShot())
-    {
-#ifdef DEBUG
-	countTime();
-#endif
-	std::for_each(std::begin(_cameras), std::end(_cameras),
-		      std::bind(&camera_type::snap, std::placeholders::_1));
-	size_t	i = 0, offset = 0;
-	for (const auto& camera : _cameras)
-	{
-	    camera.captureRaw(_images.data.get_buffer(false) + offset);
-	    _images.headers[i].tm = getTimestamp(camera);
-	    offset += _images.headers[i].size;
-	    ++i;
-	}
-	_imagesOut.write();
-    }
-
-    return RTC::RTC_OK;
-}
-
-template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiCameraRTC::onAborting" << std::endl;
 #endif
-    continuousShot(false);		// 連続撮影を終了
+  // デバイスを終了
+    std::for_each(std::begin(_cameras), std::end(_cameras),
+		  std::bind(&camera_type::terminate,
+			    std::placeholders::_1));
 
     return RTC::RTC_OK;
 }
 
 #ifdef DEBUG
-template <class CAMERAS> RTC::ReturnCode_t
-MultiCameraRTC<CAMERAS>::onFinalize()
-{
-    std::cerr << "MultiCameraRTC::onFinalize" << std::endl;
-
-    return RTC::RTC_OK;
-}
-
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onStartup(RTC::UniqueId ec_id)
 {
@@ -268,6 +268,14 @@ template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onShutdown(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiCameraRTC::onShutdown" << std::endl;
+
+    return RTC::RTC_OK;
+}
+
+template <class CAMERAS> RTC::ReturnCode_t
+MultiCameraRTC<CAMERAS>::onFinalize()
+{
+    std::cerr << "MultiCameraRTC::onFinalize" << std::endl;
 
     return RTC::RTC_OK;
 }

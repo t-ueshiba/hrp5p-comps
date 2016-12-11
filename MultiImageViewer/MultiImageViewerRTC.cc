@@ -46,15 +46,9 @@ namespace TU
 MultiImageViewerRTC::MultiImageViewerRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _mutex(),
-     _alive(true),
-     _isNew(false),
+     _ready(false),
      _images(),
      _imagesIn("TimedImages", _images)
-{
-    std::cerr << "MultiImageViewerRTC::MultiImageViewerRTC()" << std::endl;
-}
-
-MultiImageViewerRTC::~MultiImageViewerRTC()
 {
 }
 
@@ -74,10 +68,9 @@ MultiImageViewerRTC::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
     std::cerr << "MultiImageViewerRTC::onActivated" << std::endl;
-#endif    
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    _alive = true;
-
+#endif
+    _ready = false;
+    
     return RTC::RTC_OK;
 }
 
@@ -87,9 +80,7 @@ MultiImageViewerRTC::onDeactivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "MultiImageViewerRTC::onDeactivated" << std::endl;
 #endif
-    coil::Guard<coil::Mutex>	guard(_mutex);
-    _alive = false;
-    _isNew = false;
+    _ready = false;
 
     return RTC::RTC_OK;
 }
@@ -97,13 +88,14 @@ MultiImageViewerRTC::onDeactivated(RTC::UniqueId ec_id)
 RTC::ReturnCode_t
 MultiImageViewerRTC::onExecute(RTC::UniqueId ec_id)
 {
-#ifdef DEBUG
+//#ifdef DEBUG
+#if 0
     static int	n = 0;
     std::cerr << "MultiImageViewerRTC::onExecute " << n++;
 #endif
     coil::Guard<coil::Mutex>	guard(_mutex);
     
-    if (_imagesIn.isNew())
+    if (!_ready && _imagesIn.isNew())
     {
 	do
 	{
@@ -111,38 +103,13 @@ MultiImageViewerRTC::onExecute(RTC::UniqueId ec_id)
 	}
 	while (_imagesIn.isNew());
 
-	_isNew = true;
+	_ready = true;
     }
-#ifdef DEBUG
+//#ifdef DEBUG
+#if 0
     std::cerr << std::endl;
 #endif
     return RTC::RTC_OK;
-}
-
-bool
-MultiImageViewerRTC::setImages(v::MyCmdWindow& win)
-{
-    coil::Guard<coil::Mutex>	guard(_mutex);
-
-    if (!_isNew)
-	return false;
-
-    bool	resized = win.resize(_images.headers.length());
-    size_t	offset = 0;
-    for (size_t view = 0; view < _images.headers.length(); ++view)
-    {
-	const auto&	header = _images.headers[view];
-	
-	win.setImage(view, header, _images.data.get_buffer() + offset);
-	offset += header.size;
-    }
-
-    if (resized)
-	win.show();
-
-    _isNew = false;
-    
-    return true;
 }
 
 #ifdef DEBUG

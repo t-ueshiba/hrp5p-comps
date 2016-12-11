@@ -10,12 +10,10 @@
 #include "TU/v/CanvasPane.h"
 #include "TU/v/CanvasPaneDC.h"
 #include "TU/v/Timer.h"
-#include "Img.hh"
+#include "MultiImageViewerRTC.h"
 
 namespace TU
 {
-class MultiImageViewerRTC;
-
 namespace v
 {
 /************************************************************************
@@ -28,12 +26,12 @@ class MyCmdWindow : public CmdWindow
     {
       public:
 	CanvasBase(Window& win, size_t width, size_t height)
-	    :CanvasPane(win, width, height), _dc(*this)			{}
+	    :CanvasPane(win, 320, 240), _dc(*this, width, height)	{}
 	virtual		~CanvasBase()					{}
 
 	virtual bool	conform(const Img::Header& header)	const	= 0;
-	virtual void	setImageData(size_t width,
-				     size_t height, const void* data)	= 0;
+	virtual void	setImage(size_t width,
+				 size_t height, const void* data)	= 0;
 
       protected:
 	CanvasPaneDC	_dc;
@@ -48,8 +46,8 @@ class MyCmdWindow : public CmdWindow
 	     _format(header.format), _image()				{}
 
 	virtual bool	conform(const Img::Header& header)	const	;
-	virtual void	setImageData(size_t width,
-				     size_t height, const void* data)	;
+	virtual void	setImage(size_t width,
+				 size_t height, const void* data)	;
 	virtual void	repaintUnderlay()				;
 	virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)	;
 	
@@ -61,25 +59,15 @@ class MyCmdWindow : public CmdWindow
   public:
     MyCmdWindow(App& vapp, MultiImageViewerRTC* rtc)			;
     ~MyCmdWindow()							;
-
-    size_t		nviews()				const	;
-    bool		resize(size_t nviews)				;
-    void		setImage(size_t view, const Img::Header& header,
-				 const void* data)			;
-  //virtual void	callback(CmdId id, CmdVal val)			;
+    
+    void		setImages(const Img::TimedImages& images)	;
     virtual void	tick()						;
     
   private:
-    std::unique_ptr<MultiImageViewerRTC>	_rtc;
-    TU::Array<std::unique_ptr<CanvasBase> >	_canvases;
-    Timer					_timer;
+    MultiImageViewerRTC*		_rtc;
+    Array<std::unique_ptr<CanvasBase> >	_canvases;
+    Timer				_timer;
 };
-
-inline size_t
-MyCmdWindow::nviews() const
-{
-    return _canvases.size();
-}
 
 template <class T> inline bool
 MyCmdWindow::Canvas<T>::conform(const Img::Header& header) const
@@ -89,17 +77,10 @@ MyCmdWindow::Canvas<T>::conform(const Img::Header& header) const
 	    (_image.height() == header.height));
 }
 
-template <class T> void
-MyCmdWindow::Canvas<T>::setImageData(size_t width,
-				     size_t height, const void* data)
+template <class T> inline void
+MyCmdWindow::Canvas<T>::setImage(size_t width, size_t height, const void* data)
 {
-    _dc.setSize(width, height, 1);
-
-    _image.resize(height, width);
-    auto	p = static_cast<const T*>(data);
-    for (auto& imageLine : _image)
-	for (auto& pixel : imageLine)
-	    pixel = *p++;
+    _image.resize((T*)data, height, width);
 }
 
 template <class T> void
