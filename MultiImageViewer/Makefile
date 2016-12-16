@@ -12,7 +12,7 @@ VPATH		= ../idl
 IDLS		= Img.idl
 MOCHDRS		=
 
-INCDIRS		= -I. -I$(PREFIX)/include
+INCDIRS		= -I. -I$(PREFIX)/include -I$(HOME)/src/TUv++
 CPPFLAGS	= -DNDEBUG -DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O

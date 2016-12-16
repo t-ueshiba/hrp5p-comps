@@ -22,19 +22,22 @@ MyCmdWindow::MyCmdWindow(App& app, MultiImageViewerRTC* rtc)
 MyCmdWindow::~MyCmdWindow()
 {
     if (_rtc)
+    {
 	_rtc->exit();
+	RTC::Manager::instance().cleanupComponents();
+    }
 }
     
 void
-MyCmdWindow::setImages(const Img::TimedImages& images)
+MyCmdWindow::setImages()
 {
-    const auto	resized = _canvases.resize(images.headers.length());
+    const auto	resized = _canvases.resize(_images.headers.length());
 
-    auto	data = images.data.get_buffer();
+    auto	data = _images.data.get_buffer();
     for (size_t	i = 0; i < _canvases.size(); ++i)
     {
 	auto&		canvas = _canvases[i];
-	const auto&	header = images.headers[i];
+	const auto&	header = _images.headers[i];
 	
 	if (canvas == nullptr || !canvas->conform(header))
 	{
@@ -75,17 +78,15 @@ MyCmdWindow::setImages(const Img::TimedImages& images)
 void
 MyCmdWindow::tick()
 {
-    Img::TimedImages	images;
-
     if (_rtc->isExiting())
     {
 	_timer.stop();
 	_rtc = nullptr;
 	app().exit();
     }
-    else if (_rtc->getImages(images))
+    else if (_rtc->getImages(_images))
     {
-	setImages(images);
+	setImages();
 	
 	for (auto& canvas : _canvases)
 	    canvas->repaintUnderlay();

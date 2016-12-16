@@ -75,17 +75,6 @@ MultiImageViewerRTC::onActivated(RTC::UniqueId ec_id)
 }
 
 RTC::ReturnCode_t
-MultiImageViewerRTC::onDeactivated(RTC::UniqueId ec_id)
-{
-#ifdef DEBUG
-    std::cerr << "MultiImageViewerRTC::onDeactivated" << std::endl;
-#endif
-    _ready = false;
-
-    return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t
 MultiImageViewerRTC::onExecute(RTC::UniqueId ec_id)
 {
 //#ifdef DEBUG
@@ -112,6 +101,28 @@ MultiImageViewerRTC::onExecute(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 
+RTC::ReturnCode_t
+MultiImageViewerRTC::onDeactivated(RTC::UniqueId ec_id)
+{
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC::onDeactivated" << std::endl;
+#endif
+    _ready = false;
+
+    return RTC::RTC_OK;
+}
+
+RTC::ReturnCode_t
+MultiImageViewerRTC::onAborting(RTC::UniqueId ec_id)
+{
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC::onAborting" << std::endl;
+#endif
+    _ready = false;
+    
+    return RTC::RTC_OK;
+}
+
 #ifdef DEBUG
 RTC::ReturnCode_t
 MultiImageViewerRTC::onStartup(RTC::UniqueId ec_id)
@@ -126,11 +137,6 @@ MultiImageViewerRTC::onShutdown(RTC::UniqueId ec_id)
 {
     std::cerr << "MultiImageViewerRTC::onShutdown" << std::endl;
 
-    return RTC::RTC_OK;
-}
-
-RTC::ReturnCode_t MultiImageViewerRTC::onAborting(RTC::UniqueId ec_id)
-{
     return RTC::RTC_OK;
 }
 

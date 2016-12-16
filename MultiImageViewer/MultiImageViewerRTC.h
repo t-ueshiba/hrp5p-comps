@@ -6,7 +6,6 @@
 
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
-#include <rtm/CorbaPort.h>
 #include <rtm/DataInPort.h>
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include "Img.hh"
@@ -23,9 +22,9 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
+    virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
-    virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
 #ifdef DEBUG
     virtual RTC::ReturnCode_t	onStartup(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onShutdown(RTC::UniqueId ec_id)		;

@@ -60,11 +60,12 @@ class MyCmdWindow : public CmdWindow
     MyCmdWindow(App& vapp, MultiImageViewerRTC* rtc)			;
     ~MyCmdWindow()							;
     
-    void		setImages(const Img::TimedImages& images)	;
+    void		setImages()					;
     virtual void	tick()						;
     
   private:
     MultiImageViewerRTC*		_rtc;
+    Img::TimedImages			_images;
     Array<std::unique_ptr<CanvasBase> >	_canvases;
     Timer				_timer;
 };
