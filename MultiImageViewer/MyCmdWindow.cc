@@ -22,10 +22,8 @@ MyCmdWindow::MyCmdWindow(App& app, MultiImageViewerRTC* rtc)
 MyCmdWindow::~MyCmdWindow()
 {
     if (_rtc)
-    {
 	_rtc->exit();
-	RTC::Manager::instance().cleanupComponents();
-    }
+    RTC::Manager::instance().cleanupComponents();
 }
     
 void
