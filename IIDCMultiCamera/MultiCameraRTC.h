@@ -13,7 +13,6 @@
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include <coil/Guard.h>
-#include "TU/Vector++.h"
 #include "Img.hh"
 #include "CmdSVC_impl.h"
 
@@ -61,7 +60,6 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     
   public:
     MultiCameraRTC(RTC::Manager* manager)				;
-    ~MultiCameraRTC()							;
 
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
@@ -90,22 +88,17 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     
   private:
     void		initializeConfigurations()			;
+    void		allocateImages()				;
     void		enableTimestamp()				;
     RTC::Time		getTimestamp(const camera_type& camera)	const	;
-    void		allocateImages()				;
-    static size_t	setImageHeader(const camera_type& camera,
-				       const Calib& calib,
-				       Img::Header& image)		;
     static size_t	setImageFormat(const camera_type& camera,
 				       Img::Header& header)		;
     void		snap()						;
     
   private:
     CAMERAS				_cameras;
-    Array<Calib>			_calibs;
     mutable coil::Mutex			_mutex;
-    std::string				_cameraConfig;	// config var.
-    std::string				_cameraCalib;	// config var.
+    std::string				_cameraName;	// config var.
     int					_syncedSnap;	// config var.
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
@@ -116,11 +109,6 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 /*
  *  public member functions
  */
-template <class CAMERAS>
-MultiCameraRTC<CAMERAS>::~MultiCameraRTC()
-{
-}
-
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onInitialize()
 {
@@ -149,34 +137,30 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
     try
     {
       // 設定ファイルを読み込んでカメラを生成・セットアップ
-	std::ifstream	in(_cameraConfig.c_str());
-	if (!in)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open " + _cameraConfig + " !");
+	_cameras.restore(_cameraName.c_str());
 
-	in >> _cameras;
-	in.close();
+      // カメラ数分の画像ヘッダを確保
+	_images.headers.length(_cameras.size());
 
-	if (size(_cameras) == 0)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open cameras from " + _cameraConfig + " !");
-	
       // キャリブレーションを読み込み
-	_calibs.resize(size(_cameras));
-	in.open(_cameraCalib.c_str());
+	std::ifstream	in(_cameras.calibFile().c_str());
 	if (!in)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open " + _cameraCalib + " !");
-
-	auto	camera = std::begin(_cameras);
-	for (auto& calib : _calibs)
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::onActivated(): failed to open " + _cameras.calibFile() + " !");
+	for (size_t i = 0; i < _images.headers.length(); ++i)
 	{
-	    calib.width  = camera->width();
-	    calib.height = camera->height();
-	    in >> calib.P >> calib.d1 >> calib.d2;
-	    ++camera;
+	    auto&	header = _images.headers[i];
+	    in >> header.P[0][0] >> header.P[0][1]
+	       >> header.P[0][2] >> header.P[0][3]
+	       >> header.P[1][0] >> header.P[1][1]
+	       >> header.P[1][2] >> header.P[1][3]		
+	       >> header.P[2][0] >> header.P[2][1]
+	       >> header.P[2][2] >> header.P[2][3]		
+	       >> header.d1 >> header.d2;
 	}
-	in.close();
-	
-	enableTimestamp();		// 撮影時刻の記録を初期化
-	continuousShot(true);		// 連続撮影を開始	
+
+	allocateImages();			// 画像データ領域を確保
+	enableTimestamp();			// 撮影時刻の記録を初期化
+	continuousShot(true);			// 連続撮影を開始	
     }
     catch (std::exception& err)
     {
@@ -185,8 +169,6 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 	return RTC::RTC_ERROR;
     }
 
-    allocateImages();
-    
     return RTC::RTC_OK;
 }
 
@@ -296,39 +278,20 @@ MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 			    std::placeholders::_1, enable));
 }
 
-/*
- *  private member functions
- */
-template <class CAMERAS> void
+template <class CAMERAS> inline void
 MultiCameraRTC<CAMERAS>::allocateImages()
 {
-    _images.headers.length(size(_cameras));
-
     size_t	i = 0, total_size = 0;
     for (const auto& camera : _cameras)
     {
-	total_size += setImageHeader(camera, _calibs[i], _images.headers[i]);
-	++i;
+	auto&	header = _images.headers[i++];
+
+	header.width  = camera.width();
+	header.height = camera.height();
+	total_size += setImageFormat(camera, header);
     }
     _images.data.length(total_size);
 }
-
-template <class CAMERAS> size_t
-MultiCameraRTC<CAMERAS>::setImageHeader(const camera_type& camera,
-					const Calib& calib,
-					Img::Header& header)
-{
-    header.width  = camera.width();
-    header.height = camera.height();
-
-    for (size_t i = 0; i < calib.P.nrow(); ++i)
-	for (size_t j = 0; j < calib.P.ncol(); ++j)
-	    header.P[i][j] = calib.P[i][j];
-    header.d1 = calib.d1;
-    header.d2 = calib.d2;
-
-    return setImageFormat(camera, header);
-}
-        
+    
 }
 #endif	// !__TU_MULTICAMERA_H

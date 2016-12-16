@@ -8,8 +8,6 @@
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/IIDCCamera.conf"
-#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/IIDCCamera.calib"
 #define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
 
 // Module specification
@@ -23,11 +21,10 @@ static const char* iidcmulticamera_spec[] =
     "category",				"sensor",
     "activity_type",			"PERIODIC",
     "kind",				"DataFlowComponent",
-    "max_instance",			"1",
+    "max_instance",			"0",
     "language",				"C++",
     "lang_type",			"compile",
-    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
-    "conf.default.str_cameraCalib",	DEFAULT_CAMERA_CALIB,
+    "conf.default.str_cameraName",	TU::IIDCCameraArray::DEFAULT_CAMERA_NAME,
     "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
     ""
 };
@@ -61,8 +58,7 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _mutex(),
-     _cameraConfig(DEFAULT_CAMERA_CONFIG),
-     _cameraCalib(DEFAULT_CAMERA_CALIB),
+     _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
      _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
@@ -114,9 +110,9 @@ MultiCameraRTC<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
 template <> void
 MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 {
-    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
-    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
-    bindParameter("int_syncedSnap",   _syncedSnap,   DEFAULT_SYNCED_SNAP);
+    bindParameter("str_cameraName",
+		  _cameraName, IIDCCameraArray::DEFAULT_CAMERA_NAME);
+    bindParameter("int_syncedSnap", _syncedSnap, DEFAULT_SYNCED_SNAP);
 }
 
 template <> void

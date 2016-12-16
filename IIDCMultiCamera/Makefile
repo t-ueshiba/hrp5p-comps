@@ -62,11 +62,11 @@ HDRS		= CmdDef.h \
 		CmdSVC_impl.h \
 		MultiCameraRTC.h
 SRCS		= IIDCCmdSVC_impl.cc \
-		IIDCMultiCameraComp.cc \
-		IIDCMultiCameraRTC.cc
+		IIDCMultiCameraRTC.cc \
+		main.cc
 OBJS		= IIDCCmdSVC_impl.o \
-		IIDCMultiCameraComp.o \
-		IIDCMultiCameraRTC.o
+		IIDCMultiCameraRTC.o \
+		main.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR

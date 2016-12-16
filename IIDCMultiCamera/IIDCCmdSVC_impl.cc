@@ -9,7 +9,7 @@ namespace TU
 namespace v
 {
 /************************************************************************
-*  local data								*
+*  static functions							*
 ************************************************************************/
 static void
 setSliderCmd(const IIDCCamera& camera, CmdDef& cmd)

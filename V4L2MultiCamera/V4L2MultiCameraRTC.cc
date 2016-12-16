@@ -8,8 +8,7 @@
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_CAMERA_CONFIG	"/usr/local/etc/cameras/V4L2Camera.conf"
-#define DEFAULT_CAMERA_CALIB	"/usr/local/etc/cameras/V4L2Camera.calib"
+#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
 
 // Module specification
 static const char* v4l2multicamera_spec[] =
@@ -25,8 +24,8 @@ static const char* v4l2multicamera_spec[] =
     "max_instance",			"0",
     "language",				"C++",
     "lang_type",			"compile",
-    "conf.default.str_cameraConfig",	DEFAULT_CAMERA_CONFIG,
-    "conf.default.str_cameraCalib",	DEFAULT_CAMERA_CALIB,
+    "conf.default.str_cameraName",	TU::V4L2CameraArray::DEFAULT_CAMERA_NAME,
+    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
     ""
 };
 
@@ -59,8 +58,8 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _cameras(),
      _mutex(),
-     _cameraConfig(DEFAULT_CAMERA_CONFIG),
-     _cameraCalib(DEFAULT_CAMERA_CALIB),
+     _cameraName(V4L2CameraArray::DEFAULT_CAMERA_NAME),
+     _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
@@ -107,8 +106,9 @@ MultiCameraRTC<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
 template <> void
 MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 {
-    bindParameter("str_cameraConfig", _cameraConfig, DEFAULT_CAMERA_CONFIG);
-    bindParameter("str_cameraCalib",  _cameraCalib,  DEFAULT_CAMERA_CALIB);
+    bindParameter("str_cameraConfig",
+		  _cameraName, V4L2CameraArray::DEFAULT_CAMERA_NAME);
+    bindParameter("int_syncedSnap", _syncedSnap, DEFAULT_SYNCED_SNAP);
 }
 
 template <> void
@@ -122,7 +122,6 @@ MultiCameraRTC<V4L2CameraArray>::getTimestamp(const camera_type& camera) const
     u_int64_t	usec = camera.arrivaltime();
     RTC::Time	time = {CORBA::ULong( usec / 1000000),
 			CORBA::ULong((usec % 1000000) * 1000)};
-    
     return time;
 }
 

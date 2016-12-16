@@ -1,13 +1,13 @@
 /*
  *  $Id$
  */
+#ifndef CMDSVC_IMPL_H
+#define CMDSVC_IMPL_H
+
 #include <sstream>
 #include <boost/archive/xml_oarchive.hpp>
 #include "Cmd.hh"
 #include "CmdDef.h"
-
-#ifndef CMDSVC_IMPL_H
-#define CMDSVC_IMPL_H
 
 namespace TU
 {

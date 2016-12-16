@@ -26,7 +26,7 @@ typedef std::vector<int>	Vals;
     
 struct CmdDef
 {
-    typedef int		value_type;
+    typedef int			value_type;
 
     enum Type
     {
@@ -118,12 +118,11 @@ struct CmdDef
 	   value_type		min_=0,
 	   value_type		max_=1,
 	   value_type		step_=1,
-	   u_int		div_=1,
 	   u_int		attrs_=CA_None)
 	:type(type_), id(id_), name(name_), subcmds(subcmds_),
 	 gridx(gridx_), gridy(gridy_),
 	 gridWidth(gridWidth_), gridHeight(gridHeight_), size(size_),
-	 min(min_), max(max_), step(step_), div(div_), attrs(attrs_)	{}
+	 min(min_), max(max_), step(step_), attrs(attrs_)		{}
 
     template <class ARCHIVE> void
     serialize(ARCHIVE& ar, const unsigned int file_version)
@@ -139,7 +138,6 @@ struct CmdDef
 	ar & BOOST_SERIALIZATION_NVP(min);
 	ar & BOOST_SERIALIZATION_NVP(max);
 	ar & BOOST_SERIALIZATION_NVP(step);
-	ar & BOOST_SERIALIZATION_NVP(div);
 	ar & BOOST_SERIALIZATION_NVP(attrs);
 	ar & BOOST_SERIALIZATION_NVP(subcmds);
     }
@@ -156,7 +154,6 @@ struct CmdDef
     value_type	min;
     value_type	max;
     value_type	step;
-    u_int	div;
     u_int	attrs;
 };
     
@@ -164,26 +161,21 @@ struct CmdDef
 *  global functions							*
 ************************************************************************/
 std::ostream&	operator <<(std::ostream& out, const CmdDef& cmd)	;
-    
+
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDefs& cmds)
 {
-    for (CmdDefs::const_iterator cmd = cmds.begin(); cmd != cmds.end(); ++cmd)
-	out << *cmd << std::endl;
+    for (const auto& cmd : cmds)
+	out << cmd << std::endl;
     return out;
 }
     
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDef& cmd)
 {
-    out << cmd.name << ": " << cmd.id << " [";
-    if (cmd.div == 1)
-	out << cmd.min << ',' << cmd.max << ':' << cmd.step;
-    else
-	out << float(cmd.min) /float(cmd.div) << ','
-	    << float(cmd.max) /float(cmd.div) << ':'
-	    << float(cmd.step)/float(cmd.div);
-    return out << "]@" << cmd.gridWidth << 'x' << cmd.gridHeight
+    return out << cmd.name << ": " << cmd.id << " ["
+	       << cmd.min << ',' << cmd.max << ':' << cmd.step
+	       << "]@" << cmd.gridWidth << 'x' << cmd.gridHeight
 	       << '+'  << cmd.gridx	<< '+' << cmd.gridy
 	       << ", subcmds=" << cmd.subcmds; 
 }
