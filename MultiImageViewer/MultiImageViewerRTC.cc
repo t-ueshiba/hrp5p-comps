@@ -14,7 +14,7 @@ static const char* multiimageviewer_spec[] =
     "description",		"Viewing multiple image streams",
     "version",			"1.0.0",
     "vendor",			"t.ueshiba@aist.go.jp",
-    "category",			"sensor",
+    "category",			"viewer",
     "activity_type",		"PERIODIC",
     "kind",			"DataFlowComponent",
     "max_instance",		"1",

@@ -112,13 +112,13 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
     
     cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i];
+	cerr << ' ' << vals[i].i;
     cerr << endl;
 #endif
-    switch (vals[0])
+    switch (vals[0].i)
     {
       case c_ContinuousShot:
-	_rtc.continuousShot(vals[1]);	// カメラ撮影を起動/停止
+	_rtc.continuousShot(vals[1].i);	// カメラ撮影を起動/停止
 	return false;
 	
       case c_Format:
@@ -126,11 +126,11 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 	return false;
 	
       case c_CameraSelection:
-	_n = vals[1];			// 選択カメラを変更
+	_n = vals[1].i;			// 選択カメラを変更
 	return true;
 
       case c_AllCameras:
-	_all = vals[1];			// 全カメラ一斉操作モードを有効化/無効化
+	_all = vals[1].i;		// 全カメラ一斉操作モードを有効化/無効化
 	return false;
 	
       default:
@@ -153,15 +153,15 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
     
     cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
     for (CORBA::ULong i = 0; i < ids.length(); ++i)
-	cerr << ' ' << ids[i];
+	cerr << ' ' << ids[i].i;
 #endif
     Cmd::Values	vals;
     
-    switch (ids[0])
+    switch (ids[0].i)
     {
       case c_ContinuousShot:
 	vals.length(1);
-	vals[0] = inContinuousShot();
+	vals[0].i = inContinuousShot();
 	break;
 
       case c_Format:
@@ -170,12 +170,12 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
 
       case c_CameraSelection:
 	vals.length(1);
-	vals[0] = _n;
+	vals[0].i = _n;
 	break;
 
       case c_AllCameras:
 	vals.length(1);
-	vals[0] = _all;
+	vals[0].i = _all;
 	break;
 
       default:
@@ -185,7 +185,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
 #ifdef DEBUG
     cerr << ", vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i];
+	cerr << ' ' << vals[i].i;
     cerr << endl;
 #endif
     return new Cmd::Values(vals);

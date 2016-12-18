@@ -23,15 +23,17 @@ setSliderCmd(const IIDCCamera& camera, CmdDef& cmd)
     {
 	float	min, max;
 	camera.getMinMax(feature, min, max);
-	cmd.min = min;
-	cmd.max = max;
+	cmd.min  = min;
+	cmd.max  = max;
+	cmd.step = 0;
     }
     else
     {
 	u_int	min, max;
 	camera.getMinMax(feature, min, max);
-	cmd.min = min;
-	cmd.max = max;
+	cmd.min  = min;
+	cmd.max  = max;
+	cmd.step = 1;
     }
 }
     
@@ -178,23 +180,22 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 template <> Cmd::Values
 CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
 {
-    const auto&	cameras = _rtc.cameras();
     Cmd::Values	vals;
+    const auto	camera = std::begin(_rtc.cameras());
     
-    if (size(cameras) == 0)
+    if (camera == std::end(_rtc.cameras()))
 	return vals;
 
-    const auto&	camera = *std::begin(cameras);
     
     if (ids.length() == 1)
     {
 	vals.length(2);
-	vals[0] = camera.getFormat();
-	vals[1] = camera.getFrameRate();
+	vals[0].i = camera->getFormat();
+	vals[1].i = camera->getFrameRate();
     }
     else if (ids.length() > 1)
     {
-	IIDCCamera::Format	format = IIDCCamera::uintToFormat(ids[1]);
+	IIDCCamera::Format	format = IIDCCamera::uintToFormat(ids[1].i);
 	
 	switch (format)
 	{
@@ -207,19 +208,19 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
 	  case IIDCCamera::Format_7_6:
 	  case IIDCCamera::Format_7_7:
 	  {
-	      IIDCCamera::Format_7_Info	info = camera.getFormat_7_Info(format);
+	      IIDCCamera::Format_7_Info	info = camera->getFormat_7_Info(format);
 	      vals.length(5);
-	      vals[0] = info.u0;
-	      vals[1] = info.v0;
-	      vals[2] = info.width;
-	      vals[3] = info.height;
-	      vals[4] = info.pixelFormat;
+	      vals[0].i = info.u0;
+	      vals[1].i = info.v0;
+	      vals[2].i = info.width;
+	      vals[3].i = info.height;
+	      vals[4].i = info.pixelFormat;
 	  }
 	    break;
 
 	  default:
 	    vals.length(1);
-	    vals[0] = camera.getFrameRate();
+	    vals[0].i = camera->getFrameRate();
 	    break;
 	}
     }
@@ -231,25 +232,26 @@ template <> bool
 CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
 {
     return (_rtc.setFeature(vals, _n, _all) &&
-	    (vals[0] >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS));
+	    (vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS));
 }
 
 template <> Cmd::Values
 CmdSVC_impl<IIDCCameraArray>::getFeature(const Cmd::Values& ids) const
 {
     Cmd::Values	vals;
+    auto	camera = std::begin(_rtc.cameras());
     
-    if (size(_rtc.cameras()) == 0)
+    if (camera == std::end(_rtc.cameras()))
 	return vals;
 
-    auto	camera = std::begin(_rtc.cameras());
-    std::advance(camera, _n);				// 選択カメラ
+    std::advance(camera, _n);
 
     u_int	val;
     float	fval;
-    TU::getFeature(*camera, ids[0], val, fval);
+    TU::getFeature(*camera, ids[0].i, val, fval);
     vals.length(1);
-    vals[0] = val;
+    vals[0].i = val;
+    vals[0].f = fval;
 
     return vals;
 }

@@ -7,26 +7,48 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
+#include <type_traits>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/nvp.hpp>
-#include "TU/types.h"
 
 namespace TU
 {
 namespace v
 {
 /************************************************************************
+*  struct CmdVal							*
+************************************************************************/
+class CmdVal
+{
+  public:
+    CmdVal(int ival=0)			:_i(ival), _f(ival)	{}
+    CmdVal(int ival, float fval)	:_i(ival), _f(fval)	{}
+    
+    template <class T,
+	      class=typename std::enable_if<std::is_arithmetic<T>::value>::type>
+    CmdVal(T val)			:_i(int(val)), _f(val)	{}
+    
+		operator int()				const	{ return _i; }
+    int		i()					const	{ return _i; }
+    float	f()					const	{ return _f; }
+
+  private:
+    int		_i;
+    float	_f;
+};
+typedef std::vector<CmdVal>	CmdVals;
+    
+/************************************************************************
 *  struct CmdDef							*
 ************************************************************************/
 struct CmdDef;
 typedef std::vector<CmdDef>	CmdDefs;
-typedef std::vector<int>	Vals;
     
 struct CmdDef
 {
-    typedef int			value_type;
+    typedef float		value_type;
 
     enum Type
     {

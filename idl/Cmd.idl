@@ -6,7 +6,13 @@
 
 module Cmd
 {
-typedef sequence<long>		Values;
+struct Value
+{
+    long	i;
+    float	f;
+};
+    
+typedef sequence<Value>		Values;
     
 interface Controller
 {

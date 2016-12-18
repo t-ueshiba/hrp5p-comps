@@ -4,11 +4,11 @@
 #ifndef MULTIIMAGEVIEWERRTC_H
 #define MULTIIMAGEVIEWERRTC_H
 
+#include "Img.hh"
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/DataInPort.h>
 #include <rtm/idl/BasicDataTypeSkel.h>
-#include "Img.hh"
 
 namespace TU
 {

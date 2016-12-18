@@ -4,6 +4,7 @@
 #ifndef __TU_MULTICAMERA_H
 #define __TU_MULTICAMERA_H
 
+#include "Img.hh"
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
@@ -13,7 +14,6 @@
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include <coil/Guard.h>
-#include "Img.hh"
 #include "CmdSVC_impl.h"
 
 namespace TU

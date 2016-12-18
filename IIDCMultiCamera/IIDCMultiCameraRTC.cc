@@ -73,14 +73,15 @@ MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
     coil::Guard<coil::Mutex>	guard(_mutex);
 
     if (vals.length() == 3)
-	TU::setFormat(_cameras, vals[1], vals[2]);
+	TU::setFormat(_cameras, vals[1].i, vals[2].i);
     else if (vals.length() == 7)
     {
-	const auto	format7	    = IIDCCamera::uintToFormat(vals[1]);
-	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[6]);
+	const auto	format7	    = IIDCCamera::uintToFormat(vals[1].i);
+	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[6].i);
 	
 	for (auto& camera : _cameras)
-	    camera.setFormat_7_ROI(format7, vals[2], vals[3], vals[4], vals[5])
+	    camera.setFormat_7_ROI(format7,
+				   vals[2].i, vals[3].i, vals[4].i, vals[5].i)
 		  .setFormat_7_PixelFormat(format7, pixelFormat)
 		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
     }
@@ -95,12 +96,12 @@ MultiCameraRTC<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
     coil::Guard<coil::Mutex>	guard(_mutex);
 
     if (all)
-	return TU::setFeature(_cameras, vals[0], vals[1], vals[1]);
+	return TU::setFeature(_cameras, vals[0].i, vals[1].i, vals[1].f);
     else
     {
 	auto	camera = std::begin(_cameras);
 	std::advance(camera, n);
-	return TU::setFeature(*camera, vals[0], vals[1], vals[1]);
+	return TU::setFeature(*camera, vals[0].i, vals[1].i, vals[1].f);
     }
 }
 
