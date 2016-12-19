@@ -112,7 +112,7 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
     
     cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i].i;
+	cerr << " (" << vals[i].i << ',' << vals[i].f << ')';
     cerr << endl;
 #endif
     switch (vals[0].i)
@@ -153,7 +153,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
     
     cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
     for (CORBA::ULong i = 0; i < ids.length(); ++i)
-	cerr << ' ' << ids[i].i;
+	cerr << " (" << ids[i].i << ',' << ids[i].f << ')';
 #endif
     Cmd::Values	vals;
     
@@ -185,7 +185,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
 #ifdef DEBUG
     cerr << ", vals =";
     for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i].i;
+	cerr << " (" << ids[i].i << ',' << ids[i].f << ')';
     cerr << endl;
 #endif
     return new Cmd::Values(vals);
