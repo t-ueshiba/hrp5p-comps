@@ -130,7 +130,7 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 
 
 	cmds.push_back(CmdDef(CmdDef::C_Slider, feature.feature, feature.name,
-			      0, y));
+			      0, y, 2, 1));
 	CmdDef&	cmd = cmds.back();
 
 	switch (feature.feature)
@@ -148,7 +148,7 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 	    setSliderCmd(camera, cmd);
 	    cmds.push_back(CmdDef(CmdDef::C_Slider,
 				  feature.feature + IIDCCAMERA_OFFSET_VR,
-				  "White bal.(V/R)", 0, ++y));
+				  "White bal.(V/R)", 0, ++y, 2, 1));
 	    setSliderCmd(camera, cmds.back());
 	    break;
 
@@ -160,18 +160,18 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 	if (inq & IIDCCamera::OnOff)
 	    cmds.push_back(CmdDef(CmdDef::C_ToggleButton,
 				  feature.feature + IIDCCAMERA_OFFSET_ONOFF,
-				  "On", 1, y));
+				  "On", 2, y));
 
 	if (inq & IIDCCamera::Auto)
 	    cmds.push_back(CmdDef(CmdDef::C_ToggleButton,
 				  feature.feature + IIDCCAMERA_OFFSET_AUTO,
 				  (feature.feature == IIDCCamera::TRIGGER_MODE ?
-				   "(+)" : "Auto"), 2, y));
+				   "(+)" : "Auto"), 3, y));
 
 	if (inq & IIDCCamera::Abs_Control)
 	    cmds.push_back(CmdDef(CmdDef::C_ToggleButton,
 				  feature.feature + IIDCCAMERA_OFFSET_ABS,
-				  "Abs.", 3, y));
+				  "Abs.", 4, y));
 
 	++y;
     }

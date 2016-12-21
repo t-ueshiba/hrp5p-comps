@@ -23,12 +23,13 @@ namespace v
 class CmdVal
 {
   public:
-    CmdVal(int ival=0)			:_i(ival), _f(ival)	{}
-    CmdVal(int ival, float fval)	:_i(ival), _f(fval)	{}
-    
+    CmdVal()				:_i(0), _f(0)		{}
+    CmdVal(int i, float f)		:_i(i), _f(f)		{}
+    CmdVal(int i)			:_i(i), _f(0)		{}
     template <class T,
-	      class=typename std::enable_if<std::is_arithmetic<T>::value>::type>
-    CmdVal(T val)			:_i(int(val)), _f(val)	{}
+	      class=typename std::enable_if<std::is_floating_point<T>::value>
+				::type>
+    CmdVal(T f)				:_i(0), _f(f)		{}
     
 		operator int()				const	{ return _i; }
     int		i()					const	{ return _i; }

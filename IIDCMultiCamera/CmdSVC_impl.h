@@ -210,7 +210,7 @@ CmdSVC_impl<CAMERAS>::createCmds()
 
   // カメラ画像フォーマット選択コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_Format,
-			  "Format", 0, 1, 1, 1, 0, createFormatItems(camera)));
+			  "Format", 1, 0, 1, 1, 0, createFormatItems(camera)));
 
     if (ncameras > 1)
     {
@@ -221,10 +221,10 @@ CmdSVC_impl<CAMERAS>::createCmds()
 						 std::string(1, char('0'+i)),
 						 i));
 	cmds.push_back(CmdDef(CmdDef::C_GroupBox, c_CameraSelection,
-			      "Camera selection", 0, 2, 1, 1, 0,
+			      "Camera selection", 0, 1, 1, 1, 0,
 			      cameraSelectionCmds, 0, ncameras - 1));
 	cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_AllCameras,
-			      "all", 1, 2));
+			      "all", 1, 1));
     }
 
   // 属性操作コマンドの生成
