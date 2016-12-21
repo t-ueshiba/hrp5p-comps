@@ -72,7 +72,7 @@ MultiCameraRTC<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
 
-    TU::setFormat(_cameras, vals[1], vals[2]);
+    TU::setFormat(_cameras, vals[1].i, vals[2].i);
     allocateImages();
 }
     
@@ -82,21 +82,21 @@ MultiCameraRTC<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     
-    if (vals[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+    if (vals[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
 	for (auto& camera : _cameras)
-	    camera.setROI(vals[1], vals[2], vals[3], vals[4]);
+	    camera.setROI(vals[1].i, vals[2].i, vals[3].i, vals[4].i);
 	allocateImages();
 
 	return true;
     }
     else if (all)
-	return TU::setFeature(_cameras, vals[0], vals[1]);
+	return TU::setFeature(_cameras, vals[0].i, vals[1].i);
     else
     {
 	auto	camera = std::begin(_cameras);
 	std::advance(camera, n);
-	return TU::setFeature(*camera, vals[0], vals[1]);
+	return TU::setFeature(*camera, vals[0].i, vals[1].i);
     }
 }
 

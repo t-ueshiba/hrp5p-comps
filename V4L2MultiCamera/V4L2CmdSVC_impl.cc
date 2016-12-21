@@ -47,7 +47,7 @@ CmdSVC_impl<V4L2CameraArray>::appendFeatureCmds(const camera_type& camera,
   // ROIを指定するコマンドを作る．
     cmds.push_back(CmdDef(CmdDef::C_Button,
 			  V4L2Camera::UNKNOWN_PIXEL_FORMAT, "set ROI",
-			  0, y++, 1, 1, 0, CmdDefs(),
+			  0, y++, 2, 1, 0, CmdDefs(),
 			  0, 0, 0, 1));
     size_t	minU0, minV0, maxWidth, maxHeight;
     camera.getROILimits(minU0, minV0, maxWidth, maxHeight);
@@ -71,9 +71,10 @@ CmdSVC_impl<V4L2CameraArray>::appendFeatureCmds(const camera_type& camera,
 	cmds.push_back(CmdDef());
 	auto&	cmd = cmds.back();
 	
-	cmd.name  = camera.getName(feature);
-	cmd.id	  = feature;
-	cmd.gridy = y++;
+	cmd.name      = camera.getName(feature);
+	cmd.id	      = feature;
+	cmd.gridy     = y++;
+	cmd.gridWidth = 2;
 	
 	const auto	menuItems = camera.availableMenuItems(feature);
 
@@ -122,8 +123,8 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids) const
 	    frameSize.height.involves(camera.height()))
 	{
 	    vals.length(2);
-	    vals[0] = pixelFormat;
-	    vals[1] = i;
+	    vals[0].i = pixelFormat;
+	    vals[1].i = i;
 
 	    break;
 	}
@@ -152,25 +153,25 @@ CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids) const
 
     auto	camera = std::begin(_rtc.cameras());
 
-    if (ids[0] == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+    if (ids[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
 	size_t	u0, v0, width, height;
 	camera->getROI(u0, v0, width, height);
 
 	vals.length(4);
-	vals[0] = u0;
-	vals[1] = v0;
-	vals[2] = width;
-	vals[3] = height;
+	vals[0].i = u0;
+	vals[1].i = v0;
+	vals[2].i = width;
+	vals[3].i = height;
     }
     else
     {
 	std::advance(camera, _n);
 
 	int	val;
-	TU::getFeature(*camera, ids[0], val);
+	TU::getFeature(*camera, ids[0].i, val);
 	vals.length(1);
-	vals[0] = val;
+	vals[0].i = val;
     }
 
     return vals;
