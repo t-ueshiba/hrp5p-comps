@@ -35,10 +35,8 @@ INCDIR		= $(PREFIX)/include
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../IIDCMultiCamera/Cmd.hh \
-		../IIDCMultiCamera/CmdDef.h \
+EXTHDRS		= ../IIDCMultiCamera/CmdDef.h \
 		../IIDCMultiCamera/CmdSVC_impl.h \
-		../IIDCMultiCamera/Img.hh \
 		../IIDCMultiCamera/MultiCameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \
@@ -74,8 +72,7 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/Heap.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
 	../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
@@ -84,6 +81,5 @@ V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
 	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Minimize.h /usr/local/include/TU/Heap.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
 	../IIDCMultiCamera/CmdDef.h
