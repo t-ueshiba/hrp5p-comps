@@ -136,6 +136,10 @@ MultiCameraRTC<V4L2CameraArray>::setImageFormat(const camera_type& camera,
 	header.size = header.width * header.height;
 	break;
       case V4L2Camera::YUYV:
+	header.format = Img::YUYV_422;
+	header.size = header.width * header.height * 2;
+	break;
+      case V4L2Camera::UYVY:
 	header.format = Img::YUV_422;
 	header.size = header.width * header.height * 2;
 	break;
