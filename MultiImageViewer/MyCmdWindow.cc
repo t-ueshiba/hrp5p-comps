@@ -50,6 +50,9 @@ MyCmdWindow::setImages()
 	      case Img::YUV_422:
 		canvas.reset(new Canvas<TU::YUV422>(*this, header));
 		break;
+	      case Img::YUYV_422:
+		canvas.reset(new Canvas<TU::YUYV422>(*this, header));
+		break;
 	      case Img::YUV_444:
 		canvas.reset(new Canvas<TU::YUV444>(*this, header));
 		break;
