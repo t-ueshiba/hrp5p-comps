@@ -135,12 +135,11 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids) const
     return vals;
 }
 
-template <> bool
+template <> Cmd::Values
 CmdSVC_impl<V4L2CameraArray>::setFeature(const Cmd::Values& vals)
 {
     _rtc.setFeature(vals, _n, _all);
-
-    return false;	// GUIの更新が必要な属性はなし
+    return Cmd::Values();	// GUIの更新が必要な属性はなし
 }
 
 template <> Cmd::Values
@@ -176,6 +175,6 @@ CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids) const
 
     return vals;
 }
-
+    
 }
 }

@@ -228,11 +228,27 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
     return vals;
 }
 
-template <> bool
+template <> Cmd::Values
 CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
 {
-    return (_rtc.setFeature(vals, _n, _all) &&
-	    (vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS));
+    Cmd::Values	ret;
+    
+    if (_rtc.setFeature(vals, _n, _all) &&
+	(vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS))
+    {
+	auto	camera = std::begin(_rtc.cameras());
+	std::advance(camera, _n);
+	CmdDef	cmd;
+	cmd.id = vals[0].i - IIDCCAMERA_OFFSET_ABS;
+	setSliderCmd(*camera, cmd);
+	
+	ret.length(3);
+	ret[0].f = cmd.min;
+	ret[1].f = cmd.max;
+	ret[2].f = cmd.step;
+    }
+
+    return ret;
 }
 
 template <> Cmd::Values

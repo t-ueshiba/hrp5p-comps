@@ -18,7 +18,7 @@ interface Controller
 {
     string	getCmds()						;
     
-    boolean	setValues(in Values vals)				;
+    Values	setValues(in Values vals)				;
     Values	getValues(in Values ids)				;
 };
 
