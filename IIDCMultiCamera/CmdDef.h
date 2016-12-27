@@ -78,6 +78,8 @@ struct CmdDef
     typedef u_int	Id;	// ID for each item command or menu
     
   // standard menu item definitions
+    static constexpr Id	c_None		= ~0 - 1;
+    static constexpr Id	c_All		= ~0;
     static constexpr Id	M_File		= 32000;
     static constexpr Id	M_Edit		= 32001;
     static constexpr Id	M_Search	= 32002;

@@ -18,8 +18,9 @@ interface Controller
 {
     string	getCmds()						;
     
-    Values	setValues(in Values vals)				;
+    long	setValues(in Values vals)				;
     Values	getValues(in Values ids)				;
+    Values	getRange(in long id)					;
 };
 
 };

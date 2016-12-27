@@ -46,8 +46,9 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 
   // カメラを操作するコンポーネントとのコマンド通信
     char*		getCmds()					;
-    Cmd::Values*	setValues(const Cmd::Values& vals)		;
+    CORBA::Long		setValues(const Cmd::Values& vals)		;
     Cmd::Values*	getValues(const Cmd::Values& ids)		;
+    Cmd::Values*	getRange(CORBA::Long id)			;
     
   private:
     CmdDefs		createCmds()					;
@@ -56,9 +57,9 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 					  CmdDefs& cmds)		;
     bool		inContinuousShot()			const	;
     Cmd::Values		getFormat(const Cmd::Values& ids)	const	;
-    Cmd::Values		setFeature(const Cmd::Values& vals)		;
+    CORBA::Long		setFeature(const Cmd::Values& vals)		;
     Cmd::Values		getFeature(const Cmd::Values& ids)	const	;
-    
+
   private:
     MultiCameraRTC<CAMERAS>&	_rtc;
     size_t			_n;	// currently selected camera #
@@ -104,7 +105,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
   \param vals	コマンドとパラメータの列
   \return	操作コンポーネントの状態更新が必要ならtrue, そうでなければfalse
 */
-template <class CAMERAS> Cmd::Values*
+template <class CAMERAS> CORBA::Long
 CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 {
 #ifdef DEBUG
@@ -121,28 +122,25 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
     {
       case c_ContinuousShot:
 	_rtc.continuousShot(vals[1].i);	// カメラ撮影を起動/停止
-	break;
+	return CmdDef::c_None;
 	
       case c_Format:
 	_rtc.setFormat(vals);		// 画像フォーマットを設定
-	break;
+	return CmdDef::c_None;
 	
       case c_CameraSelection:
 	_n = vals[1].i;			// 選択カメラを変更
-	ret.length(1);
-	ret[0].i = -1;			// 全属性をrefreshするよう指示
-	break;
+	return CmdDef::c_All;		// 全属性を更新
 
       case c_AllCameras:
 	_all = vals[1].i;		// 全カメラ一斉操作モードを有効化/無効化
-	break;
+	return CmdDef::c_None;
 	
       default:
-	ret = setFeature(vals);		// カメラ属性を変更
 	break;
     }
 
-    return new Cmd::Values(ret);
+    return setFeature(vals);		// カメラ属性を変更
 }
 
 //! カメラの状態を得る
