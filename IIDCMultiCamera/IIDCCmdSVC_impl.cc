@@ -43,6 +43,11 @@ setSliderCmd(const IIDCCamera& camera, CmdDef& cmd)
 template <> Cmd::Values*
 CmdSVC_impl<IIDCCameraArray>::getRange(CORBA::Long id)
 {
+#ifdef DEBUG
+    using namespace	std;
+    
+    cerr << "CmdSVC_impl<CAMERAS>::getRange() : id   = " << id;
+#endif
     auto	camera = std::begin(_rtc.cameras());
     std::advance(camera, _n);
 
@@ -52,10 +57,15 @@ CmdSVC_impl<IIDCCameraArray>::getRange(CORBA::Long id)
 
     Cmd::Values	vals;
     vals.length(3);
-    vals[0].f = cmd.min;
-    vals[1].f = cmd.max;
-    vals[2].f = cmd.step;
-
+    vals[0] = {0, cmd.min};
+    vals[1] = {0, cmd.max};
+    vals[2] = {0, cmd.step};
+#ifdef DEBUG
+    cerr << ", vals =";
+    for (CORBA::ULong i = 0; i < vals.length(); ++i)
+	cerr << " (" << vals[i].i << ',' << vals[i].f << ')';
+    cerr << endl;
+#endif
     return new Cmd::Values(vals);
 }
     

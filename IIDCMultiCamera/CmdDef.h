@@ -40,6 +40,12 @@ class CmdVal
     float	_f;
 };
 typedef std::vector<CmdVal>	CmdVals;
+
+inline std::ostream&
+operator <<(std::ostream& out, const CmdVal& val)
+{
+    return out << '(' << val.i() << ',' << val.f() << ')';
+}
     
 /************************************************************************
 *  struct CmdDef							*

@@ -160,7 +160,7 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 
 	allocateImages();			// 画像データ領域を確保
 	enableTimestamp();			// 撮影時刻の記録を初期化
-	continuousShot(true);			// 連続撮影を開始	
+	continuousShot(false);			// 連続撮影を開始	
     }
     catch (std::exception& err)
     {

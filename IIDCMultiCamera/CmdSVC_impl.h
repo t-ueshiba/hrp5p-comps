@@ -154,7 +154,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
 #ifdef DEBUG
     using namespace	std;
     
-    cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids =";
+    cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids  =";
     for (CORBA::ULong i = 0; i < ids.length(); ++i)
 	cerr << " (" << ids[i].i << ',' << ids[i].f << ')';
 #endif
