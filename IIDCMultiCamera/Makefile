@@ -12,7 +12,7 @@ VPATH		= ../idl
 IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include
-CPPFLAGS	= -DNDEBUG -DHAVE_LIBTUTOOLS__ -DDEBUG
+CPPFLAGS	= -DNDEBUG #-DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O
 ifeq ($(shell arch), armv71)

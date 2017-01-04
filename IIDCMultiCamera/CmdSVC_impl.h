@@ -13,6 +13,16 @@ namespace TU
 {
 template <class CAMERAS>	class MultiCameraRTC;
 
+#ifdef DEBUG
+inline std::ostream&
+print(std::ostream& out, const Cmd::Values& vals)
+{
+    for (CORBA::ULong i = 0; i < vals.length(); ++i)
+	out << " (" << vals[i].i << ',' << vals[i].f << ')';
+    return out;
+}
+#endif
+
 namespace v
 {
 /************************************************************************
@@ -46,9 +56,9 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 
   // カメラを操作するコンポーネントとのコマンド通信
     char*		getCmds()					;
-    CORBA::Long		setValues(const Cmd::Values& vals)		;
-    Cmd::Values*	getValues(const Cmd::Values& ids)		;
-    Cmd::Values*	getRange(CORBA::Long id)			;
+    Cmd::Values*	setValues(const Cmd::Values& vals)		;
+    Cmd::Values*	getValues(const Cmd::Values& ids,
+				  CORBA::Boolean range)			;
     
   private:
     CmdDefs		createCmds()					;
@@ -56,10 +66,12 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     static void		appendFeatureCmds(const camera_type& camera,
 					  CmdDefs& cmds)		;
     bool		inContinuousShot()			const	;
-    Cmd::Values		getFormat(const Cmd::Values& ids)	const	;
-    CORBA::Long		setFeature(const Cmd::Values& vals)		;
-    Cmd::Values		getFeature(const Cmd::Values& ids)	const	;
-
+    Cmd::Values		getFormat(const Cmd::Values& ids,
+				  CORBA::Boolean range)		const	;
+    Cmd::Values		setFeature(const Cmd::Values& vals)		;
+    Cmd::Values		getFeature(const Cmd::Values& ids,
+				   CORBA::Boolean range)	const	;
+    
   private:
     MultiCameraRTC<CAMERAS>&	_rtc;
     size_t			_n;	// currently selected camera #
@@ -105,58 +117,55 @@ CmdSVC_impl<CAMERAS>::getCmds()
   \param vals	コマンドとパラメータの列
   \return	操作コンポーネントの状態更新が必要ならtrue, そうでなければfalse
 */
-template <class CAMERAS> CORBA::Long
+template <class CAMERAS> Cmd::Values*
 CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 {
 #ifdef DEBUG
-    using namespace	std;
-    
-    cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =";
-    for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << " (" << vals[i].i << ',' << vals[i].f << ')';
-    cerr << endl;
+    print(std::cerr << "CmdSVC_impl<CAMERAS>::setValues(): vals =", vals);
 #endif
-    Cmd::Values	ret;
+    Cmd::Values	ids;
     
     switch (vals[0].i)
     {
       case c_ContinuousShot:
 	_rtc.continuousShot(vals[1].i);	// カメラ撮影を起動/停止
-	return CmdDef::c_None;
+	break;
 	
       case c_Format:
 	_rtc.setFormat(vals);		// 画像フォーマットを設定
-	return CmdDef::c_None;
+	break;
 	
       case c_CameraSelection:
 	_n = vals[1].i;			// 選択カメラを変更
-	return CmdDef::c_All;		// 全属性を更新
+	ids.length(1);
+	ids[0] = {CORBA::Long(CmdDef::c_RefreshAll), 0};
+	break;
 
       case c_AllCameras:
 	_all = vals[1].i;		// 全カメラ一斉操作モードを有効化/無効化
-	return CmdDef::c_None;
+	break;
 	
       default:
+	ids = setFeature(vals);		// カメラ属性を変更
 	break;
     }
-
-    return setFeature(vals);		// カメラ属性を変更
+#ifdef DEBUG
+    print(std::cerr << ", ids  =", ids) << std::endl;
+#endif
+    return new Cmd::Values(ids);
 }
 
-//! カメラの状態を得る
+//! カメラ属性の値またはその値域を得る
 /*!
   \param ids	操作コンポーネントからのコマンド
-  \return	カメラの状態
+  \param range	falseならば値, trueならば値域
+  \return	カメラ属性の値または値域
 */
 template <class CAMERAS> Cmd::Values*
-CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
+CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids, CORBA::Boolean range)
 {
 #ifdef DEBUG
-    using namespace	std;
-    
-    cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids  =";
-    for (CORBA::ULong i = 0; i < ids.length(); ++i)
-	cerr << " (" << ids[i].i << ',' << ids[i].f << ')';
+    print(std::cerr << "CmdSVC_impl<CAMERAS>::getValues(): ids  =", ids);
 #endif
     Cmd::Values	vals;
     
@@ -164,32 +173,29 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids)
     {
       case c_ContinuousShot:
 	vals.length(1);
-	vals[0].i = inContinuousShot();
+	vals[0] = {CORBA::Long(inContinuousShot()), 0};
 	break;
 
       case c_Format:
-	vals = getFormat(ids);
+	vals = getFormat(ids, range);
 	break;
 
       case c_CameraSelection:
 	vals.length(1);
-	vals[0].i = _n;
+	vals[0] = {CORBA::Long(_n), 0};
 	break;
 
       case c_AllCameras:
 	vals.length(1);
-	vals[0].i = _all;
+	vals[0] = {CORBA::Long(_all), 0};
 	break;
 
       default:
-	vals = getFeature(ids);
+	vals = getFeature(ids, range);
 	break;
     }
 #ifdef DEBUG
-    cerr << ", vals =";
-    for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << " (" << ids[i].i << ',' << ids[i].f << ')';
-    cerr << endl;
+    print(std::cerr << ", vals =", vals) << std::endl;
 #endif
     return new Cmd::Values(vals);
 }
@@ -225,7 +231,7 @@ CmdSVC_impl<CAMERAS>::createCmds()
 						 i));
 	cmds.push_back(CmdDef(CmdDef::C_GroupBox, c_CameraSelection,
 			      "Camera selection", 0, 1, 1, 1, 0,
-			      cameraSelectionCmds, 0, ncameras - 1));
+			      cameraSelectionCmds));
 	cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_AllCameras,
 			      "all", 1, 1));
     }

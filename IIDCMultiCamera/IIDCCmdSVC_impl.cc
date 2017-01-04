@@ -9,66 +9,8 @@ namespace TU
 namespace v
 {
 /************************************************************************
-*  static functions							*
-************************************************************************/
-static void
-setSliderCmd(const IIDCCamera& camera, CmdDef& cmd)
-{
-    const auto	feature = (cmd.id == IIDCCamera::WHITE_BALANCE
-				   + IIDCCAMERA_OFFSET_VR	?
-			   IIDCCamera::WHITE_BALANCE		:
-			   IIDCCamera::uintToFeature(cmd.id));
-    
-    if (camera.isAbsControl(feature))
-    {
-	float	min, max;
-	camera.getMinMax(feature, min, max);
-	cmd.min  = min;
-	cmd.max  = max;
-	cmd.step = 0;
-    }
-    else
-    {
-	u_int	min, max;
-	camera.getMinMax(feature, min, max);
-	cmd.min  = min;
-	cmd.max  = max;
-	cmd.step = 1;
-    }
-}
-    
-/************************************************************************
 *  class CmdSVC_impl<IIDCCameraArray>				*
 ************************************************************************/
-template <> Cmd::Values*
-CmdSVC_impl<IIDCCameraArray>::getRange(CORBA::Long id)
-{
-#ifdef DEBUG
-    using namespace	std;
-    
-    cerr << "CmdSVC_impl<CAMERAS>::getRange() : id   = " << id;
-#endif
-    auto	camera = std::begin(_rtc.cameras());
-    std::advance(camera, _n);
-
-    CmdDef	cmd;
-    cmd.id = id;
-    setSliderCmd(*camera, cmd);
-
-    Cmd::Values	vals;
-    vals.length(3);
-    vals[0] = {0, cmd.min};
-    vals[1] = {0, cmd.max};
-    vals[2] = {0, cmd.step};
-#ifdef DEBUG
-    cerr << ", vals =";
-    for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << " (" << vals[i].i << ',' << vals[i].f << ')';
-    cerr << endl;
-#endif
-    return new Cmd::Values(vals);
-}
-    
 template <> CmdDefs
 CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
 {
@@ -97,17 +39,13 @@ CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
 		const auto	info = camera.getFormat_7_Info(format.format);
 		auto&		roiCmds = cmds.back().subcmds;
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0, "u0",
-					 0, 0, 1, 1, 0, CmdDefs(),
-					 0, info.maxWidth - 1, info.unitU0));
+					 0, 0, 1, 1, 0, CmdDefs()));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0, "v0",
-					 0, 1, 1, 1, 0, CmdDefs(),
-					 0, info.maxHeight - 1, info.unitV0));
+					 0, 1, 1, 1, 0, CmdDefs()));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Width, "width",
-					 0, 2, 1, 1, 0, CmdDefs(),
-					 0, info.maxWidth, info.unitWidth));
+					 0, 2, 1, 1, 0, CmdDefs()));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Height, "height",
-					 0, 3, 1, 1, 0, CmdDefs(),
-					 0, info.maxHeight, info.unitHeight));
+					 0, 3, 1, 1, 0, CmdDefs()));
 		roiCmds.push_back(CmdDef(CmdDef::C_Button, c_PixelFormat,
 					 "pixel format", 0, 4));
 
@@ -173,15 +111,12 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 	    break;
 
 	  case IIDCCamera::WHITE_BALANCE:
-	    setSliderCmd(camera, cmd);
 	    cmds.push_back(CmdDef(CmdDef::C_Slider,
 				  feature.feature + IIDCCAMERA_OFFSET_VR,
 				  "White bal.(V/R)", 0, ++y, 2, 1));
-	    setSliderCmd(camera, cmds.back());
 	    break;
 
 	  default:
-	    setSliderCmd(camera, cmd);
 	    break;
 	}	// switch (feature.feature)
 
@@ -206,16 +141,17 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 }
 
 template <> Cmd::Values
-CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
+CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids,
+					CORBA::Boolean range) const
 {
-    const auto	camera = std::begin(_rtc.cameras());
     Cmd::Values	vals;
+    const auto	camera = std::begin(_rtc.cameras());
     
     if (ids.length() == 1)
     {
 	vals.length(2);
-	vals[0].i = camera->getFormat();
-	vals[1].i = camera->getFrameRate();
+	vals[0] = {CORBA::Long(camera->getFormat()), 0};
+	vals[1] = {CORBA::Long(camera->getFrameRate()), 0};
     }
     else if (ids.length() > 1)
     {
@@ -233,18 +169,38 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
 	  case IIDCCamera::Format_7_7:
 	  {
 	      const auto	info = camera->getFormat_7_Info(format);
-	      vals.length(5);
-	      vals[0].i = info.u0;
-	      vals[1].i = info.v0;
-	      vals[2].i = info.width;
-	      vals[3].i = info.height;
-	      vals[4].i = info.pixelFormat;
+
+	      if (range)
+	      {
+		  vals.length(12);
+		  vals[ 0] = {0, 0};
+		  vals[ 1] = {0, float(info.maxWidth)};
+		  vals[ 2] = {0, float(info.unitU0)};
+		  vals[ 3] = {0, 0};
+		  vals[ 4] = {0, float(info.maxHeight)};
+		  vals[ 5] = {0, float(info.unitV0)};
+		  vals[ 6] = {0, 0};
+		  vals[ 7] = {0, float(info.maxWidth)};
+		  vals[ 8] = {0, float(info.unitWidth)};
+		  vals[ 9] = {0, 0};
+		  vals[10] = {0, float(info.maxHeight)};
+		  vals[11] = {0, float(info.unitHeight)};
+	      }
+	      else
+	      {
+		  vals.length(5);
+		  vals[0] = {0, float(info.u0)};
+		  vals[1] = {0, float(info.v0)};
+		  vals[2] = {0, float(info.width)};
+		  vals[3] = {0, float(info.height)};
+		  vals[4] = {CORBA::Long(info.pixelFormat), 0};
+	      }
 	  }
 	    break;
 
 	  default:
 	    vals.length(1);
-	    vals[0].i = camera->getFrameRate();
+	    vals[0] = {CORBA::Long(camera->getFrameRate()), 0};
 	    break;
 	}
     }
@@ -252,30 +208,63 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids) const
     return vals;
 }
 
-template <> CORBA::Long
+template <> Cmd::Values
 CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
 {
+    Cmd::Values	ids;
+    
     if (_rtc.setFeature(vals, _n, _all) &&
 	(vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS))
-	return vals[0].i - IIDCCAMERA_OFFSET_ABS;
-    else
-	return CmdDef::c_None;
+    {
+	ids.length(1);
+	ids[0] = {CORBA::Long(vals[0].i - IIDCCAMERA_OFFSET_ABS), 0};
+    }
+
+    return ids;
 }
 
 template <> Cmd::Values
-CmdSVC_impl<IIDCCameraArray>::getFeature(const Cmd::Values& ids) const
+CmdSVC_impl<IIDCCameraArray>::getFeature(const Cmd::Values& ids,
+					 CORBA::Boolean range) const
 {
+    Cmd::Values	vals;
     auto	camera = std::begin(_rtc.cameras());
     std::advance(camera, _n);
 
-    u_int	val;
-    float	fval;
-    TU::getFeature(*camera, ids[0].i, val, fval);
+    if (range)
+    {
+	const auto	feature = (ids[0].i == IIDCCamera::WHITE_BALANCE
+					     + IIDCCAMERA_OFFSET_VR	?
+				   IIDCCamera::WHITE_BALANCE		:
+				   IIDCCamera::uintToFeature(ids[0].i));
 
-    Cmd::Values	vals;
-    vals.length(1);
-    vals[0].i = val;
-    vals[0].f = fval;
+	vals.length(3);
+	if (camera->isAbsControl(feature))
+	{
+	    float	min, max;
+	    camera->getMinMax(feature, min, max);
+	    vals[0] = {0, min};
+	    vals[1] = {0, max};
+	    vals[2] = {0, 0};
+	}
+	else
+	{
+	    u_int	min, max;
+	    camera->getMinMax(feature, min, max);
+	    vals[0] = {0, float(min)};
+	    vals[1] = {0, float(max)};
+	    vals[2] = {0, 0};
+	}
+    }
+    else
+    {
+	u_int	val;
+	float	fval;
+	TU::getFeature(*camera, ids[0].i, val, fval);
+
+	vals.length(1);
+	vals[0] = {CORBA::Long(val), fval};
+    }
 
     return vals;
 }

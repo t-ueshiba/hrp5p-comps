@@ -47,6 +47,14 @@ operator <<(std::ostream& out, const CmdVal& val)
     return out << '(' << val.i() << ',' << val.f() << ')';
 }
     
+inline std::ostream&
+operator <<(std::ostream& out, const CmdVals& vals)
+{
+    for (const auto& val : vals)
+	out << ' ' << val;
+    return out;
+}
+    
 /************************************************************************
 *  struct CmdDef							*
 ************************************************************************/
@@ -83,9 +91,9 @@ struct CmdDef
 
     typedef u_int	Id;	// ID for each item command or menu
     
+    static constexpr Id	c_RefreshAll	= ~0;
+
   // standard menu item definitions
-    static constexpr Id	c_None		= ~0 - 1;
-    static constexpr Id	c_All		= ~0;
     static constexpr Id	M_File		= 32000;
     static constexpr Id	M_Edit		= 32001;
     static constexpr Id	M_Search	= 32002;
@@ -146,14 +154,11 @@ struct CmdDef
 	   size_t		gridHeight_=1,
 	   size_t		size_=0,
 	   CmdDefs		subcmds_=CmdDefs(),
-	   value_type		min_=0,
-	   value_type		max_=1,
-	   value_type		step_=1,
 	   u_int		attrs_=CA_None)
 	:type(type_), id(id_), name(name_), subcmds(subcmds_),
 	 gridx(gridx_), gridy(gridy_),
-	 gridWidth(gridWidth_), gridHeight(gridHeight_), size(size_),
-	 min(min_), max(max_), step(step_), attrs(attrs_)		{}
+	 gridWidth(gridWidth_), gridHeight(gridHeight_),
+	 size(size_), attrs(attrs_)					{}
 
     template <class ARCHIVE> void
     serialize(ARCHIVE& ar, const unsigned int file_version)
@@ -166,9 +171,6 @@ struct CmdDef
 	ar & BOOST_SERIALIZATION_NVP(gridWidth);
 	ar & BOOST_SERIALIZATION_NVP(gridHeight);
 	ar & BOOST_SERIALIZATION_NVP(size);
-	ar & BOOST_SERIALIZATION_NVP(min);
-	ar & BOOST_SERIALIZATION_NVP(max);
-	ar & BOOST_SERIALIZATION_NVP(step);
 	ar & BOOST_SERIALIZATION_NVP(attrs);
 	ar & BOOST_SERIALIZATION_NVP(subcmds);
     }
@@ -182,9 +184,6 @@ struct CmdDef
     size_t	gridHeight;
     size_t	size;
     CmdDefs	subcmds;
-    value_type	min;
-    value_type	max;
-    value_type	step;
     u_int	attrs;
 };
     
@@ -204,8 +203,7 @@ operator <<(std::ostream& out, const CmdDefs& cmds)
 inline std::ostream&
 operator <<(std::ostream& out, const CmdDef& cmd)
 {
-    return out << cmd.name << ": " << cmd.id << " ["
-	       << cmd.min << ',' << cmd.max << ':' << cmd.step
+    return out << cmd.name << ": [" << cmd.id
 	       << "]@" << cmd.gridWidth << 'x' << cmd.gridHeight
 	       << '+'  << cmd.gridx	<< '+' << cmd.gridy
 	       << ", subcmds=" << cmd.subcmds; 
