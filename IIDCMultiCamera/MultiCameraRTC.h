@@ -193,12 +193,13 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	    std::for_each(std::begin(_cameras), std::end(_cameras),
 			  std::bind(&camera_type::snap, std::placeholders::_1));
 	
-	size_t	i = 0, offset = 0;
+	size_t	i = 0;
+	auto	data = _images.data.get_buffer(false);
 	for (const auto& camera : _cameras)
 	{
-	    camera.captureRaw(_images.data.get_buffer(false) + offset);
+	    camera.captureRaw(data);
 	    _images.headers[i].tm = getTimestamp(camera);
-	    offset += _images.headers[i].size;
+	    data += _images.headers[i].size;
 	    ++i;
 	}
 	_imagesOut.write();
