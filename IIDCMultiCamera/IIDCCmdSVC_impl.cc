@@ -9,7 +9,7 @@ namespace TU
 namespace v
 {
 /************************************************************************
-*  class CmdSVC_impl<IIDCCameraArray>				*
+*  class CmdSVC_impl<IIDCCameraArray>					*
 ************************************************************************/
 template <> CmdDefs
 CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
@@ -38,14 +38,12 @@ CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
 
 		const auto	info = camera.getFormat_7_Info(format.format);
 		auto&		roiCmds = cmds.back().subcmds;
-		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0, "u0",
-					 0, 0, 1, 1, 0, CmdDefs()));
-		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0, "v0",
-					 0, 1, 1, 1, 0, CmdDefs()));
+		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0, "u0", 0, 0));
+		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0, "v0", 0, 1));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Width, "width",
-					 0, 2, 1, 1, 0, CmdDefs()));
+					 0, 2));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Height, "height",
-					 0, 3, 1, 1, 0, CmdDefs()));
+					 0, 3));
 		roiCmds.push_back(CmdDef(CmdDef::C_Button, c_PixelFormat,
 					 "pixel format", 0, 4));
 
