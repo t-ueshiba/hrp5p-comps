@@ -49,9 +49,9 @@ CmdSVC_impl<V4L2CameraArray>::appendFeatureCmds(const camera_type& camera,
 			  V4L2Camera::UNKNOWN_PIXEL_FORMAT, "set ROI",
 			  0, y++, 2, 1));
     auto&	roiCmds = cmds.back().subcmds;
-    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0, "u0", 0, 0));
-    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0, "v0", 0, 1));
-    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Width, "width", 0, 2));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_U0,	 "u0",	   0, 0));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_V0,	 "v0",	   0, 1));
+    roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Width,	 "width",  0, 2));
     roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Height, "height", 0, 3));
     
   // featureを指定するコマンドを作る．
@@ -96,16 +96,14 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids,
 					CORBA::Boolean range) const
 {
     Cmd::Values	vals;
-    const auto	camera = std::begin(_rtc.cameras());
-    const auto	pixelFormat = camera->pixelFormat();
-    int		i = 0;
-    BOOST_FOREACH (const auto& frameSize,
-		   camera->availableFrameSizes(pixelFormat))
+
+    if (!range)
     {
-	if (range)
-	{
-	}
-	else
+	const auto	camera = std::begin(_rtc.cameras());
+	const auto	pixelFormat = camera->pixelFormat();
+	int		i = 0;
+	BOOST_FOREACH (const auto& frameSize,
+		       camera->availableFrameSizes(pixelFormat))
 	{
 	    if (frameSize.width.involves(camera->width()) &&
 		frameSize.height.involves(camera->height()))
@@ -116,9 +114,9 @@ CmdSVC_impl<V4L2CameraArray>::getFormat(const Cmd::Values& ids,
 
 		break;
 	    }
-	}
 
-	++i;
+	    ++i;
+	}
     }
 
     return vals;
@@ -139,9 +137,9 @@ CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids,
     auto	camera = std::begin(_rtc.cameras());
     std::advance(camera, _n);
 
-    if (range)
+    if (ids[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
-	if (ids[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+	if (range)
 	{
 	    size_t	minU0, minV0, maxWidth, maxHeight;
 	    camera->getROILimits(minU0, minV0, maxWidth, maxHeight);
@@ -160,10 +158,7 @@ CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids,
 	    vals[10] = {0, float(maxHeight)};
 	    vals[11] = {0, 1};
 	}
-    }
-    else
-    {
-	if (ids[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
+	else
 	{
 	    size_t	u0, v0, width, height;
 	    camera->getROI(u0, v0, width, height);
@@ -174,13 +169,25 @@ CmdSVC_impl<V4L2CameraArray>::getFeature(const Cmd::Values& ids,
 	    vals[2] = {0, float(width)};
 	    vals[3] = {0, float(height)};
 	}
+    }
+    else
+    {
+	const auto	feature = V4L2Camera::uintToFeature(ids[0].i);
+	
+	if (range)
+	{
+	    int	min, max, step;
+	    camera->getMinMaxStep(feature, min, max, step);
+
+	    vals.length(3);
+	    vals[0] = {0, float(min)};
+	    vals[1] = {0, float(max)};
+	    vals[2] = {0, float(step)};
+	}
 	else
 	{
-	    int	val;
-	    TU::getFeature(*camera, ids[0].i, val);
-
 	    vals.length(1);
-	    vals[0] = {CORBA::Long(val), 0};
+	    vals[0] = {0, float(camera->getValue(feature))};
 	}
     }
 

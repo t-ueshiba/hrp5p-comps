@@ -12,7 +12,7 @@ VPATH		= ../idl
 IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I$(PREFIX)/include -I../IIDCMultiCamera
-CPPFLAGS	= -DNDEBUG -DDEBUG
+CPPFLAGS	= -DNDEBUG #-DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O
 ifeq ($(shell arch), armv7l)
