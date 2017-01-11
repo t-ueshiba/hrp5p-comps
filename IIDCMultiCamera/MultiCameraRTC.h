@@ -81,6 +81,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 
   // カメラ状態の変更を伴うコマンドのみ本クラスで扱い、
   // カメラ状態を取得するだけのコマンドは class CmdSVC_impl<CAMERAS> で扱う
+    bool		inContinuousShot()				;
     void		continuousShot(bool enable)			;
     void		setFormat(const Cmd::Values& vals)		;
     bool		setFeature(const Cmd::Values& vals,
@@ -175,14 +176,9 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 {
-  //#ifdef DEBUG
-#if 0
-    static int	n = 0;
-    std::cerr << "MultiCameraRTC::onExecute: " << n++ << std::endl;
-#endif
     coil::Guard<coil::Mutex>	guard(_mutex);
-    
-    if (std::begin(_cameras)->inContinuousShot())
+
+    if (inContinuousShot())
     {
 #ifdef DEBUG
 	countTime();
@@ -270,16 +266,26 @@ MultiCameraRTC<CAMERAS>::cameras() const
     return _cameras;
 }
 
-template <class CAMERAS> inline void
+template <class CAMERAS> bool
+MultiCameraRTC<CAMERAS>::inContinuousShot()
+{
+    for (const auto& camera : _cameras)
+	if (!camera.inContinuousShot())
+	    return false;
+    return true;
+}
+
+template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
+
     std::for_each(std::begin(_cameras), std::end(_cameras),
 		  std::bind(&camera_type::continuousShot,
 			    std::placeholders::_1, enable));
 }
 
-template <class CAMERAS> inline void
+template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::allocateImages()
 {
     size_t	i = 0, total_size = 0;

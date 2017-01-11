@@ -132,7 +132,12 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 	break;
 	
       case c_Format:
+      {
+	const auto	cont = _rtc.inContinuousShot();
+	_rtc.continuousShot(false);
 	_rtc.setFormat(vals);		// 画像フォーマットを設定
+	_rtc.continuousShot(cont);
+      }
 	break;
 	
       case c_CameraSelection:

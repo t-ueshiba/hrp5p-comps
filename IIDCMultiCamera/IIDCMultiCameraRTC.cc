@@ -93,8 +93,6 @@ template <> bool
 MultiCameraRTC<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
 					    size_t n, bool all)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
-
     if (all)
 	return TU::setFeature(_cameras, vals[0].i, vals[1].i, vals[1].f);
     else
