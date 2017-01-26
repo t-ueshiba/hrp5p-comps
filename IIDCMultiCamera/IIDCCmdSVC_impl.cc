@@ -44,8 +44,11 @@ CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
 					 0, 2));
 		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_Height, "height",
 					 0, 3));
+		roiCmds.push_back(CmdDef(CmdDef::C_Slider, c_PacketSize,
+					 "packet size",
+					 0, 4));
 		roiCmds.push_back(CmdDef(CmdDef::C_Button, c_PixelFormat,
-					 "pixel format", 0, 4));
+					 "pixel format", 0, 5));
 
 		auto&		pixFmtCmds = roiCmds.back().subcmds;
 		for (const auto& pixelFormat : IIDCCamera::pixelFormatNames)
@@ -170,7 +173,7 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids,
 
 	      if (range)
 	      {
-		  vals.length(12);
+		  vals.length(15);
 		  vals[ 0] = {0, 0};
 		  vals[ 1] = {0, float(info.maxWidth)};
 		  vals[ 2] = {0, float(info.unitU0)};
@@ -183,15 +186,19 @@ CmdSVC_impl<IIDCCameraArray>::getFormat(const Cmd::Values& ids,
 		  vals[ 9] = {0, 0};
 		  vals[10] = {0, float(info.maxHeight)};
 		  vals[11] = {0, float(info.unitHeight)};
+		  vals[12] = {0, float(info.unitBytePerPacket)};
+		  vals[13] = {0, float(info.maxBytePerPacket)};
+		  vals[14] = {0, float(info.unitBytePerPacket)};
 	      }
 	      else
 	      {
-		  vals.length(5);
+		  vals.length(6);
 		  vals[0] = {0, float(info.u0)};
 		  vals[1] = {0, float(info.v0)};
 		  vals[2] = {0, float(info.width)};
 		  vals[3] = {0, float(info.height)};
-		  vals[4] = {CORBA::Long(info.pixelFormat), 0};
+		  vals[4] = {0, float(info.bytePerPacket)};
+		  vals[5] = {CORBA::Long(info.pixelFormat), 0};
 	      }
 	  }
 	    break;

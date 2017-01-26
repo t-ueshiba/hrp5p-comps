@@ -47,6 +47,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 	c_V0,			//!< ROIの左上隅縦座標
 	c_Width,		//!< ROIの幅
 	c_Height,		//!< ROIの高さ
+	c_PacketSize,		//!< パケットサイズ
 	c_PixelFormat,		//!< ROIの画素フォーマット
     };
     
@@ -137,6 +138,8 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 	_rtc.continuousShot(false);
 	_rtc.setFormat(vals);		// 画像フォーマットを設定
 	_rtc.continuousShot(cont);
+	ids.length(1);
+	ids[0] = {CORBA::Long(CmdDef::c_RefreshAll), 0};
       }
 	break;
 	

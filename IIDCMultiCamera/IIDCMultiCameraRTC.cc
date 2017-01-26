@@ -74,15 +74,16 @@ MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 
     if (vals.length() == 3)
 	TU::setFormat(_cameras, vals[1].i, vals[2].i);
-    else if (vals.length() == 7)
+    else if (vals.length() == 8)
     {
 	const auto	format7	    = IIDCCamera::uintToFormat(vals[1].i);
-	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[6].i);
+	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[7].i);
 	
 	for (auto& camera : _cameras)
 	    camera.setFormat_7_ROI(format7,
 				   vals[2].i, vals[3].i, vals[4].i, vals[5].i)
 		  .setFormat_7_PixelFormat(format7, pixelFormat)
+		  .setFormat_7_PacketSize(format7, vals[6].i)
 		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
     }
 
