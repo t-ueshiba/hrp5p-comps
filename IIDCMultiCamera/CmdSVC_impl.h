@@ -39,6 +39,10 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
   //! カメラ操作コマンド
     enum
     {
+	c_RecordImages,		//!< 録画
+	c_SaveConfigToFile,	//!< 設定ファイルへの保存
+	c_SaveConfig,		//!< メモリへの設定の保存
+	c_RestoreConfig,	//!< メモリからの設定の読み込み
 	c_ContinuousShot,	//!< 画像ストリームの起動/停止
 	c_Format,		//!< 画像フォーマットの選択
 	c_CameraSelection,	//!< 操作対象カメラの選択
@@ -128,6 +132,24 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
     
     switch (vals[0].i)
     {
+      case c_RecordImages:		// ファイルへ画像列を記録
+	_rtc.recordImages(vals[1].i);
+	break;
+	
+      case c_SaveConfigToFile:		// ファイルへカメラ設定を保存
+	_rtc.saveConfigToFile();
+	break;
+
+      case c_SaveConfig:		// メモリへカメラ設定を保存
+	_rtc.saveConfig();
+	break;
+
+      case c_RestoreConfig:		// メモリからカメラ設定を読み込み
+	_rtc.restoreConfig();
+	ids.length(1);
+	ids[0] = {CORBA::Long(CmdDef::c_RefreshAll), 0};
+	break;
+
       case c_ContinuousShot:
 	_rtc.continuousShot(vals[1].i);	// カメラ撮影を起動/停止
 	break;
@@ -228,6 +250,14 @@ CmdSVC_impl<CAMERAS>::createCmds()
   // カメラ画像フォーマット選択コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_Format,
 			  "Format", 1, 0, 1, 1, 0, createFormatItems(camera)));
+
+  // ファイルへの録画コマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_RecordImages,
+			  "Rec. images", 2, 0));
+
+  // ファイルへのカメラ設定保存コマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfigToFile,
+			  "Save conf. file", 3, 0));
 
     if (ncameras > 1)
     {

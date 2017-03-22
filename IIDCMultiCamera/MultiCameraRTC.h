@@ -15,9 +15,12 @@
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include <coil/Guard.h>
 #include "CmdSVC_impl.h"
+#include <fstream>
 
 namespace TU
 {
+void	saveImageHeader(std::ostream& out, const Img::Header& header)	;
+    
 #ifdef DEBUG
 inline void
 countTime()
@@ -81,6 +84,11 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 
   // カメラ状態の変更を伴うコマンドのみ本クラスで扱い、
   // カメラ状態を取得するだけのコマンドは class CmdSVC_impl<CAMERAS> で扱う
+    void		saveConfigToFile()			const	;
+    void		saveConfig()					;
+    void		restoreConfig()					;
+    bool		inRecordingImages()				;
+    void		recordImages(bool enable)			;
     bool		inContinuousShot()				;
     void		continuousShot(bool enable)			;
     void		setFormat(const Cmd::Values& vals)		;
@@ -101,6 +109,8 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     mutable coil::Mutex			_mutex;
     std::string				_cameraName;	// config var.
     int					_syncedSnap;	// config var.
+    std::string				_recFileName;	// config var.
+    std::ofstream			_fout;
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
     v::CmdSVC_impl<CAMERAS>		_command;	// service provider
@@ -199,6 +209,11 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	    ++i;
 	}
 	_imagesOut.write();
+
+	if (_fout.is_open())
+	    _fout.write(reinterpret_cast<const char*>(
+			    _images.data.get_buffer()),
+			_images.data.length());
     }
 
     return RTC::RTC_OK;
@@ -264,6 +279,51 @@ template <class CAMERAS> inline const CAMERAS&
 MultiCameraRTC<CAMERAS>::cameras() const
 {
     return _cameras;
+}
+
+template <class CAMERAS> void
+MultiCameraRTC<CAMERAS>::saveConfigToFile() const
+{
+    _cameras.save();
+}
+
+template <class CAMERAS> void
+MultiCameraRTC<CAMERAS>::saveConfig()
+{
+}
+
+template <class CAMERAS> void
+MultiCameraRTC<CAMERAS>::restoreConfig()
+{
+}
+
+template <class CAMERAS> bool
+MultiCameraRTC<CAMERAS>::inRecordingImages()
+{
+    return _fout.is_open();
+}
+
+template <class CAMERAS> void
+MultiCameraRTC<CAMERAS>::recordImages(bool enable)
+{
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
+    if (enable == inRecordingImages())
+	return;
+
+    if (enable)
+    {
+	_fout.open(_recFileName.c_str(),
+		   std::ofstream::out | std::ofstream::binary);
+
+	_fout << 'M' << _images.headers.length() << std::endl;
+	for (size_t i = 0; i < _images.headers.length(); ++i)
+	    saveImageHeader(_fout, _images.headers[i]);
+    }
+    else
+    {
+	_fout.close();
+    }
 }
 
 template <class CAMERAS> bool

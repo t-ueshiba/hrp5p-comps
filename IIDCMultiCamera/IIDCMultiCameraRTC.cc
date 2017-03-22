@@ -9,6 +9,7 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
+#define DEFAULT_RECFILE_NAME	"/tmp/IIDCMultiCameraRTC_ImageStream.mov"
 
 // Module specification
 static const char* iidcmulticamera_spec[] =
@@ -26,6 +27,7 @@ static const char* iidcmulticamera_spec[] =
     "lang_type",			"compile",
     "conf.default.str_cameraName",	TU::IIDCCameraArray::DEFAULT_CAMERA_NAME,
     "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
+    "conf.default.str_recFileName",	DEFAULT_RECFILE_NAME,
     ""
 };
 
@@ -59,6 +61,7 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _cameras(),
      _mutex(),
      _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
+     _recFileName(DEFAULT_RECFILE_NAME),
      _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _images(),
      _imagesOut("TimedImages", _images),
@@ -67,6 +70,20 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
 {
 }
 
+template <> void
+MultiCameraRTC<IIDCCameraArray>::saveConfig()
+{
+    for (auto& camera : _cameras)
+	camera.saveConfig(1);
+}
+    
+template <> void
+MultiCameraRTC<IIDCCameraArray>::restoreConfig()
+{
+    for (auto& camera : _cameras)
+	camera.restoreConfig(1);
+}
+    
 template <> void
 MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {

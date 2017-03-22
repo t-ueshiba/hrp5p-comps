@@ -56,6 +56,7 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/functional.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
+		/usr/local/include/TU/range.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
 HDRS		= CmdDef.h \
@@ -63,10 +64,12 @@ HDRS		= CmdDef.h \
 		MultiCameraRTC.h
 SRCS		= IIDCCmdSVC_impl.cc \
 		IIDCMultiCameraRTC.cc \
-		main.cc
+		main.cc \
+		saveImageHeader.cc
 OBJS		= IIDCCmdSVC_impl.o \
 		IIDCMultiCameraRTC.o \
-		main.o
+		main.o \
+		saveImageHeader.o
 
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
@@ -78,14 +81,16 @@ IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/Heap.h MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
+	/usr/local/include/TU/functional.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/algorithm.h /usr/local/include/TU/Heap.h \
+	MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
 IIDCMultiCameraRTC.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/Heap.h MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
+	/usr/local/include/TU/functional.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/algorithm.h /usr/local/include/TU/Heap.h \
+	MultiCameraRTC.h CmdSVC_impl.h CmdDef.h

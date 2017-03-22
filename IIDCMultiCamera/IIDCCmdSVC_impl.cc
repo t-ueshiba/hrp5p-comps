@@ -85,7 +85,16 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 						CmdDefs& cmds)
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
-    
+
+  // メモリへのカメラ設定保存コマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfig,
+			  "Save to mem.", 0, y));
+
+  // メモリからのカメラ設定読み込みコマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_Button, c_RestoreConfig,
+			  "Restore from mem.", 1, y++));
+
+  // 属性操作コマンドの生成
     for (const auto& feature : IIDCCamera::featureNames)
     {
 	const auto	inq = camera.inquireFeatureFunction(feature.feature);
