@@ -35,8 +35,10 @@ INCDIR		= $(PREFIX)/include
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../IIDCMultiCamera/CmdDef.h \
+EXTHDRS		= ../IIDCMultiCamera/Cmd.hh \
+		../IIDCMultiCamera/CmdDef.h \
 		../IIDCMultiCamera/CmdSVC_impl.h \
+		../IIDCMultiCamera/Img.hh \
 		../IIDCMultiCamera/MultiCameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Geometry++.h \
@@ -49,15 +51,18 @@ EXTHDRS		= ../IIDCMultiCamera/CmdDef.h \
 		/usr/local/include/TU/functional.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
+		/usr/local/include/TU/range.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h
 HDRS		=
 SRCS		= V4L2CmdSVC_impl.cc \
 		V4L2MultiCameraRTC.cc \
-		main.cc
+		main.cc \
+		saveImageHeader.cc
 OBJS		= V4L2CmdSVC_impl.o \
 		V4L2MultiCameraRTC.o \
-		main.o
+		main.o \
+		saveImageHeader.o
 
 include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 #include $(PROJECT)/lib/qt.mk		# MOCSRCS, OBJS
@@ -70,16 +75,19 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/Heap.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
-	../IIDCMultiCamera/CmdDef.h
+	/usr/local/include/TU/functional.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Heap.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	../IIDCMultiCamera/Img.hh ../IIDCMultiCamera/CmdSVC_impl.h \
+	../IIDCMultiCamera/Cmd.hh ../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/Geometry++.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/functional.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Minimize.h /usr/local/include/TU/Heap.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
-	../IIDCMultiCamera/CmdDef.h
+	/usr/local/include/TU/functional.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Heap.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	../IIDCMultiCamera/Img.hh ../IIDCMultiCamera/CmdSVC_impl.h \
+	../IIDCMultiCamera/Cmd.hh ../IIDCMultiCamera/CmdDef.h
+saveImageHeader.o: ../IIDCMultiCamera/Img.hh
