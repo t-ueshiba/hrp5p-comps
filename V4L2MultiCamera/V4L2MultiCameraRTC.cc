@@ -9,6 +9,7 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
+#define DEFAULT_RECFILE_PREFIX	"/tmp/V4L2MultiCameraRTC"
 
 // Module specification
 static const char* v4l2multicamera_spec[] =
@@ -26,6 +27,7 @@ static const char* v4l2multicamera_spec[] =
     "lang_type",			"compile",
     "conf.default.str_cameraName",	TU::V4L2CameraArray::DEFAULT_CAMERA_NAME,
     "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
+    "conf.default.str_recFilePrefix",	DEFAULT_RECFILE_PREFIX,
     ""
 };
 
@@ -60,6 +62,7 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _mutex(),
      _cameraName(V4L2CameraArray::DEFAULT_CAMERA_NAME),
      _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
+     _recFilePrefix(DEFAULT_RECFILE_PREFIX),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
