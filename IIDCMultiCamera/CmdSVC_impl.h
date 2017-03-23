@@ -70,6 +70,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     static CmdDefs	createFormatItems(const camera_type& camera)	;
     static void		appendFeatureCmds(const camera_type& camera,
 					  CmdDefs& cmds)		;
+    bool		inRecordingImages()			const	;
     bool		inContinuousShot()			const	;
     Cmd::Values		getFormat(const Cmd::Values& ids,
 				  CORBA::Boolean range)		const	;
@@ -137,7 +138,7 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 	break;
 	
       case c_SaveConfigToFile:		// ファイルへカメラ設定を保存
-	_rtc.saveConfigToFile();
+	_rtc.cameras().save();
 	break;
 
       case c_SaveConfig:		// メモリへカメラ設定を保存
@@ -201,6 +202,11 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids, CORBA::Boolean range)
     
     switch (ids[0].i)
     {
+      case c_RecordImages:
+	vals.length(1);
+	vals[0] = {CORBA::Long(inRecordingImages()), 0};
+	break;
+	
       case c_ContinuousShot:
 	vals.length(1);
 	vals[0] = {CORBA::Long(inContinuousShot()), 0};
@@ -278,6 +284,12 @@ CmdSVC_impl<CAMERAS>::createCmds()
     appendFeatureCmds(camera, cmds);
 
     return cmds;
+}
+
+template <class CAMERAS> inline bool
+CmdSVC_impl<CAMERAS>::inRecordingImages() const
+{
+    return _rtc.inRecordingImages();
 }
 
 template <class CAMERAS> inline bool

@@ -16,6 +16,8 @@
 #include <coil/Guard.h>
 #include "CmdSVC_impl.h"
 #include <fstream>
+#include <sstream>
+#include <chrono>
 
 namespace TU
 {
@@ -48,17 +50,6 @@ template <class CAMERAS>
 class MultiCameraRTC : public RTC::DataFlowComponentBase
 {
   private:
-    struct Calib
-    {
-	Calib()	:u0(0), v0(0), width(0), height(0), d1(0), d2(0)
-					{ P[0][0] = P[1][1] = P[2][2] = 1; }
-
-	size_t		u0, v0;
-	size_t		width, height;
-	Matrix34d	P;
-	double		d1, d2;
-    };
-
     typedef typename CAMERAS::value_type	camera_type;
     
   public:
@@ -84,7 +75,6 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
 
   // カメラ状態の変更を伴うコマンドのみ本クラスで扱い、
   // カメラ状態を取得するだけのコマンドは class CmdSVC_impl<CAMERAS> で扱う
-    void		saveConfigToFile()			const	;
     void		saveConfig()					;
     void		restoreConfig()					;
     bool		inRecordingImages()				;
@@ -109,7 +99,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     mutable coil::Mutex			_mutex;
     std::string				_cameraName;	// config var.
     int					_syncedSnap;	// config var.
-    std::string				_recFileName;	// config var.
+    std::string				_recFilePrefix;	// config var.
     std::ofstream			_fout;
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
@@ -171,7 +161,8 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 
 	allocateImages();			// 画像データ領域を確保
 	enableTimestamp();			// 撮影時刻の記録を初期化
-	continuousShot(false);			// 連続撮影を開始	
+      //continuousShot(true);			// 連続撮影を開始	
+	continuousShot(false);			// 連続撮影を停止した状態で開始
     }
     catch (std::exception& err)
     {
@@ -210,7 +201,7 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	}
 	_imagesOut.write();
 
-	if (_fout.is_open())
+	if (inRecordingImages())
 	    _fout.write(reinterpret_cast<const char*>(
 			    _images.data.get_buffer()),
 			_images.data.length());
@@ -282,12 +273,6 @@ MultiCameraRTC<CAMERAS>::cameras() const
 }
 
 template <class CAMERAS> void
-MultiCameraRTC<CAMERAS>::saveConfigToFile() const
-{
-    _cameras.save();
-}
-
-template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::saveConfig()
 {
 }
@@ -306,16 +291,26 @@ MultiCameraRTC<CAMERAS>::inRecordingImages()
 template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::recordImages(bool enable)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
-
     if (enable == inRecordingImages())
 	return;
 
+    coil::Guard<coil::Mutex>	guard(_mutex);
+
     if (enable)
     {
-	_fout.open(_recFileName.c_str(),
+	using	std::chrono::system_clock;
+	
+	std::ostringstream	sout(_recFilePrefix);
+	const auto		now_c = system_clock::to_time_t(
+					    system_clock::now());
+	sout << _recFilePrefix << '-'
+	     << std::put_time(std::localtime(&now_c), "%F-%T")
+	     << ".epbms";
+	_fout.open(sout.str().c_str(),
 		   std::ofstream::out | std::ofstream::binary);
-
+	if (!_fout)
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::recordImages(): failed to open " + sout.str() + " !");
+	
 	_fout << 'M' << _images.headers.length() << std::endl;
 	for (size_t i = 0; i < _images.headers.length(); ++i)
 	    saveImageHeader(_fout, _images.headers[i]);
