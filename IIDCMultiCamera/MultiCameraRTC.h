@@ -16,8 +16,7 @@
 #include <coil/Guard.h>
 #include "CmdSVC_impl.h"
 #include <fstream>
-#include <sstream>
-#include <chrono>
+#include <ctime>	// for std::strftime()
 
 namespace TU
 {
@@ -298,18 +297,15 @@ MultiCameraRTC<CAMERAS>::recordImages(bool enable)
 
     if (enable)
     {
-	using	std::chrono::system_clock;
-	
-	std::ostringstream	sout(_recFilePrefix);
-	const auto		now_c = system_clock::to_time_t(
-					    system_clock::now());
-	sout << _recFilePrefix << '-'
-	     << std::put_time(std::localtime(&now_c), "%F-%T")
-	     << ".epbms";
-	_fout.open(sout.str().c_str(),
+	char		recFileSuffix[128];
+	const auto	t = std::time(NULL);
+	std::strftime(recFileSuffix, sizeof(recFileSuffix),
+		      "-%F-%T.epbms", std::localtime(&t));
+	const auto	recFileName = _recFilePrefix + recFileSuffix;
+	_fout.open(recFileName.c_str(),
 		   std::ofstream::out | std::ofstream::binary);
 	if (!_fout)
-	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::recordImages(): failed to open " + sout.str() + " !");
+	    throw std::runtime_error("MultiCameraRTC<CAMERAS>::recordImages(): failed to open " + recFileName + " !");
 	
 	_fout << 'M' << _images.headers.length() << std::endl;
 	for (size_t i = 0; i < _images.headers.length(); ++i)
