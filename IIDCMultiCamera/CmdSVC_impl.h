@@ -259,11 +259,11 @@ CmdSVC_impl<CAMERAS>::createCmds()
 
   // ファイルへの録画コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_RecordImages,
-			  "Rec. images", 2, 0));
+			  "Rec.", 2, 0));
 
   // ファイルへのカメラ設定保存コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfigToFile,
-			  "Save conf. file", 3, 0));
+			  "Save conf.", 3, 0));
 
     if (ncameras > 1)
     {

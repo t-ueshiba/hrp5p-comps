@@ -88,11 +88,11 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
 
   // メモリへのカメラ設定保存コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfig,
-			  "Save to mem.", 0, y));
+			  "Write to mem.", 0, y));
 
   // メモリからのカメラ設定読み込みコマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_RestoreConfig,
-			  "Restore from mem.", 1, y++));
+			  "Read mem.", 1, y++));
 
   // 属性操作コマンドの生成
     for (const auto& feature : IIDCCamera::featureNames)
@@ -228,10 +228,24 @@ CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
     Cmd::Values	ids;
     
     if (_rtc.setFeature(vals, _n, _all) &&
-	(vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS))
+	vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ONOFF)
     {
-	ids.length(1);
-	ids[0] = {CORBA::Long(vals[0].i - IIDCCAMERA_OFFSET_ABS), 0};
+	auto	camera = std::begin(_rtc.cameras());
+	std::advance(camera, _n);
+	u_int	val;
+	float	fval;
+	TU::getFeature(*camera, vals[0].i, val, fval);
+	
+	if (val != vals[1].i)	// 実際の値が設定した値と異なるなら...
+	{
+	    ids.length(1);
+	    ids[0] = {CORBA::Long(vals[0].i), 0};
+	}
+	else if (vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS)
+	{
+	    ids.length(1);
+	    ids[0] = {CORBA::Long(vals[0].i - IIDCCAMERA_OFFSET_ABS), 0};
+	}
     }
 
     return ids;
