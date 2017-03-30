@@ -227,24 +227,20 @@ CmdSVC_impl<IIDCCameraArray>::setFeature(const Cmd::Values& vals)
 {
     Cmd::Values	ids;
     
-    if (_rtc.setFeature(vals, _n, _all) &&
-	vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ONOFF)
+    if (_rtc.setFeature(vals, _n, _all))
     {
-	auto	camera = std::begin(_rtc.cameras());
-	std::advance(camera, _n);
-	u_int	val;
-	float	fval;
-	TU::getFeature(*camera, vals[0].i, val, fval);
-	
-	if (val != vals[1].i)	// 実際の値が設定した値と異なるなら...
+	if (vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS)
 	{
-	    ids.length(1);
-	    ids[0] = {CORBA::Long(vals[0].i), 0};
-	}
-	else if (vals[0].i >= IIDCCamera::BRIGHTNESS + IIDCCAMERA_OFFSET_ABS)
-	{
+	  // Absoluteモードを変更したら，そのFeatureをrefreshする
 	    ids.length(1);
 	    ids[0] = {CORBA::Long(vals[0].i - IIDCCAMERA_OFFSET_ABS), 0};
+	}
+	else if (vals[0].i ==
+		 IIDCCamera::TRIGGER_MODE + IIDCCAMERA_OFFSET_ONOFF)
+	{
+	  // TRIGGER_MODEをon/offしたら，全Featureをrefreshする
+	    ids.length(1);
+	    ids[0] = {CORBA::Long(CmdDef::c_RefreshAll), 0};
 	}
     }
 
