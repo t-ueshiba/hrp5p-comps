@@ -239,7 +239,7 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids, CORBA::Boolean range)
 template <class CAMERAS> CmdDefs
 CmdSVC_impl<CAMERAS>::createCmds()
 {
-    const auto	ncameras = size(_rtc.cameras());
+    const auto	ncameras = std::size(_rtc.cameras());
     CmdDefs	cmds;
     
     if (ncameras == 0)

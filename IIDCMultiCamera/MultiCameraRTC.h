@@ -301,7 +301,8 @@ MultiCameraRTC<CAMERAS>::recordImages(bool enable)
 	const auto	t = std::time(NULL);
 	std::strftime(recFileSuffix, sizeof(recFileSuffix),
 		      "-%F-%T.epbms", std::localtime(&t));
-	const auto	recFileName = _recFilePrefix + recFileSuffix;
+	const auto	recFileName = _recFilePrefix
+				    + std::string(recFileSuffix);
 	_fout.open(recFileName.c_str(),
 		   std::ofstream::out | std::ofstream::binary);
 	if (!_fout)
