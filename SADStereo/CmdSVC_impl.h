@@ -1,16 +1,26 @@
 /*
  *  $Id$
  */
+#ifndef	CMDSVC_IMPL_H
+#define	CMDSVC_IMPL_H
+
 #include <sstream>
 #include <boost/archive/xml_oarchive.hpp>
 #include "Cmd.hh"
 #include "CmdDef.h"
 
-#ifndef CMDSVC_IMPL_H
-#define CMDSVC_IMPL_H
-
 namespace TU
 {
+#ifdef DEBUG
+inline std::ostream&
+print(std::ostream& out, const Cmd::Values& vals)
+{
+    for (CORBA::ULong i = 0; i < vals.length(); ++i)
+	out << " (" << vals[i].i << ',' << vals[i].f << ')';
+    return out;
+}
+#endif
+    
 namespace v
 {
 /************************************************************************
@@ -35,14 +45,15 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     virtual		~CmdSVC_impl()					{}
 
     char*		getCmds()					;
-    CORBA::Boolean	setValues(const Cmd::Values& vals)		;
-    Cmd::Values*	getValues(const Cmd::Values& ids)		;
+    Cmd::Values*	setValues(const Cmd::Values& vals)		;
+    Cmd::Values*	getValues(const Cmd::Values& ids,
+				  CORBA::Boolean range)			;
     
   private:
     static CmdDefs	createCmds()					;
     static void		addOtherCmds(CmdDefs& cmds)			;
-    CORBA::Boolean	setOtherValues(const Cmd::Values& vals)		;
-    CORBA::Long		getOtherValues(const Cmd::Values& ids)	const	;
+    Cmd::Values		setOtherValues(const Cmd::Values& vals)		;
+    Cmd::Values		getOtherValues(const Cmd::Values& ids)	const	;
     
   private:
     STEREO_RTC&		_rtc;
@@ -62,100 +73,92 @@ CmdSVC_impl<STEREO_RTC>::getCmds()
     return CORBA::string_dup(oss.str().c_str());
 }
 
-template <class STEREO_RTC> CORBA::Boolean
+template <class STEREO_RTC> Cmd::Values*
 CmdSVC_impl<STEREO_RTC>::setValues(const Cmd::Values& vals)
 {
 #ifdef DEBUG
-    using namespace	std;
-    
-    cerr << "CmdSVC_impl<STEREO_RTC>::setValues(): vals =";
-    for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i];
-    cerr << endl;
+    print(std::cerr << "CmdSVC_impl<STEREO_RTC>::setValues(): vals =", vals)
+	<< std::endl;
 #endif
     params_type	params = _rtc.getParameters();
+    Cmd::Values	ids;
 
-    switch (vals[0])
+    switch (vals[0].i)
     {
       case c_Binocular:
-	_rtc.setBinocular(vals[1]);
+	_rtc.setBinocular(vals[1].i);
 	break;
       case c_DisparitySearchWidth:
-	params.disparitySearchWidth = vals[1];
+	params.disparitySearchWidth = vals[1].i;
 	_rtc.setParameters(params, true);
 	break;
       case c_DisparityMax:
-	params.disparityMax = vals[1];
+	params.disparityMax = vals[1].i;
 	_rtc.setParameters(params, true);
 	break;
       case c_DisparityInconsistency:
-	params.disparityInconsistency = vals[1];
+	params.disparityInconsistency = vals[1].i;
 	_rtc.setParameters(params);
 	break;
       case c_grainSize:
-	params.grainSize = vals[1];
+	params.grainSize = vals[1].i;
 	_rtc.setParameters(params);
 	break;
       case c_WindowSize:
-	params.windowSize = vals[1];
+	params.windowSize = vals[1].i;
 	_rtc.setParameters(params);
 	break;
       case c_IntensityDiffMax:
-	params.intensityDiffMax = vals[1];
+	params.intensityDiffMax = vals[1].i;
 	_rtc.setParameters(params);
 	break;
       default:
-	return setOtherValues(vals);
+	ids = setOtherValues(vals);
+	break;
     }
     
-    return true;
+    return new Cmd::Values(ids);
 }
 
 template <class STEREO_RTC> Cmd::Values*
-CmdSVC_impl<STEREO_RTC>::getValues(const Cmd::Values& ids)
+CmdSVC_impl<STEREO_RTC>::getValues(const Cmd::Values& ids,
+				   CORBA::Boolean range)
 {
 #ifdef DEBUG
-    using namespace	std;
-    
-    cerr << "CmdSVC_impl<STEREO_RTC>::getValues(): ids =";
-    for (CORBA::ULong i = 0; i < ids.length(); ++i)
-	cerr << ' ' << ids[i];
+    print(std::cerr << "CmdSVC_impl<STEREO_RTC>::getValues(): ids =", ids);
 #endif
     Cmd::Values	vals;
     vals.length(1);
     
-    switch (ids[0])
+    switch (ids[0].i)
     {
       case c_Binocular:
-	vals[0] = _rtc.getBinocular();
+	vals[0] = {CORBA::Long(_rtc.getBinocular()), 0};
 	break;
       case c_DisparitySearchWidth:
-	vals[0] = _rtc.getParameters().disparitySearchWidth;
+	vals[0] = {CORBA::Long(_rtc.getParameters().disparitySearchWidth), 0};
 	break;
       case c_DisparityMax:
-	vals[0] = _rtc.getParameters().disparityMax;
+	vals[0] = {CORBA::Long(_rtc.getParameters().disparityMax), 0};
 	break;
       case c_DisparityInconsistency:
-	vals[0] = _rtc.getParameters().disparityInconsistency;
+	vals[0] = {CORBA::Long(_rtc.getParameters().disparityInconsistency), 0};
 	break;
       case c_grainSize:
-	vals[0] = _rtc.getParameters().grainSize;
+	vals[0] = {CORBA::Long(_rtc.getParameters().grainSize), 0};
 	break;
       case c_WindowSize:
-	vals[0] = _rtc.getParameters().windowSize;
+	vals[0] = {CORBA::Long(_rtc.getParameters().windowSize), 0};
 	break;
       case c_IntensityDiffMax:
-	vals[0] = _rtc.getParameters().intensityDiffMax;
+	vals[0] = {CORBA::Long(_rtc.getParameters().intensityDiffMax), 0};
 	break;
       default:
-	vals[0] = getOtherValues(ids);
+	vals = getOtherValues(ids);
 	break;
     }
 #ifdef DEBUG
-    cerr << ", vals =";
-    for (CORBA::ULong i = 0; i < vals.length(); ++i)
-	cerr << ' ' << vals[i];
-    cerr << endl;
+    print(std::cerr << ", vals =", vals) << std::endl;
 #endif
     return new Cmd::Values(vals);
 }
@@ -165,18 +168,14 @@ CmdSVC_impl<STEREO_RTC>::createCmds()
 {
     static CmdDefs cmds =
     {
-	{C_ToggleButton, "Binocular",	      c_Binocular,		noSub,
-	 0, 1, 1, 1, CA_None, 0, 0},
-	{C_Slider, "Window size",	      c_WindowSize,		noSub,
-	 3, 81, 1, 1, CA_None, 0, 1},
-	{C_Slider, "Disparity search width",  c_DisparitySearchWidth,	noSub,
-	 16, 192, 1, 1, CA_None, 0, 2},
-	{C_Slider, "Max. disparity",	      c_DisparityMax,		noSub,
-	 48, 768, 1, 1, CA_None, 0, 3},
-	{C_Slider, "Disparity inconsistency", c_DisparityInconsistency,	noSub,
-	 0, 10, 1, 1, CA_None, 0, 4},
-	{C_Slider, "Max. intensity diff.",    c_IntensityDiffMax,	noSub,
-	 0, 10, 1, 1, CA_None, 0, 5},
+	{CmdDef::C_ToggleButton, c_Binocular,	"Binocular",		0, 0},
+	{CmdDef::C_Slider, c_WindowSize,	"Window size",		0, 1},
+	{CmdDef::C_Slider, c_DisparitySearchWidth, "Disparity search width",
+	 0, 2},
+	{CmdDef::C_Slider, c_DisparityMax,	"Max. disparity",	0, 3},
+	{CmdDef::C_Slider, c_DisparityInconsistency, "Disparity inconsistency",
+	 0, 4},
+	{CmdDef::C_Slider, c_IntensityDiffMax,  "Max. intensity diff.",	0, 5},
     };
 
     addOtherCmds(cmds);
@@ -189,18 +188,18 @@ CmdSVC_impl<STEREO_RTC>::addOtherCmds(CmdDefs& cmds)
 {
 }
     
-template <class STEREO_RTC> CORBA::Boolean
+template <class STEREO_RTC> Cmd::Values
 CmdSVC_impl<STEREO_RTC>::setOtherValues(const Cmd::Values& vals)
 {
-    return false;
+    return Cmd::Values();
 }
 
-template <class STEREO_RTC> CORBA::Long
+template <class STEREO_RTC> Cmd::Values
 CmdSVC_impl<STEREO_RTC>::getOtherValues(const Cmd::Values& ids) const
 {
-    return 0;
+    return Cmd::Values();
 }
 
-}
-}
-#endif // CMDSVC_IMPL_H
+}	// namespace v
+}	// namespace TU
+#endif	// !CMDSVC_IMPL_H

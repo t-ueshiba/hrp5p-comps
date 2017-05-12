@@ -70,9 +70,11 @@ StereoRTC<SADStereoType>::StereoRTC(RTC::Manager* manager)
       _disparityMap(),
       _stereoParams(DEFAULT_STEREO_PARAMS),
       _inImages(),
-      _inImagesPort("InTimedImages", _inImages),
-      _outImages(),
-      _outImagesPort("OutTimedImages", _outImages),
+      _inImagesPort("InImages", _inImages),
+      _outRectifiedImages(),
+      _outRectifiedImagesPort("OutRectifiedImages", _outRectifiedImages),
+      _outDisparityMap(),
+      _outDisparityMapPort("OutDisparityMap", _outDisparityMap),
       _command(*this),
       _commandPort("Command")
 {

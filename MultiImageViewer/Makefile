@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ../idl
+VPATH		= ../TU/idl
 
 IDLS		= Img.idl
 MOCHDRS		=
@@ -43,9 +43,10 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Manip.h \
 		/usr/local/include/TU/Minimize.h \
 		/usr/local/include/TU/Vector++.h \
-		/usr/local/include/TU/functional.h \
+		/usr/local/include/TU/algorithm.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
+		/usr/local/include/TU/range.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/types.h \
 		/usr/local/include/TU/v/App.h \
@@ -77,28 +78,29 @@ include $(PROJECT)/lib/common.mk
 MultiImageViewerRTC.o: MultiImageViewerRTC.h
 MyCmdWindow.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
-	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/tuple.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
+	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/v/Widget-Xaw.h \
 	/usr/local/include/TU/v/Colormap.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/v/CmdWindow.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/v/CmdWindow.h \
 	/usr/local/include/TU/v/CanvasPane.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/Manip.h \
 	/usr/local/include/TU/v/Menu.h /usr/local/include/TU/v/Timer.h \
 	MultiImageViewerRTC.h
-main.o: MultiImageViewerRTC.h MyCmdWindow.h /usr/local/include/TU/v/App.h \
+main.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
-	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/tuple.h /usr/local/include/TU/functional.h \
-	/usr/local/include/TU/pair.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
+	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/v/Widget-Xaw.h \
 	/usr/local/include/TU/v/Colormap.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/v/CmdWindow.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/v/CmdWindow.h \
 	/usr/local/include/TU/v/CanvasPane.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/Manip.h \
-	/usr/local/include/TU/v/Menu.h /usr/local/include/TU/v/Timer.h
+	/usr/local/include/TU/v/Menu.h /usr/local/include/TU/v/Timer.h \
+	MultiImageViewerRTC.h

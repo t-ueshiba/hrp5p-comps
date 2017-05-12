@@ -4,7 +4,7 @@
 #ifndef __TU_STEREORTC_H
 #define __TU_STEREORTC_H
 
-#include <fstream>
+#include "Img.hh"
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
@@ -15,7 +15,6 @@
 #include <rtm/idl/InterfaceDataTypesSkel.h>
 #include <coil/Guard.h>
 #include "TU/Rectify.h"
-#include "Img.hh"
 #include "CmdSVC_impl.h"
 
 namespace TU
@@ -27,7 +26,6 @@ template <class T> static Img::PixelFormat
 pixelFormat()
 {
     return Img::MONO_8;
-    
 }
 template <> Img::PixelFormat
 pixelFormat<YUV411>()
@@ -38,6 +36,11 @@ template <> Img::PixelFormat
 pixelFormat<YUV422>()
 {
     return Img::YUV_422;
+}
+template <> Img::PixelFormat
+pixelFormat<YUYV422>()
+{
+    return Img::YUYV_422;
 }
 template <> Img::PixelFormat
 pixelFormat<YUV444>()
@@ -65,29 +68,6 @@ copyCalib(const SRC& src, DST& dst)
     dst.d2 = src.d2;
 }
 
-template <class T> static void
-mapImage(const Img::TimedImage& inImage, Image<T>& image)
-{
-    copyCalib(inImage, image);
-    image.resize((T*)inImage.data.get_buffer(), inImage.height, inImage.width);
-}
-
-template <class T> static void
-allocateImage(const RTC::Time& tm, size_t width, size_t height,
-	      Image<T>& rectifiedImage, Img::TimedImage& outImage)
-{
-    outImage.tm	    = tm;
-    outImage.format = pixelFormat<T>();
-    outImage.width  = width;
-    outImage.height = height;
-    copyCalib(rectifiedImage, outImage);
-
-    outImage.data.length(sizeof(T) * outImage.width * outImage.height);
-
-    rectifiedImage.resize((T*)outImage.data.get_buffer(),
-			  outImage.height, outImage.width);
-}
-    
 /************************************************************************
 *  class StereoRTC<STEREO, PIXEL>					*
 ************************************************************************/
@@ -121,12 +101,14 @@ class StereoRTC : public RTC::DataFlowComponentBase
     void		setBinocular(bool binocular)			;
     bool		getBinocular()				const	;
     void		setParameters(const params_type& params,
-				      bool initialization_needed=false)	;
+				      bool needsInitialization=false)	;
     const params_type&	getParameters()				const	;
     void		initializeRectification()			;
     
   private:
     void		initializeConfigurations()			;
+    bool		mapInImages()					;
+    void		mapOutImages()					;
     void		stereoMatch()					;
     
   private:
@@ -139,11 +121,14 @@ class StereoRTC : public RTC::DataFlowComponentBase
     Image<pixel_type>			_images[3];
     Image<pixel_type>			_rectifiedImages[3];
     Image<float>			_disparityMap;
+
     std::string				_stereoParams;	// config var.
-    Img::TimedImages			_inImages;	// in data
-    RTC::InPort<Img::TimedImages>	_inImagesPort;	// in data poprt
-    Img::TimedImages			_outImages;	// out data
-    RTC::OutPort<Img::TimedImages>	_outImagesPort;	// out data poprt
+    Img::TimedImages			_inImages;
+    RTC::InPort<Img::TimedImages>	_inImagesPort;
+    Img::TimedImages			_outRectifiedImages;
+    RTC::OutPort<Img::TimedImages>	_outRectifiedImagesPort;
+    Img::TimedImages			_outDisparityMap;
+    RTC::OutPort<Img::TimedImages>	_outDisparityMapPort;
     v::CmdSVC_impl<StereoRTC>		_command;	// service provider
     RTC::CorbaPort			_commandPort;	// service port
 };
@@ -157,7 +142,8 @@ StereoRTC<STEREO, PIXEL>::onInitialize()
     initializeConfigurations();
     
     addInPort( "TimedImages", _inImagesPort);
-    addOutPort("TimedImages", _outImagesPort);
+    addOutPort("TimedImages", _outRectifiedImagesPort);
+    addOutPort("TimedImages", _outDisparityMapPort);
 
     _commandPort.registerProvider("Command", "Cmd::Controller", _command);
     addPort(_commandPort);
@@ -196,8 +182,6 @@ StereoRTC<STEREO, PIXEL>::onDeactivated(RTC::UniqueId ec_id)
 template <class STEREO, class PIXEL> RTC::ReturnCode_t
 StereoRTC<STEREO, PIXEL>::onExecute(RTC::UniqueId ec_id)
 {
-    using namespace	std;
-    
     if (_inImagesPort.isNew())
     {
 	coil::Guard<coil::Mutex>	guard(_mutex);
@@ -208,35 +192,20 @@ StereoRTC<STEREO, PIXEL>::onExecute(RTC::UniqueId ec_id)
 	}
 	while (_inImagesPort.isNew());
 
-	if (!_initialized)		// 初期化されていなかったら...
-	{
-	    if (_inImages.length() < 2)	// 画像数をチェック
-	    {
-		cerr << "Two or more images required!" << endl;
-		return RTC::RTC_ERROR;
-	    }
-	    else if (_inImages.length() == 2)
-		_binocular = true;
-	    else
-		_binocular = false;
+	if (!mapInImages())
+	    return RTC::RTC_ERROR;
     
-	    initializeRectification();	// 初期化する
-	    _initialized = true;
-	}
-	else
+ 	if (!_initialized)		// 初期化されていなかったら...
 	{
-	    _images[0].resize((pixel_type*)_inImages[0].data.get_buffer(),
-			      _inImages[0].height, _inImages[0].width);
-	    _images[1].resize((pixel_type*)_inImages[1].data.get_buffer(),
-			      _inImages[1].height, _inImages[1].width);
-	    if (!_binocular)
-		_images[2].resize((pixel_type*)_inImages[2].data.get_buffer(),
-				  _inImages[2].height, _inImages[2].width);
+	    initializeRectification();	// 初期化する
+	    mapOutImages();
+	    _initialized = true;
 	}
 
 	stereoMatch();			// ステレオマッチング
 
-	_outImagesPort.write();
+	_outRectifiedImagesPort.write();
+	_outDisparityMapPort.write();
     }
 
     return RTC::RTC_OK;
@@ -280,8 +249,8 @@ template <class STEREO, class PIXEL> void
 StereoRTC<STEREO, PIXEL>::setBinocular(bool binocular)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
-    bool	binocular_old = _binocular;
-    _binocular = (binocular || _inImages.length() <= 2);
+    const auto	binocular_old = _binocular;
+    _binocular = (binocular || _inImages.headers.length() <= 2);
     if (_binocular != binocular_old)
 	_initialized = false;
 }
@@ -294,11 +263,11 @@ StereoRTC<STEREO, PIXEL>::getBinocular() const
     
 template <class STEREO, class PIXEL> void
 StereoRTC<STEREO, PIXEL>::setParameters(const params_type& params,
-					bool initialization_needed)
+					bool needsInitialization)
 {
     coil::Guard<coil::Mutex>	guard(_mutex);
     _stereo.setParameters(params);
-    if (initialization_needed)
+    if (needsInitialization)
 	_initialized = false;
 }
     
@@ -312,10 +281,6 @@ StereoRTC<STEREO, PIXEL>::getParameters() const
 template <class STEREO, class PIXEL> void
 StereoRTC<STEREO, PIXEL>::initializeRectification()
 {
-  // 入力画像を内部入力画像にマップ
-    mapImage(_inImages[0], _images[0]);
-    mapImage(_inImages[1], _images[1]);
-
   // rectificationを初期化
     if (_binocular)
     {
@@ -323,31 +288,17 @@ StereoRTC<STEREO, PIXEL>::initializeRectification()
 			    _scale,
 			    _stereo.getParameters().disparitySearchWidth,
 			    _stereo.getParameters().disparityMax);
-
-      //_outImages.length(3);
-	_outImages.length(1);
     }
     else
     {
-	mapImage(_inImages[2], _images[2]);
-
 	_rectify.initialize(_images[0], _images[1], _images[2],
 			    _scale,
 			    _stereo.getParameters().disparitySearchWidth,
 			    _stereo.getParameters().disparityMax);
-
+	
       // rectifyされた上画像のカメラ行列をセット
 	_rectifiedImages[2].P  = _rectify.H(2) * _images[2].P;
 	_rectifiedImages[2].P /= _rectifiedImages[2].P[2](0, 3).length();
-
-      // rectifyされた上出力画像を確保し，rectifyされた内部上画像にマップ
-      /*
-	allocateImage(_inImages[2].tm, _rectify.width(2), _rectify.height(2),
-		      _rectifiedImages[2], _outImages[2]);
-      */
-
-      //_outImages.length(4);
-	_outImages.length(1);
     }
 
   // rectifyされた左・右画像および視差マップのカメラ行列をセット
@@ -356,22 +307,81 @@ StereoRTC<STEREO, PIXEL>::initializeRectification()
     _rectifiedImages[1].P  = _rectify.H(1) * _images[1].P;
     _rectifiedImages[1].P /= _rectifiedImages[1].P[2](0, 3).length();
     _disparityMap.P	   = _rectifiedImages[0].P;
+}
 
-  // rectifyされた左・右出力画像を確保し，rectifyされた内部左・右画像にマップ
-  /*
-    allocateImage(_inImages[0].tm, _rectify.width(0), _rectify.height(0),
-		  _rectifiedImages[0], _outImages[0]);
-    allocateImage(_inImages[1].tm, _rectify.width(1), _rectify.height(1),
-		  _rectifiedImages[1], _outImages[1]);
-  */
+template <class STEREO, class PIXEL> bool
+StereoRTC<STEREO, PIXEL>::mapInImages()
+{
+    switch (_inImages.headers.length())	// 画像数をチェック
+    {
+      case 0:
+      case 1:
+	std::cerr << "Two or more images required!" << std::endl;
+	return false;
+      case 2:
+	_binocular = true;
+	break;
+      default:
+	_binocular = false;
+	break;
+    }
+    
+    const size_t	nimages = (_binocular ? 2 : 3);
+    auto		data = _inImages.data.get_buffer();
+    for (size_t i = 0; i < nimages; ++i)
+    {
+	const auto&	header = _inImages.headers[i];
 
-  // 視差画像を確保し，内部視差画像にマップ
-  /*
-    allocateImage(_inImages[0].tm, _rectify.width(0), _rectify.height(0),
-		  _disparityMap, _outImages[_binocular ? 2 : 3]);
-  */
-    allocateImage(_inImages[0].tm, _rectify.width(0), _rectify.height(0),
-		  _disparityMap, _outImages[0]);
+	if (header.format != pixelFormat<pixel_type>())
+	    throw std::runtime_error("Mismatched output image pixel format!");
+	copyCalib(header, _images[i]);
+	_images[i].resize((pixel_type*)data, header.height, header.width);
+	data += header.size;
+    }
+
+    return true;
+}
+
+template <class STEREO, class PIXEL> void
+StereoRTC<STEREO, PIXEL>::mapOutImages()
+{
+  // rectifyされた出力画像の枚数を設定
+    const size_t	nimages = (_binocular ? 2 : 3);
+    _outRectifiedImages.headers.length(nimages);	// ヘッダ数を設定
+    
+  // rectifyされた出力画像のヘッダを設定し，データ領域を確保
+    size_t	total_size = 0;
+    for (size_t i = 0; i < nimages; ++i)
+    {
+	auto&	header = _outRectifiedImages.headers[i];
+	header.format = pixelFormat<pixel_type>();
+	header.width  = _rectify.width(i);
+	header.height = _rectify.height(i);
+	header.size   = header.width * header.size * sizeof(pixel_type);
+	copyCalib(_rectifiedImages[i], header);
+
+	total_size += header.size;
+    }
+    _outRectifiedImages.data.length(total_size);	// データ領域を確保
+
+  // rectifyされた出力画像のデータ領域を内部画像にマップ
+    auto	data = _outRectifiedImages.data.get_buffer(false);
+    for (size_t i = 0; i < nimages; ++i)
+    {
+	const auto&	header = _outRectifiedImages.headers[i];
+
+	_rectifiedImages[i].resize((pixel_type*)data,
+				   header.height, header.width);
+	data += header.size;
+    }
+
+  // 視差画像のヘッダをrectify出力画像からコピーし，データ領域を確保して内部画像にマップ
+    _outDisparityMap.headers.length(1);
+    auto&	header = _outRectifiedImages.headers[0];
+    header = _outRectifiedImages.headers[0];
+    _outDisparityMap.data.length(header.width * header.height * sizeof(float));
+    _disparityMap.resize((float*)_outDisparityMap.data.get_buffer(false),
+			 header.height, header.width);
 }
 
 template <class STEREO, class PIXEL> void
@@ -394,5 +404,5 @@ StereoRTC<STEREO, PIXEL>::stereoMatch()
     }
 }
 
-}
+}	// namespace TU
 #endif	// !__TU_STEREOTC_H

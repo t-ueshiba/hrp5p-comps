@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ../idl
+VPATH		= ../TU/idl
 
 IDLS		= Img.idl Cmd.idl
 
@@ -35,10 +35,8 @@ INCDIR		= $(PREFIX)/include
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../IIDCMultiCamera/Cmd.hh \
-		../IIDCMultiCamera/CmdDef.h \
+EXTHDRS		= ../IIDCMultiCamera/CmdDef.h \
 		../IIDCMultiCamera/CmdSVC_impl.h \
-		../IIDCMultiCamera/Img.hh \
 		../IIDCMultiCamera/MultiCameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Image++.h \
@@ -73,8 +71,7 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
 	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
 	../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
@@ -82,7 +79,5 @@ V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
 	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/Img.hh \
-	../IIDCMultiCamera/CmdSVC_impl.h ../IIDCMultiCamera/Cmd.hh \
+	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
 	../IIDCMultiCamera/CmdDef.h
-saveImageHeader.o: ../IIDCMultiCamera/Img.hh

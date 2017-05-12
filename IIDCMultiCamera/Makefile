@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ../idl
+VPATH		= ../TU/idl
 
 IDLS		= Img.idl Cmd.idl
 
@@ -58,20 +58,12 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 HDRS		= CmdDef.h \
 		CmdSVC_impl.h \
 		MultiCameraRTC.h
-SRCS		= CmdDynSK.cc \
-		CmdSK.cc \
-		IIDCCmdSVC_impl.cc \
+SRCS		= IIDCCmdSVC_impl.cc \
 		IIDCMultiCameraRTC.cc \
-		ImgDynSK.cc \
-		ImgSK.cc \
 		main.cc \
 		saveImageHeader.cc
-OBJS		= CmdDynSK.o \
-		CmdSK.o \
-		IIDCCmdSVC_impl.o \
+OBJS		= IIDCCmdSVC_impl.o \
 		IIDCMultiCameraRTC.o \
-		ImgDynSK.o \
-		ImgSK.o \
 		main.o \
 		saveImageHeader.o
 
@@ -80,22 +72,17 @@ include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
 ###
-CmdDynSK.o: Cmd.hh
-CmdSK.o: Cmd.hh
 IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	MultiCameraRTC.h Img.hh CmdSVC_impl.h Cmd.hh CmdDef.h
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
+	MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
 IIDCMultiCameraRTC.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/types.h /usr/local/include/TU/pair.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	MultiCameraRTC.h Img.hh CmdSVC_impl.h Cmd.hh CmdDef.h
-ImgDynSK.o: Img.hh
-ImgSK.o: Img.hh
-saveImageHeader.o: Img.hh
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
+	MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
