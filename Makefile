@@ -8,7 +8,7 @@ SUBDIR	= IIDCMultiCamera	\
 #	  SADStereo		\
 #	  GFStereo
 
-TARGETS	= all clean depend install
+TARGETS	= all clean depend install other
 
 $(TARGETS):
 	@for d in $(SUBDIR); do				\

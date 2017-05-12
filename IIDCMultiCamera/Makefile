@@ -40,6 +40,8 @@ BINDIR		= $(PREFIX)/bin
 LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
 INCDIR		= $(PREFIX)/include
 
+OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/src/rtc/IIDCMultiCamera
+
 #########################
 #  Macros set by mkmf	#
 #########################
@@ -67,10 +69,14 @@ OBJS		= IIDCCmdSVC_impl.o \
 		main.o \
 		saveImageHeader.o
 
+OTHER_HDRS	= $(HDRS)
+OTHER_SRCS	= $(SRCS)
+
 include $(PROJECT)/lib/rtc.mk		# modified: CPPFLAGS, LIBS
 #include $(PROJECT)/lib/cnoid.mk	# modified: CPPFLAGS, LIBS, LIBDIR
 #include $(PROJECT)/lib/lib.mk		# added:    PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
+include $(PROJECT)/lib/other.mk
 ###
 IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \

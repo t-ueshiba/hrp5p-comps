@@ -32,6 +32,8 @@ BINDIR		= $(PREFIX)/bin
 LIBDIR		= $(PREFIX)/lib
 INCDIR		= $(PREFIX)/include
 
+OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/src/rtc/MultiImageViewer
+
 #########################
 #  Macros set by mkmf	#
 #########################
@@ -69,11 +71,15 @@ OBJS		= MultiImageViewerRTC.o \
 		MyCmdWindow.o \
 		main.o
 
+OTHER_HDRS	= $(HDRS)
+OTHER_SRCS	= $(SRCS)
+
 include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 #include $(PROJECT)/lib/qt.mk		# MOCSRCS, OBJS
 #include $(PROJECT)/lib/cnoid.mk	# CPPFLAGS, LIBS, LIBDIR
 #include $(PROJECT)/lib/lib.mk		# PUBHDRS TARGHDRS
 include $(PROJECT)/lib/common.mk
+include $(PROJECT)/lib/other.mk
 ###
 MultiImageViewerRTC.o: MultiImageViewerRTC.h
 MyCmdWindow.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
