@@ -63,14 +63,10 @@ EXTHDRS		= /usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/v/XDC.h
 HDRS		= MultiImageViewerRTC.h \
 		MyCmdWindow.h
-SRCS		= ImgDynSK.cc \
-		ImgSK.cc \
-		MultiImageViewerRTC.cc \
+SRCS		= MultiImageViewerRTC.cc \
 		MyCmdWindow.cc \
 		main.cc
-OBJS		= ImgDynSK.o \
-		ImgSK.o \
-		MultiImageViewerRTC.o \
+OBJS		= MultiImageViewerRTC.o \
 		MyCmdWindow.o \
 		main.o
 
@@ -84,9 +80,7 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
-ImgDynSK.o: Img.hh
-ImgSK.o: Img.hh
-MultiImageViewerRTC.o: MultiImageViewerRTC.h Img.hh
+MultiImageViewerRTC.o: MultiImageViewerRTC.h
 MyCmdWindow.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
@@ -100,7 +94,7 @@ MyCmdWindow.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/Manip.h \
 	/usr/local/include/TU/v/Menu.h /usr/local/include/TU/v/Timer.h \
-	MultiImageViewerRTC.h Img.hh
+	MultiImageViewerRTC.h
 main.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
@@ -114,4 +108,4 @@ main.o: MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/Manip.h \
 	/usr/local/include/TU/v/Menu.h /usr/local/include/TU/v/Timer.h \
-	MultiImageViewerRTC.h Img.hh
+	MultiImageViewerRTC.h
