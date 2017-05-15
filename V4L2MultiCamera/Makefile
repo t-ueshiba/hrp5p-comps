@@ -49,14 +49,21 @@ EXTHDRS		= ../IIDCMultiCamera/CmdDef.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/range.h \
-		/usr/local/include/TU/tuple.h \
-		/usr/local/include/TU/types.h
+		/usr/local/include/TU/tuple.h
 HDRS		=
-SRCS		= V4L2CmdSVC_impl.cc \
+SRCS		= CmdDynSK.cc \
+		CmdSK.cc \
+		ImgDynSK.cc \
+		ImgSK.cc \
+		V4L2CmdSVC_impl.cc \
 		V4L2MultiCameraRTC.cc \
 		main.cc \
 		saveImageHeader.cc
-OBJS		= V4L2CmdSVC_impl.o \
+OBJS		= CmdDynSK.o \
+		CmdSK.o \
+		ImgDynSK.o \
+		ImgSK.o \
+		V4L2CmdSVC_impl.o \
 		V4L2MultiCameraRTC.o \
 		main.o \
 		saveImageHeader.o
@@ -71,19 +78,24 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
+CmdDynSK.o: Cmd.hh
+CmdSK.o: Cmd.hh
+ImgDynSK.o: Img.hh
+ImgSK.o: Img.hh
 V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/types.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Vector++.h \
+	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/algorithm.h /usr/local/include/TU/iterator.h \
+	/usr/local/include/TU/tuple.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	Img.hh ../IIDCMultiCamera/CmdSVC_impl.h Cmd.hh \
 	../IIDCMultiCamera/CmdDef.h
 V4L2MultiCameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/types.h /usr/local/include/TU/pair.h \
-	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
-	/usr/local/include/TU/range.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/tuple.h /usr/local/include/TU/iterator.h \
-	../IIDCMultiCamera/MultiCameraRTC.h ../IIDCMultiCamera/CmdSVC_impl.h \
+	/usr/local/include/TU/pair.h /usr/local/include/TU/Vector++.h \
+	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
+	/usr/local/include/TU/algorithm.h /usr/local/include/TU/iterator.h \
+	/usr/local/include/TU/tuple.h ../IIDCMultiCamera/MultiCameraRTC.h \
+	Img.hh ../IIDCMultiCamera/CmdSVC_impl.h Cmd.hh \
 	../IIDCMultiCamera/CmdDef.h
+saveImageHeader.o: Img.hh
