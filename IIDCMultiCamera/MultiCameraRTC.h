@@ -297,6 +297,8 @@ MultiCameraRTC<CAMERAS>::recordImages(bool enable)
 
     if (enable)
     {
+	using	std::operator +;
+	
 	char		recFileSuffix[128];
 	const auto	t = std::time(NULL);
 	std::strftime(recFileSuffix, sizeof(recFileSuffix),
