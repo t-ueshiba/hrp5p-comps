@@ -31,7 +31,7 @@ BINDIR		= $(PREFIX)/bin
 LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
 INCDIR		= $(PREFIX)/include
 
-OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/src/rtc/V4L2MultiCamera
+OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/V4L2MultiCamera
 
 #########################
 #  Macros set by mkmf	#

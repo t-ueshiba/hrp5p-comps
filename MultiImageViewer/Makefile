@@ -32,7 +32,7 @@ BINDIR		= $(PREFIX)/bin
 LIBDIR		= $(PREFIX)/lib
 INCDIR		= $(PREFIX)/include
 
-OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/src/rtc/MultiImageViewer
+OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/MultiImageViewer
 
 #########################
 #  Macros set by mkmf	#
