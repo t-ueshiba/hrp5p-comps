@@ -122,10 +122,10 @@ MultiCameraRTC<V4L2CameraArray>::enableTimestamp()
 template <> RTC::Time
 MultiCameraRTC<V4L2CameraArray>::getTimestamp(const camera_type& camera) const
 {
-    u_int64_t	usec = camera.arrivaltime();
-    RTC::Time	time = {CORBA::ULong( usec / 1000000),
-			CORBA::ULong((usec % 1000000) * 1000)};
-    return time;
+    const std::chrono::nanoseconds
+		nsec = camera.getTimestamp().time_since_epoch();
+    return {CORBA::ULong(nsec.count() / 1000000000),
+	    CORBA::ULong(nsec.count() % 1000000000)};
 }
 
 template <> size_t

@@ -184,7 +184,7 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	countTime();
 #endif
 	if (_syncedSnap)
-	    syncedSnap(_cameras);
+	    syncedSnap(_cameras, std::chrono::microseconds(10));
 	else
 	    std::for_each(std::begin(_cameras), std::end(_cameras),
 			  std::bind(&camera_type::snap, std::placeholders::_1));
