@@ -9,6 +9,7 @@
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/DataInPort.h>
 #include <rtm/idl/BasicDataTypeSkel.h>
+#include <mutex>
 
 namespace TU
 {
@@ -38,7 +39,7 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
     bool			getImages(Img::TimedImages& images)	;
     
   protected:
-    mutable coil::Mutex			_mutex;
+    mutable std::mutex			_mutex;
     bool				_ready;
     Img::TimedImages			_images;
     RTC::InPort<Img::TimedImages>	_imagesIn;
@@ -47,7 +48,7 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
 inline bool
 MultiImageViewerRTC::isExiting() const
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     return m_exiting;
 }
@@ -55,7 +56,7 @@ MultiImageViewerRTC::isExiting() const
 inline bool
 MultiImageViewerRTC::getImages(Img::TimedImages& images)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     if (!_ready)
 	return false;

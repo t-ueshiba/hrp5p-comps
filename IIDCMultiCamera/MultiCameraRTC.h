@@ -13,8 +13,8 @@
 #include <rtm/idl/BasicDataTypeSkel.h>
 #include <rtm/idl/ExtendedDataTypesSkel.h>
 #include <rtm/idl/InterfaceDataTypesSkel.h>
-#include <coil/Guard.h>
 #include "CmdSVC_impl.h"
+#include <mutex>
 #include <fstream>
 #include <ctime>	// for std::strftime()
 
@@ -95,10 +95,11 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     
   private:
     CAMERAS				_cameras;
-    mutable coil::Mutex			_mutex;
+    mutable std::mutex			_mutex;
     std::string				_cameraName;	// config var.
-    int					_syncedSnap;	// config var.
     std::string				_recFilePrefix;	// config var.
+    int					_syncedSnap;	// config var.
+    int					_startWithFlow;	// config var.
     std::ofstream			_fout;
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
@@ -160,8 +161,7 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 
 	allocateImages();			// 画像データ領域を確保
 	enableTimestamp();			// 撮影時刻の記録を初期化
-      //continuousShot(true);			// 連続撮影を開始	
-	continuousShot(false);			// 連続撮影を停止した状態で開始
+	continuousShot(_startWithFlow);		// 連続撮影/停止のいずれかで開始	
     }
     catch (std::exception& err)
     {
@@ -176,7 +176,7 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 template <class CAMERAS> RTC::ReturnCode_t
 MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     if (inContinuousShot())
     {
@@ -184,7 +184,7 @@ MultiCameraRTC<CAMERAS>::onExecute(RTC::UniqueId ec_id)
 	countTime();
 #endif
 	if (_syncedSnap)
-	    syncedSnap(_cameras, std::chrono::microseconds(10));
+	    syncedSnap(_cameras, std::chrono::microseconds(_syncedSnap));
 	else
 	    std::for_each(std::begin(_cameras), std::end(_cameras),
 			  std::bind(&camera_type::snap, std::placeholders::_1));
@@ -293,7 +293,7 @@ MultiCameraRTC<CAMERAS>::recordImages(bool enable)
     if (enable == inRecordingImages())
 	return;
 
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     if (enable)
     {
@@ -332,7 +332,7 @@ MultiCameraRTC<CAMERAS>::inContinuousShot()
 template <class CAMERAS> void
 MultiCameraRTC<CAMERAS>::continuousShot(bool enable)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     std::for_each(std::begin(_cameras), std::end(_cameras),
 		  std::bind(&camera_type::continuousShot,

@@ -2,14 +2,17 @@
  *  $Id$
  */
 #include <fstream>
+#include <cstdlib>			// for atoi()
 #include "TU/V4L2CameraArray.h"
 #include "MultiCameraRTC.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
 #define DEFAULT_RECFILE_PREFIX	"/tmp/V4L2MultiCameraRTC"
+#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, otherwise: sync.
+					//   accuracy with micro seconds.
+#define DEFAULT_START_WITH_FLOW	"0"	// "0": without flow, "1": with flow
 
 // Module specification
 static const char* v4l2multicamera_spec[] =
@@ -26,8 +29,9 @@ static const char* v4l2multicamera_spec[] =
     "language",				"C++",
     "lang_type",			"compile",
     "conf.default.str_cameraName",	TU::V4L2CameraArray::DEFAULT_CAMERA_NAME,
-    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
     "conf.default.str_recFilePrefix",	DEFAULT_RECFILE_PREFIX,
+    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
+    "conf.default.int_startWithFlow",	DEFAULT_START_WITH_FLOW,
     ""
 };
 
@@ -61,8 +65,9 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _cameras(),
      _mutex(),
      _cameraName(V4L2CameraArray::DEFAULT_CAMERA_NAME),
-     _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
+     _syncedSnap(atoi(DEFAULT_SYNCED_SNAP)),
+     _startWithFlow(atoi(DEFAULT_START_WITH_FLOW)),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
@@ -73,7 +78,7 @@ MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
 template <> void
 MultiCameraRTC<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     TU::setFormat(_cameras, vals[1].i, vals[2].i);
     allocateImages();
@@ -83,7 +88,7 @@ template <> bool
 MultiCameraRTC<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
 					    size_t n, bool all)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
     
     if (vals[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
@@ -111,7 +116,12 @@ MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig",
 		  _cameraName, V4L2CameraArray::DEFAULT_CAMERA_NAME);
-    bindParameter("int_syncedSnap", _syncedSnap, DEFAULT_SYNCED_SNAP);
+    bindParameter("str_recFilePrefix",
+		  _recFilePrefix, DEFAULT_RECFILE_PREFIX);
+    bindParameter("int_syncedSnap",
+		  _syncedSnap, DEFAULT_SYNCED_SNAP);
+    bindParameter("int_startWithFlow",
+		  _startWithFlow, DEFAULT_START_WITH_FLOW);
 }
 
 template <> void

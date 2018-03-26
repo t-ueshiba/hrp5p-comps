@@ -2,14 +2,17 @@
  *  $Id$
  */
 #include <fstream>
+#include <cstdlib>			// for atoi()
 #include "TU/IIDCCameraArray.h"
 #include "MultiCameraRTC.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, "1": synced
 #define DEFAULT_RECFILE_PREFIX	"/tmp/IIDCMultiCameraRTC"
+#define DEFAULT_SYNCED_SNAP	"0"	// "0": not synced, otherwise: sync.
+					//   accuracy with micro seconds.
+#define DEFAULT_START_WITH_FLOW	"0"	// "0": without flow, "1": with flow
 
 // Module specification
 static const char* iidcmulticamera_spec[] =
@@ -26,8 +29,9 @@ static const char* iidcmulticamera_spec[] =
     "language",				"C++",
     "lang_type",			"compile",
     "conf.default.str_cameraName",	TU::IIDCCameraArray::DEFAULT_CAMERA_NAME,
-    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
     "conf.default.str_recFilePrefix",	DEFAULT_RECFILE_PREFIX,
+    "conf.default.int_syncedSnap",	DEFAULT_SYNCED_SNAP,
+    "conf.default.int_startWithFlow",	DEFAULT_START_WITH_FLOW,
     ""
 };
 
@@ -61,8 +65,9 @@ MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
      _cameras(),
      _mutex(),
      _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
-     _syncedSnap(DEFAULT_SYNCED_SNAP[0] - '0'),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
+     _syncedSnap(atoi(DEFAULT_SYNCED_SNAP)),
+     _startWithFlow(atoi(DEFAULT_START_WITH_FLOW)),
      _images(),
      _imagesOut("TimedImages", _images),
      _command(*this),
@@ -87,7 +92,7 @@ MultiCameraRTC<IIDCCameraArray>::restoreConfig()
 template <> void
 MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
 
     if (vals.length() == 3)
 	TU::setFormat(_cameras, vals[1].i, vals[2].i);
@@ -129,7 +134,12 @@ MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 {
     bindParameter("str_cameraName",
 		  _cameraName, IIDCCameraArray::DEFAULT_CAMERA_NAME);
-    bindParameter("int_syncedSnap", _syncedSnap, DEFAULT_SYNCED_SNAP);
+    bindParameter("str_recFilePrefix",
+		  _recFilePrefix, DEFAULT_RECFILE_PREFIX);
+    bindParameter("int_syncedSnap",
+		  _syncedSnap, DEFAULT_SYNCED_SNAP);
+    bindParameter("int_startWithFlow",
+		  _startWithFlow, DEFAULT_START_WITH_FLOW);
 }
 
 template <> void

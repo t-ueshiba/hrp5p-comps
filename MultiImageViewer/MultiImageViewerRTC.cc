@@ -82,7 +82,7 @@ MultiImageViewerRTC::onExecute(RTC::UniqueId ec_id)
     static int	n = 0;
     std::cerr << "MultiImageViewerRTC::onExecute " << n++;
 #endif
-    coil::Guard<coil::Mutex>	guard(_mutex);
+    std::unique_lock<std::mutex>	lock(_mutex);
     
     if (!_ready && _imagesIn.isNew())
     {
