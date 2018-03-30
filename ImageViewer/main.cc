@@ -11,11 +11,11 @@
 static RTC::RtcBase*	rtc = nullptr;
 
 // Module specification
-static const char* multiimageviewer_spec[] =
+static const char* imageviewer_spec[] =
 {
-    "implementation_id",	"MultiImageViewerRTC",
-    "type_name",		"MultiImageViewer",
-    "description",		"Viewing multiple image streams",
+    "implementation_id",	"ImageViewerRTC",
+    "type_name",		"ImageViewer",
+    "description",		"Viewing a single image stream",
     "version",			"1.0.0",
     "vendor",			"t.ueshiba@aist.go.jp",
     "category",			"viewer",
@@ -33,11 +33,11 @@ static const char* multiimageviewer_spec[] =
 extern "C"
 {
 static void
-MultiImageViewerRTCInit(RTC::Manager* manager)
+ImageViewerRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::MultiImageViewerRTC<Img::TimedImages>;
+    using	rtc_type = TU::MultiImageViewerRTC<Img::TimedCameraImage>;
     
-    coil::Properties	profile(multiimageviewer_spec);
+    coil::Properties	profile(imageviewer_spec);
     manager->registerFactory(profile,
 			     RTC::Create<rtc_type>, RTC::Delete<rtc_type>);
 }
@@ -46,9 +46,9 @@ MultiImageViewerRTCInit(RTC::Manager* manager)
 static void
 MyModuleInit(RTC::Manager* manager)
 {
-    MultiImageViewerRTCInit(manager);
+    ImageViewerRTCInit(manager);
 
-    if (!(rtc = manager->createComponent("MultiImageViewerRTC")))
+    if (!(rtc = manager->createComponent("ImageViewerRTC")))
 	throw std::runtime_error("Failed to create component.");
 }
 
@@ -62,8 +62,8 @@ main(int argc, char** argv)
 
     try
     {
-	using image_t	= Img::TimedImages;
-	using format_t	= Img::PixelFormat;
+	using image_t	= Img::TimedCameraImage;
+	using format_t	= Img::ColorFormat;
 	
 	const auto	manager = RTC::Manager::init(argc, argv);
 	manager->setModuleInitProc(MyModuleInit);

@@ -17,11 +17,14 @@ namespace TU
 namespace v
 {
 /************************************************************************
-*  class MyCmdWindow							*
+*  class MyCmdWindow<IMAGES, FORMAT>					*
 ************************************************************************/
+template <class IMAGES, class FORMAT>
 class MyCmdWindow : public CmdWindow
 {
   private:
+    using rtc_type	= MultiImageViewerRTC<IMAGES>;
+    
     class CanvasBase : public CanvasPane
     {
       public:
@@ -29,7 +32,8 @@ class MyCmdWindow : public CmdWindow
 	    :CanvasPane(win, 320, 240), _dc(*this, width, height)	{}
 	virtual		~CanvasBase()					{}
 
-	virtual bool	conform(const Img::Header& header)	const	= 0;
+	virtual bool	conform(size_t width,
+				size_t height, FORMAT format)	const	= 0;
 	virtual void	setImage(size_t width,
 				 size_t height, const void* data)	= 0;
 
@@ -40,71 +44,100 @@ class MyCmdWindow : public CmdWindow
     template <class T>
     class Canvas : public CanvasBase
     {
+      private:
+	using	CanvasBase::_dc;
+	using	CanvasBase::parent;
+	
       public:
-	Canvas(Window& win, const Img::Header& header)
-	    :CanvasBase(win, header.width, header.height),
-	     _format(header.format), _image()				{}
+	Canvas(Window& win, size_t width, size_t height, FORMAT format)
+	    :CanvasBase(win, width, height), _format(format), _image()	{}
 
-	virtual bool	conform(const Img::Header& header)	const	;
+	virtual bool	conform(size_t width,
+				size_t height, FORMAT format) const
+			{
+			    return ((_format == format) &&
+				    (_image.width()  == width) &&
+				    (_image.height() == height));
+			}
 	virtual void	setImage(size_t width,
-				 size_t height, const void* data)	;
-	virtual void	repaintUnderlay()				;
-	virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)	;
+				 size_t height, const void* data)
+			{
+			    _image.resize((T*)data, height, width);
+			}
+	
+	virtual void	repaintUnderlay()
+			{
+			    _dc << _image;
+			}
+	virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)
+			{
+			    switch (id)
+			    {
+			      case Id_MouseButton1Press:
+			      case Id_MouseButton1Drag:
+			      case Id_MouseButton1Release:
+			      case Id_MouseMove:
+				parent().callback(
+					id,
+					CmdVal(_dc.dev2logU(val.u()),
+					       _dc.dev2logV(val.v())));
+				return;
+			    }
+
+			    parent().callback(id, val);
+			}
 	
       private:
-	const Img::PixelFormat	_format;
-	Image<T>		_image;
+	const FORMAT	_format;
+	Image<T>	_image;
     };
     
   public:
-    MyCmdWindow(App& vapp, MultiImageViewerRTC* rtc)			;
+    MyCmdWindow(App& vapp, rtc_type* rtc)				;
     ~MyCmdWindow()							;
     
     void		setImages()					;
     virtual void	tick()						;
     
   private:
-    MultiImageViewerRTC*		_rtc;
-    Img::TimedImages			_images;
+    rtc_type*				_rtc;
+    IMAGES				_images;
     Array<std::unique_ptr<CanvasBase> >	_canvases;
     Timer				_timer;
 };
 
-template <class T> inline bool
-MyCmdWindow::Canvas<T>::conform(const Img::Header& header) const
+template <class IMAGES, class FORMAT>
+MyCmdWindow<IMAGES, FORMAT>::MyCmdWindow(App& app, rtc_type* rtc)
+    :CmdWindow(app, "ImageViewer", Colormap::RGBColor, 16, 0, 0),
+     _rtc(rtc), _canvases(0), _timer(*this, 0)
 {
-    return ((_format == header.format) &&
-	    (_image.width()  == header.width) &&
-	    (_image.height() == header.height));
+    _timer.start(5);
 }
 
-template <class T> inline void
-MyCmdWindow::Canvas<T>::setImage(size_t width, size_t height, const void* data)
+template <class IMAGES, class FORMAT>
+MyCmdWindow<IMAGES, FORMAT>::~MyCmdWindow()
 {
-    _image.resize((T*)data, height, width);
+    if (_rtc)
+	_rtc->exit();
+    RTC::Manager::instance().cleanupComponents();
 }
-
-template <class T> void
-MyCmdWindow::Canvas<T>::repaintUnderlay()
+    
+template <class IMAGES, class FORMAT> void
+MyCmdWindow<IMAGES, FORMAT>::tick()
 {
-    _dc << _image;
-}
-
-template <class T> void
-MyCmdWindow::Canvas<T>::callback(CmdId id, CmdVal val)
-{
-    switch (id)
+    if (_rtc->isExiting())
     {
-      case Id_MouseButton1Press:
-      case Id_MouseButton1Drag:
-      case Id_MouseButton1Release:
-      case Id_MouseMove:
-	parent().callback(id,
-			  CmdVal(_dc.dev2logU(val.u()), _dc.dev2logV(val.v())));
-	return;
+	_timer.stop();
+	_rtc = nullptr;
+	app().exit();
     }
+    else if (_rtc->getImages(_images))
+    {
+	setImages();
 
-    parent().callback(id, val);
+	for (auto& canvas : _canvases)
+	    canvas->repaintUnderlay();
+    }
 }
 
 }	// namespace v

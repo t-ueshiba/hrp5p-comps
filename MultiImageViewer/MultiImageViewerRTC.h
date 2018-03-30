@@ -4,7 +4,6 @@
 #ifndef MULTIIMAGEVIEWERRTC_H
 #define MULTIIMAGEVIEWERRTC_H
 
-#include "Img.hh"
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/DataInPort.h>
@@ -14,8 +13,9 @@
 namespace TU
 {
 /************************************************************************
-*  class MultiImageViewerRTC						*
+*  class MultiImageViewerRTC<IMAGES>					*
 ************************************************************************/
+template <class IMAGES>
 class MultiImageViewerRTC : public RTC::DataFlowComponentBase
 {
   public:
@@ -26,35 +26,82 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
     virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
     virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
-#ifdef DEBUG
-    virtual RTC::ReturnCode_t	onStartup(RTC::UniqueId ec_id)		;
-    virtual RTC::ReturnCode_t	onShutdown(RTC::UniqueId ec_id)		;
-    virtual RTC::ReturnCode_t	onFinalize()				;
-  //virtual RTC::ReturnCode_t	onError(RTC::UniqueId ec_id)		;
-  //virtual RTC::ReturnCode_t	onReset(RTC::UniqueId ec_id)		;
-  //virtual RTC::ReturnCode_t	onStateUpdatedRTC::UniqueId ec_id)	;
-  //virtual RTC::ReturnCode_t	onRateChanged(RTC::UniqueId ec_id)	;
-#endif
     bool			isExiting()			const	;
-    bool			getImages(Img::TimedImages& images)	;
+    bool			getImages(IMAGES& images)		;
     
   protected:
-    mutable std::mutex			_mutex;
-    bool				_ready;
-    Img::TimedImages			_images;
-    RTC::InPort<Img::TimedImages>	_imagesIn;
+    mutable std::mutex	_mutex;
+    bool		_ready;
+    IMAGES		_images;
+    RTC::InPort<IMAGES>	_imagesIn;
 };
 
-inline bool
-MultiImageViewerRTC::isExiting() const
+template <class IMAGES>
+MultiImageViewerRTC<IMAGES>::MultiImageViewerRTC(RTC::Manager* manager)
+    :RTC::DataFlowComponentBase(manager),
+     _mutex(),
+     _ready(false),
+     _images(),
+     _imagesIn("images", _images)
+{
+}
+
+template <class IMAGES> RTC::ReturnCode_t
+MultiImageViewerRTC<IMAGES>::onInitialize()
+{
+    addInPort("images", _imagesIn);
+    
+    return RTC::RTC_OK;
+}
+
+template <class IMAGES> RTC::ReturnCode_t
+MultiImageViewerRTC<IMAGES>::onActivated(RTC::UniqueId ec_id)
+{
+    _ready = false;
+    
+    return RTC::RTC_OK;
+}
+
+template <class IMAGES> RTC::ReturnCode_t
+MultiImageViewerRTC<IMAGES>::onExecute(RTC::UniqueId ec_id)
+{
+    std::unique_lock<std::mutex>	lock(_mutex);
+    
+    if (!_ready && _imagesIn.isNew())
+    {
+	_imagesIn.read();
+	_ready = true;
+    }
+
+    return RTC::RTC_OK;
+}
+
+template <class IMAGES> RTC::ReturnCode_t
+MultiImageViewerRTC<IMAGES>::onDeactivated(RTC::UniqueId ec_id)
+{
+    _ready = false;
+
+    return RTC::RTC_OK;
+}
+
+template <class IMAGES> RTC::ReturnCode_t
+MultiImageViewerRTC<IMAGES>::onAborting(RTC::UniqueId ec_id)
+{
+    _ready = false;
+    
+    return RTC::RTC_OK;
+}
+
+template <class IMAGES> inline bool
+MultiImageViewerRTC<IMAGES>::isExiting() const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
     return m_exiting;
 }
     
-inline bool
-MultiImageViewerRTC::getImages(Img::TimedImages& images)
+template <class IMAGES> inline bool
+MultiImageViewerRTC<IMAGES>::getImages(IMAGES& images)
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 

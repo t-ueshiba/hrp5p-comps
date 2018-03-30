@@ -2,32 +2,17 @@
  *  $Id$
  */
 #include "MyCmdWindow.h"
+#include "Img.hh"
 
 namespace TU
 {
 namespace v
 {
 /************************************************************************
-*  class MyCmdWindow							*
+*  class MyCmdWindow<IMAGES, FORMAT>					*
 ************************************************************************/
-MyCmdWindow::MyCmdWindow(App& app, MultiImageViewerRTC* rtc)
-    :CmdWindow(app, "MultiImageViewer", Colormap::RGBColor, 16, 0, 0),
-     _rtc(rtc),
-     _canvases(0),
-     _timer(*this, 0)
-{
-    _timer.start(5);
-}
-
-MyCmdWindow::~MyCmdWindow()
-{
-    if (_rtc)
-	_rtc->exit();
-    RTC::Manager::instance().cleanupComponents();
-}
-    
-void
-MyCmdWindow::setImages()
+template <> void
+MyCmdWindow<Img::TimedImages, Img::PixelFormat>::setImages()
 {
     const auto	resized = _canvases.resize(_images.headers.length());
 
@@ -37,27 +22,40 @@ MyCmdWindow::setImages()
 	auto&		canvas = _canvases[i];
 	const auto&	header = _images.headers[i];
 	
-	if (canvas == nullptr || !canvas->conform(header))
+	if (canvas == nullptr ||
+	    !canvas->conform(header.width, header.height, header.format))
 	{
 	    switch (header.format)
 	    {
 	      case Img::MONO_8:
-		canvas.reset(new Canvas<u_char>(*this, header));
+		canvas.reset(new Canvas<u_char>(*this, header.width,
+						header.height,
+						header.format));
 		break;
 	      case Img::YUV_411:
-		canvas.reset(new Canvas<TU::YUV411>(*this, header));
+		canvas.reset(new Canvas<TU::YUV411>(*this, header.width,
+						    header.height,
+						    header.format));
 		break;
 	      case Img::YUV_422:
-		canvas.reset(new Canvas<TU::YUV422>(*this, header));
+		canvas.reset(new Canvas<TU::YUV422>(*this, header.width,
+						    header.height,
+						    header.format));
 		break;
 	      case Img::YUYV_422:
-		canvas.reset(new Canvas<TU::YUYV422>(*this, header));
+		canvas.reset(new Canvas<TU::YUYV422>(*this, header.width,
+						    header.height,
+						    header.format));
 		break;
 	      case Img::YUV_444:
-		canvas.reset(new Canvas<TU::YUV444>(*this, header));
+		canvas.reset(new Canvas<TU::YUV444>(*this, header.width,
+						    header.height,
+						    header.format));
 		break;
 	      case Img::RGB_24:
-		canvas.reset(new Canvas<TU::RGB>(*this, header));
+		canvas.reset(new Canvas<TU::RGB>(*this, header.width,
+						    header.height,
+						    header.format));
 		break;
 	      default:
 		throw std::runtime_error("Unsupported format!!");
@@ -74,24 +72,6 @@ MyCmdWindow::setImages()
 
     if (resized)
 	show();
-}
-    
-void
-MyCmdWindow::tick()
-{
-    if (_rtc->isExiting())
-    {
-	_timer.stop();
-	_rtc = nullptr;
-	app().exit();
-    }
-    else if (_rtc->getImages(_images))
-    {
-	setImages();
-	
-	for (auto& canvas : _canvases)
-	    canvas->repaintUnderlay();
-    }
 }
 
 }	// namespace v
