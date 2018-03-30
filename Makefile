@@ -1,11 +1,15 @@
 #
 #  $Id$
 #
-SUBDIR	= IIDCMultiCamera	\
-	  V4L2MultiCamera	\
-	  MultiImageViewer	\
-	  TU			\
-#	  SADStereo		\
+SUBDIR	= IIDCMultiCamera		\
+	  V4L2MultiCamera		\
+	  MultiImageViewer		\
+	  ImageViewer			\
+	  TUMultiImageViewerPlugin	\
+	  TUImageViewerPlugin		\
+	  TUControlPanelPlugin		\
+	  TU				\
+#	  SADStereo			\
 #	  GFStereo
 
 TARGETS	= all clean depend install other

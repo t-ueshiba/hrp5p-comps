@@ -1,8 +1,8 @@
 /*
  *  $Id$
  */
-#ifndef MULTIIMAGEVIEWERRTC_H
-#define MULTIIMAGEVIEWERRTC_H
+#ifndef TU_MULTIIMAGEVIEWERRTC_H
+#define TU_MULTIIMAGEVIEWERRTC_H
 
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
@@ -28,6 +28,8 @@ class MultiImageViewerRTC : public RTC::DataFlowComponentBase
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
     bool			isExiting()			const	;
     bool			getImages(IMAGES& images)		;
+    template <class VIEWER>
+    bool			setImages(VIEWER*)			;
     
   protected:
     mutable std::mutex	_mutex;
@@ -49,6 +51,9 @@ MultiImageViewerRTC<IMAGES>::MultiImageViewerRTC(RTC::Manager* manager)
 template <class IMAGES> RTC::ReturnCode_t
 MultiImageViewerRTC<IMAGES>::onInitialize()
 {
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC<IMAGES>::onInitialize" << std::endl;
+#endif
     addInPort("images", _imagesIn);
     
     return RTC::RTC_OK;
@@ -57,6 +62,9 @@ MultiImageViewerRTC<IMAGES>::onInitialize()
 template <class IMAGES> RTC::ReturnCode_t
 MultiImageViewerRTC<IMAGES>::onActivated(RTC::UniqueId ec_id)
 {
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC<IMAGES>::onActivated" << std::endl;
+#endif
     _ready = false;
     
     return RTC::RTC_OK;
@@ -79,6 +87,9 @@ MultiImageViewerRTC<IMAGES>::onExecute(RTC::UniqueId ec_id)
 template <class IMAGES> RTC::ReturnCode_t
 MultiImageViewerRTC<IMAGES>::onDeactivated(RTC::UniqueId ec_id)
 {
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC<IMAGES>::onDeactivated" << std::endl;
+#endif
     _ready = false;
 
     return RTC::RTC_OK;
@@ -87,6 +98,9 @@ MultiImageViewerRTC<IMAGES>::onDeactivated(RTC::UniqueId ec_id)
 template <class IMAGES> RTC::ReturnCode_t
 MultiImageViewerRTC<IMAGES>::onAborting(RTC::UniqueId ec_id)
 {
+#ifdef DEBUG
+    std::cerr << "MultiImageViewerRTC<IMAGES>::onAborting" << std::endl;
+#endif
     _ready = false;
     
     return RTC::RTC_OK;
@@ -115,4 +129,4 @@ MultiImageViewerRTC<IMAGES>::getImages(IMAGES& images)
 }
 
 }	// namespace TU
-#endif	// MULTIIMAGEVIEWERRTC_H
+#endif	// TU_MULTIIMAGEVIEWERRTC_H

@@ -11,7 +11,7 @@ VPATH		= ../TU/idl
 
 IDLS		= Img.idl Cmd.idl
 
-INCDIRS		= -I. -I$(PREFIX)/include
+INCDIRS		= -I. -I../include -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG #-DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O
@@ -46,19 +46,25 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/IIDCMultiCamera
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= /usr/local/include/TU/Array++.h \
+EXTHDRS		= ../include/CmdDef.h \
+		../include/CmdSVC_impl.h \
+		../include/MultiCameraRTC.h \
+		/usr/local/include/TU/Array++.h \
+		/usr/local/include/TU/Camera++.h \
+		/usr/local/include/TU/Geometry++.h \
 		/usr/local/include/TU/IIDC++.h \
 		/usr/local/include/TU/IIDCCameraArray.h \
 		/usr/local/include/TU/Image++.h \
+		/usr/local/include/TU/Manip.h \
+		/usr/local/include/TU/Minimize.h \
 		/usr/local/include/TU/Vector++.h \
 		/usr/local/include/TU/algorithm.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/range.h \
-		/usr/local/include/TU/tuple.h
-HDRS		= CmdDef.h \
-		CmdSVC_impl.h \
-		MultiCameraRTC.h
+		/usr/local/include/TU/tuple.h \
+		/usr/local/include/TU/type_traits.h
+HDRS		=
 SRCS		= IIDCCmdSVC_impl.cc \
 		IIDCMultiCameraRTC.cc \
 		main.cc \
@@ -79,13 +85,21 @@ include $(PROJECT)/lib/other.mk
 ###
 IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/pair.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
-	/usr/local/include/TU/algorithm.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/tuple.h MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
+	/usr/local/include/TU/pair.h /usr/local/include/TU/type_traits.h \
+	/usr/local/include/TU/Manip.h /usr/local/include/TU/Camera++.h \
+	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
+	/usr/local/include/TU/range.h /usr/local/include/TU/iterator.h \
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/algorithm.h \
+	../include/MultiCameraRTC.h ../include/CmdSVC_impl.h \
+	../include/CmdDef.h
 IIDCMultiCameraRTC.o: /usr/local/include/TU/IIDCCameraArray.h \
 	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
-	/usr/local/include/TU/pair.h /usr/local/include/TU/Vector++.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
-	/usr/local/include/TU/algorithm.h /usr/local/include/TU/iterator.h \
-	/usr/local/include/TU/tuple.h MultiCameraRTC.h CmdSVC_impl.h CmdDef.h
+	/usr/local/include/TU/pair.h /usr/local/include/TU/type_traits.h \
+	/usr/local/include/TU/Manip.h /usr/local/include/TU/Camera++.h \
+	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
+	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
+	/usr/local/include/TU/range.h /usr/local/include/TU/iterator.h \
+	/usr/local/include/TU/tuple.h /usr/local/include/TU/algorithm.h \
+	../include/MultiCameraRTC.h ../include/CmdSVC_impl.h \
+	../include/CmdDef.h
