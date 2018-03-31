@@ -9,29 +9,11 @@
 
 namespace TU
 {
-extern "C"
-{
-void	ControlPanelRTCInit(RTC::Manager* manager)			;
-}
-
-/************************************************************************
-*  static functions							*
-************************************************************************/
-static ControlPanelRTC*
-createControlPanelRTC()
-{
-  // OpenRTMPluginによって立てられた既存のRTCマネージャを獲得
-    auto&	manager = RTC::Manager::instance();
-
-  // ControlPanelコンポーネントを立ち上げ
-    ControlPanelRTCInit(&manager);
-    return dynamic_cast<ControlPanelRTC*>(manager
-					  .createComponent("ControlPanel"));
-}
+ControlPanelRTC*	createControlPanelRTC()				;
     
 namespace v
 {
-QWidget*	createCmd(QWidget* parent, const CmdDef& cmd)		;
+QWidget*		createCmd(QWidget* parent, const CmdDef& cmd)	;
 
 /************************************************************************
 *  class CmdPane							*

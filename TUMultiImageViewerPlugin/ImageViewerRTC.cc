@@ -25,33 +25,25 @@ static const char* multiimageviewer_spec[] =
     ""
 };
 
+namespace TU
+{
 /************************************************************************
 *  global functions							*
 ************************************************************************/
-extern "C"
-{
-void
-MultiImageViewerRTCInit(RTC::Manager* manager)
-{
-    using rtc_type = TU::ImageViewerRTC<Img::TimedImages>;
-    
-    coil::Properties	profile(multiimageviewer_spec);
-    manager->registerFactory(profile,
-			     RTC::Create<rtc_type>, RTC::Delete<rtc_type>);
-}
-};
-
-namespace TU
-{
 template <> ImageViewerRTC<Img::TimedImages>*
 createImageViewerRTC<Img::TimedImages>()
 {
+    using rtc_type = ImageViewerRTC<Img::TimedImages>;
+    
   // OpenRTMPluginによって立てられた既存のRTCマネージャを獲得
     RTC::Manager&	manager = RTC::Manager::instance();
 
   // MultiImageViewerコンポーネントを立ち上げ
-    MultiImageViewerRTCInit(&manager);
-    return dynamic_cast<ImageViewerRTC<Img::TimedImages>*>(
+    coil::Properties	profile(multiimageviewer_spec);
+    manager.registerFactory(profile,
+			    RTC::Create<rtc_type>, RTC::Delete<rtc_type>);
+
+    return dynamic_cast<rtc_type*>(
 		manager.createComponent("MultiImageViewer"));
 }
 

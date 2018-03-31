@@ -26,23 +26,27 @@ static const char* controlpanel_spec[] =
     ""
 };
 
+namespace TU
+{
 /************************************************************************
 *  global functions							*
 ************************************************************************/
-extern "C"
+ControlPanelRTC*
+createControlPanelRTC()
 {
-void
-ControlPanelRTCInit(RTC::Manager* manager)
-{
-    coil::Properties	profile(controlpanel_spec);
-    manager->registerFactory(profile,
-                             RTC::Create<TU::ControlPanelRTC>,
-			     RTC::Delete<TU::ControlPanelRTC>);
-}
-};
+  // OpenRTMPluginによって立てられた既存のRTCマネージャを獲得
+    auto&	manager = RTC::Manager::instance();
 
-namespace TU
-{
+  // ControlPanelコンポーネントを立ち上げ
+    coil::Properties	profile(controlpanel_spec);
+    manager.registerFactory(profile,
+			    RTC::Create<ControlPanelRTC>,
+			    RTC::Delete<ControlPanelRTC>);
+
+    return dynamic_cast<ControlPanelRTC*>(manager
+					  .createComponent("ControlPanel"));
+}
+    
 /************************************************************************
 *  class ControlPanelRTC						*
 ************************************************************************/
