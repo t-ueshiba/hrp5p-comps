@@ -78,8 +78,8 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
   private:
     void		initializeConfigurations()			;
     void		allocateImages()				;
-    void		enableTimestamp()				;
-    RTC::Time		getTimestamp(const camera_type& camera)	const	;
+    void		embedTimestamp(bool enable)			;
+    static RTC::Time	getTimestamp(const camera_type& camera)		;
     static size_t	setImageFormat(const camera_type& camera,
 				       Img::Header& header)		;
     void		snap()						;
@@ -150,9 +150,9 @@ MultiCameraRTC<CAMERAS>::onActivated(RTC::UniqueId ec_id)
 	       >> header.d1 >> header.d2;
 	}
 
-	allocateImages();			// 画像データ領域を確保
-	enableTimestamp();			// 撮影時刻の記録を初期化
-	continuousShot(_startWithFlow);		// 連続撮影/停止のいずれかで開始	
+	allocateImages();		// 画像データ領域を確保
+	embedTimestamp(true);		// 撮影時刻の記録を初期化
+	continuousShot(_startWithFlow);	// 連続撮影/停止のいずれかで開始
     }
     catch (std::exception& err)
     {
@@ -306,15 +306,18 @@ MultiCameraRTC<CAMERAS>::allocateImages()
 {
     size_t	i = 0, total_size = 0;
     for (const auto& camera : _cameras)
-    {
-	auto&	header = _images.headers[i++];
-
-	header.width  = camera.width();
-	header.height = camera.height();
-	total_size += setImageFormat(camera, header);
-    }
+	total_size += setImageFormat(camera, _images.headers[i++]);
     _images.data.length(total_size);
 }
     
+template <class CAMERAS> RTC::Time
+MultiCameraRTC<CAMERAS>::getTimestamp(const camera_type& camera)
+{
+    const std::chrono::nanoseconds
+		nsec = camera.getTimestamp().time_since_epoch();
+    return {CORBA::ULong(nsec.count() / 1000000000),
+	    CORBA::ULong(nsec.count() % 1000000000)};
+}
+
 }
 #endif	// !__TU_MULTICAMERA_H

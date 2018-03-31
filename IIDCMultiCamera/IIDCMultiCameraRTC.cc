@@ -143,25 +143,19 @@ MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 }
 
 template <> void
-MultiCameraRTC<IIDCCameraArray>::enableTimestamp()
+MultiCameraRTC<IIDCCameraArray>::embedTimestamp(bool enable)
 {
     std::for_each(std::begin(_cameras), std::end(_cameras),
-		  [](auto& camera){ camera.embedTimestamp(true); });
-}
-
-template <> RTC::Time
-MultiCameraRTC<IIDCCameraArray>::getTimestamp(const camera_type& camera) const
-{
-    const std::chrono::nanoseconds
-		nsec = camera.getTimestamp().time_since_epoch();
-    return {CORBA::ULong(nsec.count() / 1000000000),
-	    CORBA::ULong(nsec.count() % 1000000000)};
+		  [enable](auto& camera){ camera.embedTimestamp(enable); });
 }
 
 template <> size_t
 MultiCameraRTC<IIDCCameraArray>::setImageFormat(const camera_type& camera,
 						Img::Header& header)
 {
+    header.width  = camera.width();
+    header.height = camera.height();
+    
     switch (camera.pixelFormat())
     {
       case IIDCCamera::MONO_8:

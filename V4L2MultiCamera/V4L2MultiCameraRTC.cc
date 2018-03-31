@@ -125,23 +125,17 @@ MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 }
 
 template <> void
-MultiCameraRTC<V4L2CameraArray>::enableTimestamp()
+MultiCameraRTC<V4L2CameraArray>::embedTimestamp(bool)
 {
 }
     
-template <> RTC::Time
-MultiCameraRTC<V4L2CameraArray>::getTimestamp(const camera_type& camera) const
-{
-    const std::chrono::nanoseconds
-		nsec = camera.getTimestamp().time_since_epoch();
-    return {CORBA::ULong(nsec.count() / 1000000000),
-	    CORBA::ULong(nsec.count() % 1000000000)};
-}
-
 template <> size_t
 MultiCameraRTC<V4L2CameraArray>::setImageFormat(const camera_type& camera,
 						Img::Header& header)
 {
+    header.width  = camera.width();
+    header.height = camera.height();
+    
     switch (camera.pixelFormat())
     {
       case V4L2Camera::GREY:
