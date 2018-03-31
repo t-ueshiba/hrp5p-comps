@@ -3,6 +3,7 @@
 #
 SUBDIR	= IIDCMultiCamera		\
 	  V4L2MultiCamera		\
+	  V4L2Camera			\
 	  MultiImageViewer		\
 	  ImageViewer			\
 	  TUMultiImageViewerPlugin	\
