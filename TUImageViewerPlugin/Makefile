@@ -40,21 +40,16 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/src/cnoid/TUImageViewerPlugin
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../include/MultiImageViewer.h \
-		/usr/local/include/TU/Array++.h \
-		/usr/local/include/TU/algorithm.h \
-		/usr/local/include/TU/iterator.h \
-		/usr/local/include/TU/range.h \
-		/usr/local/include/TU/tuple.h \
-		/usr/local/include/TU/type_traits.h
+EXTHDRS		= ../include/ImageViewer.h \
+		../include/ImageViewerRTC.h
 HDRS		= ImageView.h
 SRCS		= ImageView.cc \
 		ImageViewerPlugin.cc \
-		MultiImageViewerRTC.cc \
+		ImageViewerRTC.cc \
 		setImage.cc
 OBJS		= ImageView.o \
 		ImageViewerPlugin.o \
-		MultiImageViewerRTC.o \
+		ImageViewerRTC.o \
 		setImage.o
 
 OTHER_HDRS	= $(HDRS)
@@ -68,14 +63,8 @@ include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
 ImageView.o: ImageView.h
-ImageViewerPlugin.o: ../include/MultiImageViewer.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/type_traits.h /usr/local/include/TU/algorithm.h \
+ImageViewerPlugin.o: ../include/ImageViewer.h ../include/ImageViewerRTC.h \
 	ImageView.h
-MultiImageViewerRTC.o: ../include/MultiImageViewer.h \
-	/usr/local/include/TU/Array++.h /usr/local/include/TU/range.h \
-	/usr/local/include/TU/iterator.h /usr/local/include/TU/tuple.h \
-	/usr/local/include/TU/type_traits.h /usr/local/include/TU/algorithm.h \
+ImageViewerRTC.o: ../include/ImageViewer.h ../include/ImageViewerRTC.h \
 	ImageView.h
 setImage.o: ImageView.h

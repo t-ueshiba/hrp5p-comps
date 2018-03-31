@@ -10,66 +10,60 @@
 #include "TU/v/CanvasPane.h"
 #include "TU/v/CanvasPaneDC.h"
 #include "TU/v/Timer.h"
-#include "MultiImageViewerRTC.h"
+#include "ImageViewerRTC.h"
 
 namespace TU
 {
 namespace v
 {
 /************************************************************************
-*  class MyCmdWindow<IMAGES, FORMAT>					*
+*  class MyCanvas<FORMAT>						*
 ************************************************************************/
-template <class IMAGES, class FORMAT>
-class MyCmdWindow : public CmdWindow
+template <class FORMAT>
+class MyCanvasBase : public CanvasPane
 {
-  private:
-    using rtc_type	= MultiImageViewerRTC<IMAGES>;
-    
-    class CanvasBase : public CanvasPane
-    {
-      public:
-	CanvasBase(Window& win, size_t width, size_t height)
-	    :CanvasPane(win, 320, 240), _dc(*this, width, height)	{}
-	virtual		~CanvasBase()					{}
+  public:
+    MyCanvasBase(Window& win, size_t width, size_t height)
+	:CanvasPane(win, 640, 480), _dc(*this, width, height)		{}
+    virtual		~MyCanvasBase()					{}
 
-	virtual bool	conform(size_t width,
+    virtual bool	conform(size_t width,
 				size_t height, FORMAT format)	const	= 0;
-	virtual void	setImage(size_t width,
+    virtual void	setImage(size_t width,
 				 size_t height, const void* data)	= 0;
 
-      protected:
-	CanvasPaneDC	_dc;
-    };
+  protected:
+    CanvasPaneDC	_dc;
+};
 
-    template <class T>
-    class Canvas : public CanvasBase
-    {
-      private:
-	using	CanvasBase::_dc;
-	using	CanvasBase::parent;
+template <class T, class FORMAT>
+class MyCanvas : public MyCanvasBase<FORMAT>
+{
+  private:
+    using	MyCanvasBase<FORMAT>::_dc;
+    using	MyCanvasBase<FORMAT>::parent;
 	
-      public:
-	Canvas(Window& win, size_t width, size_t height, FORMAT format)
-	    :CanvasBase(win, width, height), _format(format), _image()	{}
+  public:
+    MyCanvas(Window& win, size_t width, size_t height, FORMAT format)
+	:MyCanvasBase<FORMAT>(win, width, height), _format(format)	{}
 
-	virtual bool	conform(size_t width,
+    virtual bool	conform(size_t width,
 				size_t height, FORMAT format) const
 			{
 			    return ((_format == format) &&
 				    (_image.width()  == width) &&
 				    (_image.height() == height));
 			}
-	virtual void	setImage(size_t width,
-				 size_t height, const void* data)
+    virtual void	setImage(size_t width, size_t height, const void* data)
 			{
 			    _image.resize((T*)data, height, width);
 			}
 	
-	virtual void	repaintUnderlay()
+    virtual void	repaintUnderlay()
 			{
 			    _dc << _image;
 			}
-	virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)
+    virtual void	callback(TU::v::CmdId id, TU::v::CmdVal val)
 			{
 			    switch (id)
 			    {
@@ -87,29 +81,37 @@ class MyCmdWindow : public CmdWindow
 			    parent().callback(id, val);
 			}
 	
-      private:
-	const FORMAT	_format;
-	Image<T>	_image;
-    };
+  private:
+    const FORMAT	_format;
+    Image<T>		_image;
+};
+    
+/************************************************************************
+*  class MyCmdWindow<IMAGES, FORMAT>					*
+************************************************************************/
+template <class IMAGES, class FORMAT>
+class MyCmdWindow : public CmdWindow,
+		    public Array<std::unique_ptr<MyCanvasBase<FORMAT> > >
+{
+  private:
+    using array_type	= Array<std::unique_ptr<MyCanvasBase<FORMAT> > >;
+    using rtc_type	= ImageViewerRTC<IMAGES>;
     
   public:
-    MyCmdWindow(App& vapp, rtc_type* rtc)				;
-    ~MyCmdWindow()							;
+    MyCmdWindow(App& vapp, rtc_type* rtc)	;
+    ~MyCmdWindow()				;
     
-    void		setImages()					;
-    virtual void	tick()						;
+    virtual void	tick()			;
     
   private:
-    rtc_type*				_rtc;
-    IMAGES				_images;
-    Array<std::unique_ptr<CanvasBase> >	_canvases;
-    Timer				_timer;
+    rtc_type*		_rtc;
+    Timer		_timer;
 };
 
 template <class IMAGES, class FORMAT>
 MyCmdWindow<IMAGES, FORMAT>::MyCmdWindow(App& app, rtc_type* rtc)
     :CmdWindow(app, "ImageViewer", Colormap::RGBColor, 16, 0, 0),
-     _rtc(rtc), _canvases(0), _timer(*this, 0)
+     array_type(0), _rtc(rtc), _timer(*this, 0)
 {
     _timer.start(5);
 }
@@ -131,11 +133,9 @@ MyCmdWindow<IMAGES, FORMAT>::tick()
 	_rtc = nullptr;
 	app().exit();
     }
-    else if (_rtc->getImages(_images))
+    else if (_rtc->setImage(*this))
     {
-	setImages();
-
-	for (auto& canvas : _canvases)
+	for (auto& canvas : *this)
 	    canvas->repaintUnderlay();
     }
 }

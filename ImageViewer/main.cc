@@ -35,7 +35,7 @@ extern "C"
 static void
 ImageViewerRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::MultiImageViewerRTC<Img::TimedCameraImage>;
+    using	rtc_type = TU::ImageViewerRTC<Img::TimedCameraImage>;
     
     coil::Properties	profile(imageviewer_spec);
     manager->registerFactory(profile,
@@ -72,7 +72,7 @@ main(int argc, char** argv)
 
 	v::App	vapp(argc, argv);
 	v::MyCmdWindow<image_t, format_t>
-		win(vapp, dynamic_cast<MultiImageViewerRTC<image_t>*>(rtc));
+		win(vapp, dynamic_cast<ImageViewerRTC<image_t>*>(rtc));
 	vapp.run();
     }
     catch (const std::exception& err)

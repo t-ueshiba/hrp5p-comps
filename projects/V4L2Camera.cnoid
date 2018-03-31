@@ -36,7 +36,7 @@ items:
             pos: [ 92, -106 ]
             InPorts: 
               - 
-                name: ImageViewer0.images
+                name: ImageViewer0.image
                 isServicePort: false
           - 
             name: V4L2Camera0
@@ -51,7 +51,7 @@ items:
             sourceRtcName: V4L2Camera0
             sourcePortName: V4L2Camera0.TimedCameraImage
             targetRtcName: ImageViewer0
-            targetPortName: ImageViewer0.images
+            targetPortName: ImageViewer0.image
             dataflow: Push
             subscription: flush
             position: [ -48, -87, -43, -87, 40.5, -87, 40.5, -87, 115, -87, 120, -87 ]

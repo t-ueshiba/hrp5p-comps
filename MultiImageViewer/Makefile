@@ -38,7 +38,7 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/MultiImageViewer
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../include/MultiImageViewerRTC.h \
+EXTHDRS		= ../include/ImageViewerRTC.h \
 		../include/MyCmdWindow.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Camera++.h \
@@ -66,9 +66,9 @@ EXTHDRS		= ../include/MultiImageViewerRTC.h \
 		/usr/local/include/TU/v/Widget-Xaw.h \
 		/usr/local/include/TU/v/XDC.h
 HDRS		=
-SRCS		= MyCmdWindow.cc \
+SRCS		= ImageViewerRTC.cc \
 		main.cc
-OBJS		= MyCmdWindow.o \
+OBJS		= ImageViewerRTC.o \
 		main.o
 
 OTHER_HDRS	= $(HDRS)
@@ -81,7 +81,7 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
-MyCmdWindow.o: ../include/MyCmdWindow.h /usr/local/include/TU/v/App.h \
+ImageViewerRTC.o: ../include/MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
@@ -95,7 +95,7 @@ MyCmdWindow.o: ../include/MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/CanvasPane.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/v/Menu.h \
-	/usr/local/include/TU/v/Timer.h ../include/MultiImageViewerRTC.h
+	/usr/local/include/TU/v/Timer.h ../include/ImageViewerRTC.h
 main.o: ../include/MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/TUv++.h /usr/local/include/TU/List.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
@@ -110,4 +110,4 @@ main.o: ../include/MyCmdWindow.h /usr/local/include/TU/v/App.h \
 	/usr/local/include/TU/v/CanvasPane.h \
 	/usr/local/include/TU/v/CanvasPaneDC.h /usr/local/include/TU/v/XDC.h \
 	/usr/local/include/TU/v/DC.h /usr/local/include/TU/v/Menu.h \
-	/usr/local/include/TU/v/Timer.h ../include/MultiImageViewerRTC.h
+	/usr/local/include/TU/v/Timer.h ../include/ImageViewerRTC.h

@@ -14,7 +14,10 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
     switch (pixelFormat)
     {
       case Img::MONO_8:
-	_qimage = QImage(data, width, height, width, QImage::Format_Indexed8);
+	_data.resize(width*height);
+	std::copy_n(data, width*height, _data.data());
+	_qimage = QImage(_data.data(),
+			 width, height, width, QImage::Format_Indexed8);
 	_qimage.setColorTable(_colors);
 	break;
 	
@@ -79,7 +82,10 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	break;
 
       case Img::RGB_24:
-	_qimage = QImage(data, width, height, 3*width, QImage::Format_RGB888);
+	_data.resize(3*width*height);
+	std::copy_n(data, 3*width*height, _data.data());
+	_qimage = QImage(_data.data(),
+			 width, height, 3*width, QImage::Format_RGB888);
 	_qimage.setColorTable(_colors);
 	break;
 

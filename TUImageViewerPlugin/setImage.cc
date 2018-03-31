@@ -16,12 +16,18 @@ ImageView::setImage(Img::ColorFormat format,
     switch (format)
     {
       case Img::CF_GRAY:
-	_qimage = QImage(data, width, height, width, QImage::Format_Indexed8);
+	_data.resize(width*height);
+	std::copy_n(data, width*height, _data.data());
+	_qimage = QImage(_data.data(),
+			 width, height, width, QImage::Format_Indexed8);
 	_qimage.setColorTable(_colors);
 	break;
 	
       case Img::CF_RGB:
-	_qimage = QImage(data, width, height, 3*width, QImage::Format_RGB888);
+	_data.resize(3*width*height);
+	std::copy_n(data, 3*width*height, _data.data());
+	_qimage = QImage(_data.data(),
+			 width, height, 3*width, QImage::Format_RGB888);
 	_qimage.setColorTable(_colors);
 	break;
 

@@ -1,7 +1,7 @@
 /*
  *  $Id$
  */
-#include "MultiImageViewer.h"
+#include "ImageViewer.h"
 #include "Img.hh"
 
 /************************************************************************
@@ -33,7 +33,7 @@ extern "C"
 void
 MultiImageViewerRTCInit(RTC::Manager* manager)
 {
-    using rtc_type = TU::MultiImageViewerRTC<Img::TimedImages>;
+    using rtc_type = TU::ImageViewerRTC<Img::TimedImages>;
     
     coil::Properties	profile(multiimageviewer_spec);
     manager->registerFactory(profile,
@@ -43,40 +43,40 @@ MultiImageViewerRTCInit(RTC::Manager* manager)
 
 namespace TU
 {
-template <> MultiImageViewerRTC<Img::TimedImages>*
-createMultiImageViewerRTC<Img::TimedImages>()
+template <> ImageViewerRTC<Img::TimedImages>*
+createImageViewerRTC<Img::TimedImages>()
 {
   // OpenRTMPluginによって立てられた既存のRTCマネージャを獲得
     RTC::Manager&	manager = RTC::Manager::instance();
 
   // MultiImageViewerコンポーネントを立ち上げ
     MultiImageViewerRTCInit(&manager);
-    return dynamic_cast<MultiImageViewerRTC<Img::TimedImages>*>(
+    return dynamic_cast<ImageViewerRTC<Img::TimedImages>*>(
 		manager.createComponent("MultiImageViewer"));
 }
 
 /************************************************************************
-*  class MultiImageViewerRTC						*
+*  class ImageViewerRTC<IMAGE>						*
 ************************************************************************/
 template <> template <> bool
-MultiImageViewerRTC<Img::TimedImages>::
-setImages(MultiImageViewer<Img::TimedImages>* multiImageViewer)
+ImageViewerRTC<Img::TimedImages>
+::setImage(ImageViewer<Img::TimedImages>& imageViewer) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
     if (!_ready)		// 新データが到着していなければ...
   	return false;		// falseを返す.
     
-    multiImageViewer->resize(_images.headers.length());
+    imageViewer.resize(_image.headers.length());
 
     size_t	offset = 0;
-    for (size_t i = 0; i < multiImageViewer->size(); ++i)
+    for (size_t i = 0; i < imageViewer.size(); ++i)
     {
-	const auto&	header = _images.headers[i];
+	const auto&	header = _image.headers[i];
 	
-	(*multiImageViewer)[i]->setImage(header.format,
-					 header.width, header.height,
-					 _images.data.get_buffer() + offset);
+	imageViewer[i]->setImage(header.format,
+				 header.width, header.height,
+				 _image.data.get_buffer() + offset);
 	offset += header.size;
     }
 
