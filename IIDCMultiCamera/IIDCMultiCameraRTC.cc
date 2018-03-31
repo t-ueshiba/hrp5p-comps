@@ -146,8 +146,7 @@ template <> void
 MultiCameraRTC<IIDCCameraArray>::enableTimestamp()
 {
     std::for_each(std::begin(_cameras), std::end(_cameras),
-		  std::bind(&camera_type::embedTimestamp,
-			    std::placeholders::_1, true));
+		  [](auto& camera){ camera.embedTimestamp(true); });
 }
 
 template <> RTC::Time
