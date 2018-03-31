@@ -90,7 +90,7 @@ class MultiCameraRTC : public RTC::DataFlowComponentBase
     std::string				_cameraName;	// config var.
     std::string				_recFilePrefix;	// config var.
     int					_syncedSnap;	// config var.
-    int					_startWithFlow;	// config var.
+    bool				_startWithFlow;	// config var.
     std::ofstream			_fout;
     Img::TimedImages			_images;	// out data
     RTC::OutPort<Img::TimedImages>	_imagesOut;	// out data port
