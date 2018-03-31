@@ -7,11 +7,11 @@
 namespace TU
 {
 /************************************************************************
-*  class ImageViewerRTC<IMAGE>						*
+*  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
 ImageViewerRTC<Img::TimedCameraImage>
-::setImage(v::MyCmdWindow<Img::TimedCameraImage, Img::ColorFormat>& win) const
+::setImages(v::MyCmdWindow<Img::TimedCameraImage, Img::ColorFormat>& win) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
@@ -20,7 +20,7 @@ ImageViewerRTC<Img::TimedCameraImage>
 
     const auto	resized   = win.resize(1);
     auto&	canvas	  = win[0];
-    const auto&	imageData = _image.data.image;
+    const auto&	imageData = _images.data.image;
 	
     if (canvas == nullptr ||
 	!canvas->conform(imageData.width, imageData.height, imageData.format))

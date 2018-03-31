@@ -56,11 +56,11 @@ createImageViewerRTC<Img::TimedCameraImage>()
 }
 
 /************************************************************************
-*  class ImageViewerRTC<IMAGE>						*
+*  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
 ImageViewerRTC<Img::TimedCameraImage>
-::setImage(ImageViewer<Img::TimedCameraImage>& imageViewer) const
+::setImages(ImageViewer<Img::TimedCameraImage>& imageViewer) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
@@ -69,7 +69,7 @@ ImageViewerRTC<Img::TimedCameraImage>
 
     imageViewer.resize(1);
     
-    const auto&	imageData = _image.data.image;
+    const auto&	imageData = _images.data.image;
     imageViewer[0]->setImage(imageData.format,
 			     imageData.width, imageData.height,
 			     imageData.raw_data.get_buffer());

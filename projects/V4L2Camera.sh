@@ -7,6 +7,6 @@ viewer_name=ImageViewer
 camera=/${nameserver}/${camera_name}0.rtc
 viewer=/${nameserver}/${viewer_name}0.rtc
        
-rtcon ${camera}:TimedCameraImage ${viewer}:image
+rtcon ${camera}:TimedCameraImage ${viewer}:images
 
 rtact ${camera} ${viewer}

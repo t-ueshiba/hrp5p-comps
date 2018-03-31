@@ -7,24 +7,24 @@
 namespace TU
 {
 /************************************************************************
-*  class ImageViewerRTC<IMAGE>						*
+*  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
 ImageViewerRTC<Img::TimedImages>
-::setImage(v::MyCmdWindow<Img::TimedImages, Img::PixelFormat>& win) const
+::setImages(v::MyCmdWindow<Img::TimedImages, Img::PixelFormat>& win) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
     if (!_ready)		// 新データが到着していなければ...
   	return false;		// falseを返す.
 
-    const auto	resized = win.resize(_image.headers.length());
+    const auto	resized = win.resize(_images.headers.length());
 
-    auto	data = _image.data.get_buffer();
+    auto	data = _images.data.get_buffer();
     for (size_t	i = 0; i < win.size(); ++i)
     {
 	auto&		canvas = win[i];
-	const auto&	header = _image.headers[i];
+	const auto&	header = _images.headers[i];
 	
 	if (canvas == nullptr ||
 	    !canvas->conform(header.width, header.height, header.format))

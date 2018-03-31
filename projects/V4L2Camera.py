@@ -35,7 +35,7 @@ else:
     mgr.load("ImageViewerComp")
     viewer = mgr.create("ImageViewer", "viewer")
 
-connectPorts(camera.port("TimedCameraImage"), viewer.port("image"))
+connectPorts(camera.port("TimedCameraImage"), viewer.port("images"))
 
 rtm.serializeComponents([camera, viewer])
 

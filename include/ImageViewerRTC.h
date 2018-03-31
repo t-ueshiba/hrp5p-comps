@@ -13,9 +13,9 @@
 namespace TU
 {
 /************************************************************************
-*  class ImageViewerRTC<IMAGE>						*
+*  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
-template <class IMAGE>
+template <class IMAGES>
 class ImageViewerRTC : public RTC::DataFlowComponentBase
 {
   public:
@@ -27,105 +27,90 @@ class ImageViewerRTC : public RTC::DataFlowComponentBase
     virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
     bool			isExiting()			const	;
-    bool			getImage(IMAGE& image)		const	;
     template <class VIEWER>
-    bool			setImage(VIEWER&)		const	;
+    bool			setImages(VIEWER&)		const	;
     
   protected:
     mutable std::mutex	_mutex;
     mutable bool	_ready;
-    IMAGE		_image;
-    RTC::InPort<IMAGE>	_imageIn;
+    IMAGES		_images;
+    RTC::InPort<IMAGES>	_imagesIn;
 };
 
-template <class IMAGE>
-ImageViewerRTC<IMAGE>::ImageViewerRTC(RTC::Manager* manager)
+template <class IMAGES>
+ImageViewerRTC<IMAGES>::ImageViewerRTC(RTC::Manager* manager)
     :RTC::DataFlowComponentBase(manager),
      _mutex(),
      _ready(false),
-     _image(),
-     _imageIn("image", _image)
+     _images(),
+     _imagesIn("images", _images)
 {
 }
 
-template <class IMAGE> RTC::ReturnCode_t
-ImageViewerRTC<IMAGE>::onInitialize()
+template <class IMAGES> RTC::ReturnCode_t
+ImageViewerRTC<IMAGES>::onInitialize()
 {
 #ifdef DEBUG
-    std::cerr << "ImageViewerRTC<IMAGE>::onInitialize" << std::endl;
+    std::cerr << "ImageViewerRTC<IMAGES>::onInitialize" << std::endl;
 #endif
-    addInPort("image", _imageIn);
+    addInPort("images", _imagesIn);
     
     return RTC::RTC_OK;
 }
 
-template <class IMAGE> RTC::ReturnCode_t
-ImageViewerRTC<IMAGE>::onActivated(RTC::UniqueId ec_id)
+template <class IMAGES> RTC::ReturnCode_t
+ImageViewerRTC<IMAGES>::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "ImageViewerRTC<IMAGE>::onActivated" << std::endl;
+    std::cerr << "ImageViewerRTC<IMAGES>::onActivated" << std::endl;
 #endif
     _ready = false;
     
     return RTC::RTC_OK;
 }
 
-template <class IMAGE> RTC::ReturnCode_t
-ImageViewerRTC<IMAGE>::onExecute(RTC::UniqueId ec_id)
+template <class IMAGES> RTC::ReturnCode_t
+ImageViewerRTC<IMAGES>::onExecute(RTC::UniqueId ec_id)
 {
     std::unique_lock<std::mutex>	lock(_mutex);
     
-    if (!_ready && _imageIn.isNew())
+    if (!_ready && _imagesIn.isNew())
     {
-	_imageIn.read();
+	_imagesIn.read();
 	_ready = true;
     }
 
     return RTC::RTC_OK;
 }
 
-template <class IMAGE> RTC::ReturnCode_t
-ImageViewerRTC<IMAGE>::onDeactivated(RTC::UniqueId ec_id)
+template <class IMAGES> RTC::ReturnCode_t
+ImageViewerRTC<IMAGES>::onDeactivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "ImageViewerRTC<IMAGE>::onDeactivated" << std::endl;
+    std::cerr << "ImageViewerRTC<IMAGES>::onDeactivated" << std::endl;
 #endif
     _ready = false;
 
     return RTC::RTC_OK;
 }
 
-template <class IMAGE> RTC::ReturnCode_t
-ImageViewerRTC<IMAGE>::onAborting(RTC::UniqueId ec_id)
+template <class IMAGES> RTC::ReturnCode_t
+ImageViewerRTC<IMAGES>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
-    std::cerr << "ImageViewerRTC<IMAGE>::onAborting" << std::endl;
+    std::cerr << "ImageViewerRTC<IMAGES>::onAborting" << std::endl;
 #endif
     _ready = false;
     
     return RTC::RTC_OK;
 }
 
-template <class IMAGE> inline bool
-ImageViewerRTC<IMAGE>::isExiting() const
+template <class IMAGES> inline bool
+ImageViewerRTC<IMAGES>::isExiting() const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
     return m_exiting;
-}
-    
-template <class IMAGE> inline bool
-ImageViewerRTC<IMAGE>::getImage(IMAGE& image) const
-{
-    std::unique_lock<std::mutex>	lock(_mutex);
-
-    if (!_ready)
-	return false;
-
-    image = _image;
-    _ready = false;
-    
-    return true;
 }
 
 }	// namespace TU

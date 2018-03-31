@@ -14,13 +14,13 @@
 
 namespace TU
 {
-template <class IMAGE>
-ImageViewerRTC<IMAGE>*	createImageViewerRTC()		;
+template <class IMAGES>
+ImageViewerRTC<IMAGES>*	createImageViewerRTC()		;
 
 /************************************************************************
-*  class ImageViewer<IMAGE>						*
+*  class ImageViewer<IMAGES>						*
 ************************************************************************/
-template <class IMAGE>
+template <class IMAGES>
 class ImageViewer : public cnoid::View, public std::vector<ImageView*>
 {
   private:
@@ -37,14 +37,14 @@ class ImageViewer : public cnoid::View, public std::vector<ImageView*>
     void	onTimeout()		;
      
   private:
-    ImageViewerRTC<IMAGE>*	_rtc;
+    ImageViewerRTC<IMAGES>*	_rtc;
     cnoid::Timer		_timer;
     QGridLayout* const		_layout;
 };
 
-template <class IMAGE>
-ImageViewer<IMAGE>::ImageViewer()
-    :View(), array_type(0), _rtc(createImageViewerRTC<IMAGE>()),
+template <class IMAGES>
+ImageViewer<IMAGES>::ImageViewer()
+    :View(), array_type(0), _rtc(createImageViewerRTC<IMAGES>()),
      _timer(), _layout(new QGridLayout(this))
 {
     if (!_rtc)
@@ -61,8 +61,8 @@ ImageViewer<IMAGE>::ImageViewer()
     _layout->setSpacing(0);
 }
 
-template <class IMAGE>
-ImageViewer<IMAGE>::~ImageViewer()
+template <class IMAGES>
+ImageViewer<IMAGES>::~ImageViewer()
 {
     _timer.stop();
 
@@ -73,8 +73,8 @@ ImageViewer<IMAGE>::~ImageViewer()
     }
 }
     
-template <class IMAGE> void
-ImageViewer<IMAGE>::resize(size_t nviews)
+template <class IMAGES> void
+ImageViewer<IMAGES>::resize(size_t nviews)
 {
     if (nviews == size())
 	return;
@@ -96,8 +96,8 @@ ImageViewer<IMAGE>::resize(size_t nviews)
     setLayout(_layout);
 }
     
-template <class IMAGE> void
-ImageViewer<IMAGE>::onTimeout()
+template <class IMAGES> void
+ImageViewer<IMAGES>::onTimeout()
 {
     if (_rtc->isExiting())		// RTCが死んでいたら...
     {
@@ -105,7 +105,7 @@ ImageViewer<IMAGE>::onTimeout()
 	_rtc = nullptr;
 	viewArea()->removeView(this);
     }
-    else if (_rtc->setImage(*this))	// RTCが持っている画像を
+    else if (_rtc->setImages(*this))	// RTCが持っている画像を
     {					// 各ビューにセットできたら...
 	for (size_t i = 0; i < size(); ++i)
 	    (*this)[i]->viewport()->update();	// 各ビューを更新

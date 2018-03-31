@@ -27,7 +27,7 @@ camera = rtm.findRTC("V4L2MultiCamera0")
 viewer = rtm.findRTC("MultiImageViewer0")
 cpanel = rtm.findRTC("ControlPanel0")
 
-connectPorts(camera.port("TimedImages"), viewer.port("image"))
+connectPorts(camera.port("TimedImages"), viewer.port("images"))
 connectPorts(cpanel.port("Command"),     camera.port("Command"))
 
 #rtm.serializeComponents([camera, viewer, cpanel])

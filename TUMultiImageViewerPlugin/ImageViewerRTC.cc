@@ -56,27 +56,27 @@ createImageViewerRTC<Img::TimedImages>()
 }
 
 /************************************************************************
-*  class ImageViewerRTC<IMAGE>						*
+*  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
 ImageViewerRTC<Img::TimedImages>
-::setImage(ImageViewer<Img::TimedImages>& imageViewer) const
+::setImages(ImageViewer<Img::TimedImages>& imageViewer) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 
     if (!_ready)		// 新データが到着していなければ...
   	return false;		// falseを返す.
     
-    imageViewer.resize(_image.headers.length());
+    imageViewer.resize(_images.headers.length());
 
     size_t	offset = 0;
     for (size_t i = 0; i < imageViewer.size(); ++i)
     {
-	const auto&	header = _image.headers[i];
+	const auto&	header = _images.headers[i];
 	
 	imageViewer[i]->setImage(header.format,
 				 header.width, header.height,
-				 _image.data.get_buffer() + offset);
+				 _images.data.get_buffer() + offset);
 	offset += header.size;
     }
 
