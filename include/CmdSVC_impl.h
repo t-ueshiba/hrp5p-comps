@@ -5,7 +5,7 @@
 #define CMDSVC_IMPL_H
 
 #include <sstream>
-#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include "Cmd.hh"
 #include "CmdDef.h"
 
@@ -111,7 +111,7 @@ CmdSVC_impl<CAMERAS>::getCmds()
     std::cerr << "CmdSVC_impl<CAMERAS>::getCmds() called!" << std::endl;
 #endif
     std::ostringstream			oss;
-    boost::archive::xml_oarchive	oar(oss);
+    boost::archive::text_oarchive	oar(oss);
     CmdDefs				cmds = createCmds();
     oar << BOOST_SERIALIZATION_NVP(cmds);
     

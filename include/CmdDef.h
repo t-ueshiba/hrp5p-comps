@@ -27,8 +27,7 @@ class CmdVal
     CmdVal(int i, float f)		:_i(i), _f(f)		{}
     CmdVal(int i)			:_i(i), _f(0)		{}
     template <class T,
-	      class=typename std::enable_if<std::is_floating_point<T>::value>
-				::type>
+	      std::enable_if_t<std::is_floating_point<T>::value>* = nullptr>
     CmdVal(T f)				:_i(0), _f(f)		{}
     
 		operator int()				const	{ return _i; }
@@ -61,8 +60,9 @@ operator <<(std::ostream& out, const CmdVals& vals)
 struct CmdDef;
 typedef std::vector<CmdDef>	CmdDefs;
     
-struct CmdDef
+class CmdDef
 {
+  public:
     typedef float		value_type;
 
     enum Type
@@ -91,60 +91,61 @@ struct CmdDef
 
     typedef u_int	Id;	// ID for each item command or menu
     
-    static constexpr Id	c_RefreshAll	= ~0;
+    constexpr static Id	c_RefreshAll	= ~0;
 
   // standard menu item definitions
-    static constexpr Id	M_File		= 32000;
-    static constexpr Id	M_Edit		= 32001;
-    static constexpr Id	M_Search	= 32002;
-    static constexpr Id	M_Help		= 32003;
-    static constexpr Id	M_Window	= 32004;
-    static constexpr Id	M_Options	= 32005;
-    static constexpr Id	M_Tools		= 32006;
-    static constexpr Id	M_Font		= 32007;
-    static constexpr Id	M_View		= 32008;
-    static constexpr Id	M_Format	= 32009;
-    static constexpr Id	M_Insert	= 32010;
-    static constexpr Id	M_Test		= 32011;
+    constexpr static Id	M_File		= 32000;
+    constexpr static Id	M_Edit		= 32001;
+    constexpr static Id	M_Search	= 32002;
+    constexpr static Id	M_Help		= 32003;
+    constexpr static Id	M_Window	= 32004;
+    constexpr static Id	M_Options	= 32005;
+    constexpr static Id	M_Tools		= 32006;
+    constexpr static Id	M_Font		= 32007;
+    constexpr static Id	M_View		= 32008;
+    constexpr static Id	M_Format	= 32009;
+    constexpr static Id	M_Insert	= 32010;
+    constexpr static Id	M_Test		= 32011;
 
-    static constexpr Id	M_Line		= 32090;
+    constexpr static Id	M_Line		= 32090;
 
-    static constexpr Id	M_New		= 32100;
-    static constexpr Id	M_Open		= 32101;
-    static constexpr Id	M_Close		= 32102;
-    static constexpr Id	M_Save		= 32103;
-    static constexpr Id	M_SaveAs	= 32104;
-    static constexpr Id	M_Print		= 32105;
-    static constexpr Id	M_PrintPreview	= 32106;
-    static constexpr Id	M_About		= 32107;
-    static constexpr Id	M_Exit		= 32108;
-    static constexpr Id	M_CloseFile	= 32109;	// V:1.13
+    constexpr static Id	M_New		= 32100;
+    constexpr static Id	M_Open		= 32101;
+    constexpr static Id	M_Close		= 32102;
+    constexpr static Id	M_Save		= 32103;
+    constexpr static Id	M_SaveAs	= 32104;
+    constexpr static Id	M_Print		= 32105;
+    constexpr static Id	M_PrintPreview	= 32106;
+    constexpr static Id	M_About		= 32107;
+    constexpr static Id	M_Exit		= 32108;
+    constexpr static Id	M_CloseFile	= 32109;	// V:1.13
 
-    static constexpr Id	M_Cut		= 32110;
-    static constexpr Id	M_Copy		= 32111;
-    static constexpr Id	M_Paste		= 32112;
-    static constexpr Id	M_Delete	= 32113;
-    static constexpr Id	M_Clear		= 32114;
+    constexpr static Id	M_Cut		= 32110;
+    constexpr static Id	M_Copy		= 32111;
+    constexpr static Id	M_Paste		= 32112;
+    constexpr static Id	M_Delete	= 32113;
+    constexpr static Id	M_Clear		= 32114;
 
-    static constexpr Id	M_UnDo		= 32120;
-    static constexpr Id	M_SetDebug	= 32121;
+    constexpr static Id	M_UnDo		= 32120;
+    constexpr static Id	M_SetDebug	= 32121;
 
-    static constexpr Id	M_Find		= 32130;
-    static constexpr Id	M_FindAgain	= 32131;
-    static constexpr Id	M_Replace	= 32132;
+    constexpr static Id	M_Find		= 32130;
+    constexpr static Id	M_FindAgain	= 32131;
+    constexpr static Id	M_Replace	= 32132;
 
-    static constexpr Id	M_Preferences	= 32140;
-    static constexpr Id	M_FontSelect	= 32141;
+    constexpr static Id	M_Preferences	= 32140;
+    constexpr static Id	M_FontSelect	= 32141;
 
-    static constexpr Id	M_Cancel	= 32150;
-    static constexpr Id	M_Done		= 32151;
-    static constexpr Id	M_OK		= 32152;
-    static constexpr Id	M_Yes		= 32153;
-    static constexpr Id	M_No		= 32154;
-    static constexpr Id	M_All		= 32155;
-    static constexpr Id	M_None		= 32156;
-    static constexpr Id	M_Default	= 32157;
+    constexpr static Id	M_Cancel	= 32150;
+    constexpr static Id	M_Done		= 32151;
+    constexpr static Id	M_OK		= 32152;
+    constexpr static Id	M_Yes		= 32153;
+    constexpr static Id	M_No		= 32154;
+    constexpr static Id	M_All		= 32155;
+    constexpr static Id	M_None		= 32156;
+    constexpr static Id	M_Default	= 32157;
 
+  public:
     CmdDef(Type			type_=C_Label,
 	   Id			id_=0,
 	   const std::string&	name_="",
@@ -160,6 +161,9 @@ struct CmdDef
 	 gridWidth(gridWidth_), gridHeight(gridHeight_),
 	 size(size_), attrs(attrs_)					{}
 
+  private:
+    friend	class boost::serialization::access;
+    
     template <class ARCHIVE> void
     serialize(ARCHIVE& ar, const unsigned int file_version)
     {
@@ -174,7 +178,8 @@ struct CmdDef
 	ar & BOOST_SERIALIZATION_NVP(attrs);
 	ar & BOOST_SERIALIZATION_NVP(subcmds);
     }
-    
+
+  public:
     Type	type;
     Id		id;
     std::string	name;

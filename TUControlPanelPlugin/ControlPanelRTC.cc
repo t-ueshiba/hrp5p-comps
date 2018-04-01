@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include <sstream>
-#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 #include "ControlPanelRTC.h"
 
 /************************************************************************
@@ -87,7 +87,7 @@ ControlPanelRTC::onExecute(RTC::UniqueId ec_id)
 	    std::unique_lock<std::mutex>	lock(_mutex);
 	    CORBA::String_var			s = _command->getCmds();
 	    std::istringstream			iss(s._retn());
-	    boost::archive::xml_iarchive	iar(iss);
+	    boost::archive::text_iarchive	iar(iss);
 	    iar >> BOOST_SERIALIZATION_NVP(_cmds);
 
 	    _ready = true;
