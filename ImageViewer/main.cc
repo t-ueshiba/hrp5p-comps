@@ -2,8 +2,8 @@
  *  $Id$
  */
 #include <rtm/Manager.h>
-#include "MyCmdWindow.h"
 #include "Img.hh"
+#include "MyCmdWindow.h"
 
 /************************************************************************
 *  static data								*

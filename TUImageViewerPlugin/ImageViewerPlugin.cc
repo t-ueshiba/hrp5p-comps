@@ -3,8 +3,8 @@
  */
 #include <cnoid/Plugin>
 #include <cnoid/ViewManager>
-#include "ImageViewer.h"
 #include "Img.hh"
+#include "ImageViewer.h"
 
 namespace TU
 {

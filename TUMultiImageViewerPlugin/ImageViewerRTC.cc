@@ -1,8 +1,8 @@
 /*
  *  $Id$
  */
-#include "ImageViewer.h"
 #include "Img.hh"
+#include "ImageViewer.h"
 
 /************************************************************************
 *  static data								*
