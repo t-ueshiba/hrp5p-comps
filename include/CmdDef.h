@@ -57,7 +57,7 @@ operator <<(std::ostream& out, const CmdVals& vals)
 /************************************************************************
 *  struct CmdDef							*
 ************************************************************************/
-struct CmdDef;
+class CmdDef;
 typedef std::vector<CmdDef>	CmdDefs;
     
 class CmdDef
