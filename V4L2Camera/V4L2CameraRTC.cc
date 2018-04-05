@@ -165,12 +165,12 @@ template <> inline RTC::Time
 CameraRTC<V4L2Camera>::getTimestamp() const
 {
     const auto	timestamp   = _camera.getTimestamp();
-    const auto	arrivaltime = _camera.getArrivaltime();
 #ifdef DEBUG
+    const auto	arrivaltime = _camera.getArrivaltime();
     std::cerr << "timestamp: " << timestamp << '\t'
 	      << "arrival: "   << arrivaltime << std::endl;
 #endif
-    const std::chrono::nanoseconds	nsec = arrivaltime.time_since_epoch();
+    const std::chrono::nanoseconds	nsec = timestamp.time_since_epoch();
     
     return {CORBA::ULong(nsec.count() / 1000000000),
 	    CORBA::ULong(nsec.count() % 1000000000)};
