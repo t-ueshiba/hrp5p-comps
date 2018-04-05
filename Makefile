@@ -6,12 +6,12 @@ SUBDIR	= IIDCMultiCamera		\
 	  V4L2Camera			\
 	  MultiImageViewer		\
 	  ImageViewer			\
-	  TUMultiImageViewerPlugin	\
+	  TU				\
+#	  TUMultiImageViewerPlugin	\
 	  TUImageViewerPlugin		\
 	  TUControlPanelPlugin		\
-	  TU				\
-#	  SADStereo			\
-#	  GFStereo
+	  SADStereo			\
+	  GFStereo
 
 TARGETS	= all clean depend install other
 

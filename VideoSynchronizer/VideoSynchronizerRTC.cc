@@ -7,7 +7,7 @@
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_BUFFER_SIZE	"100"
+#define DEFAULT_BUFFER_SIZE	"1000"
 
 // Module specification
 static const char* videosynchronizer_spec[] =
