@@ -25,7 +25,7 @@ except:
 
 cpanel = rtm.findRTC("ControlPanel0")
 viewer = rtm.findRTC("ImageViewer0")
-camera = rtm.findRTC("IIDCCamera0")
+camera = rtm.findRTC("V4L2Camera0")
 
 connectPorts(cpanel.port("Command"),          camera.port("Command"))
 connectPorts(camera.port("TimedCameraImage"), viewer.port("images"))

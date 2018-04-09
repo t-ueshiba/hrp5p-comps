@@ -60,21 +60,21 @@ items:
           - 
             name: connector0
             sourceRtcName: V4L2Camera0
+            sourcePortName: V4L2Camera0.Command
+            targetRtcName: ControlPanel0
+            targetPortName: ControlPanel0.Command
+            dataflow: Push
+            subscription: flush
+            position: [ -50, -87, -45, -87, -47.5, -87, -47.5, -211, -50, -211, -55, -211 ]
+          - 
+            name: connector0
+            sourceRtcName: V4L2Camera0
             sourcePortName: V4L2Camera0.TimedCameraImage
             targetRtcName: ImageViewer0
             targetPortName: ImageViewer0.images
             dataflow: Push
             subscription: flush
-            position: [ -48, -69, -43, -69, 36, -69, 36, -69, 129, -69, 134, -69 ]
-          - 
-            name: connector0
-            sourceRtcName: ControlPanel0
-            sourcePortName: ControlPanel0.Command
-            targetRtcName: V4L2Camera0
-            targetPortName: V4L2Camera0.Command
-            dataflow: Push
-            subscription: flush
-            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
+            position: [ -48, -69, -43, -69, 43, -69, 43, -69, 129, -69, 134, -69 ]
 views: 
   - 
     id: 0
@@ -337,7 +337,7 @@ viewAreas:
                 - 
                   type: pane
                   views: [ 13, 9 ]
-                  current: 9
+                  current: 13
                 - 
                   type: pane
                   views: [ 14 ]
