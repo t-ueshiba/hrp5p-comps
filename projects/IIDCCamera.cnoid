@@ -6,22 +6,22 @@ items:
   children: 
     - 
       id: 1
-      name: "V4L2CameraRTC"
+      name: "IIDCCameraRTC"
       plugin: OpenRTM
       class: RTCItem
       data: 
-        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/V4L2CameraRTC.so"
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCCameraRTC.so"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
         periodicRate: 1000
         activation: false
     - 
       id: 2
-      name: "V4L2Camera.py"
+      name: "IIDCCamera.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/V4L2Camera.py"
+        file: "${PROJECT_DIR}/IIDCCamera.py"
         executionOnLoading: true
         backgroundExecution: false
     - 
@@ -40,41 +40,41 @@ items:
                 name: ControlPanel0.Command
                 isServicePort: true
           - 
+            name: IIDCCamera0
+            pos: [ -134, -106 ]
+            OutPorts: 
+              - 
+                name: IIDCCamera0.Command
+                isServicePort: true
+              - 
+                name: IIDCCamera0.TimedCameraImage
+                isServicePort: false
+          - 
             name: ImageViewer0
             pos: [ 106, -88 ]
             InPorts: 
               - 
                 name: ImageViewer0.images
                 isServicePort: false
-          - 
-            name: V4L2Camera0
-            pos: [ -134, -106 ]
-            OutPorts: 
-              - 
-                name: V4L2Camera0.Command
-                isServicePort: true
-              - 
-                name: V4L2Camera0.TimedCameraImage
-                isServicePort: false
         RTSConnections: 
           - 
             name: connector0
-            sourceRtcName: V4L2Camera0
-            sourcePortName: V4L2Camera0.TimedCameraImage
+            sourceRtcName: ControlPanel0
+            sourcePortName: ControlPanel0.Command
+            targetRtcName: IIDCCamera0
+            targetPortName: IIDCCamera0.Command
+            dataflow: Push
+            subscription: flush
+            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
+          - 
+            name: connector0
+            sourceRtcName: IIDCCamera0
+            sourcePortName: IIDCCamera0.TimedCameraImage
             targetRtcName: ImageViewer0
             targetPortName: ImageViewer0.images
             dataflow: Push
             subscription: flush
             position: [ -48, -69, -43, -69, 36, -69, 36, -69, 129, -69, 134, -69 ]
-          - 
-            name: connector0
-            sourceRtcName: ControlPanel0
-            sourcePortName: ControlPanel0.Command
-            targetRtcName: V4L2Camera0
-            targetPortName: V4L2Camera0.Command
-            dataflow: Push
-            subscription: flush
-            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
 views: 
   - 
     id: 0
@@ -337,7 +337,7 @@ viewAreas:
                 - 
                   type: pane
                   views: [ 13, 9 ]
-                  current: 9
+                  current: 13
                 - 
                   type: pane
                   views: [ 14 ]

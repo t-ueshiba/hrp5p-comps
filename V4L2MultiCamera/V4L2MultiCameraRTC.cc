@@ -4,7 +4,8 @@
 #include <fstream>
 #include <cstdlib>			// for atoi()
 #include "TU/V4L2CameraArray.h"
-#include "MultiCameraRTC.h"
+#include "Img.hh"
+#include "CameraRTC.h"
 
 /************************************************************************
 *  static data								*
@@ -43,76 +44,39 @@ extern "C"
 void
 V4L2MultiCameraRTCInit(RTC::Manager* manager)
 {
+    using	rtc_type = TU::CameraRTC<TU::V4L2CameraArray, Img::TimedImages>;
+    
     coil::Properties	profile(v4l2multicamera_spec);
-    manager->registerFactory(
-		 profile,
-		 RTC::Create<TU::MultiCameraRTC<TU::V4L2CameraArray> >,
-		 RTC::Delete<TU::MultiCameraRTC<TU::V4L2CameraArray> >);
+    manager->registerFactory(profile,
+			     RTC::Create<rtc_type>, RTC::Delete<rtc_type>);
 }
 };
 
 namespace TU
 {
 /************************************************************************
-*  class MultiCameraRTC<V4L2CameraArray>				*
+*  class CameraRTC<V4L2CameraArray, Img::TimedImages>			*
 ************************************************************************/
 /*
  *  public member functions
  */
 template <>
-MultiCameraRTC<V4L2CameraArray>::MultiCameraRTC(RTC::Manager* manager)
-    :RTC::DataFlowComponentBase(manager),
-     _cameras(),
-     _mutex(),
+CameraRTC<V4L2CameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
+    :super(manager),
      _cameraName(V4L2CameraArray::DEFAULT_CAMERA_NAME),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
      _syncedSnap(atoi(DEFAULT_SYNCED_SNAP)),
      _startWithFlow(atoi(DEFAULT_START_WITH_FLOW)),
      _images(),
-     _imagesOut("TimedImages", _images),
-     _command(*this),
-     _commandPort("Command")
+     _imagesOut("TimedImages", _images)
 {
-}
-
-template <> void
-MultiCameraRTC<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
-{
-    std::unique_lock<std::mutex>	lock(_mutex);
-
-    TU::setFormat(_cameras, vals[1].i, vals[2].i);
-    allocateImages();
-}
-    
-template <> bool
-MultiCameraRTC<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
-					    size_t n, bool all)
-{
-    std::unique_lock<std::mutex>	lock(_mutex);
-    
-    if (vals[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
-    {
-	for (auto& camera : _cameras)
-	    camera.setROI(vals[1].i, vals[2].i, vals[3].i, vals[4].i);
-	allocateImages();
-
-	return true;
-    }
-    else if (all)
-	return TU::setFeature(_cameras, vals[0].i, vals[1].i);
-    else
-    {
-	auto	camera = std::begin(_cameras);
-	std::advance(camera, n);
-	return TU::setFeature(*camera, vals[0].i, vals[1].i);
-    }
 }
 
 /*
  *  private member functions
  */
 template <> void
-MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
+CameraRTC<V4L2CameraArray, Img::TimedImages>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig",
 		  _cameraName, V4L2CameraArray::DEFAULT_CAMERA_NAME);
@@ -124,14 +88,9 @@ MultiCameraRTC<V4L2CameraArray>::initializeConfigurations()
 		  _startWithFlow, DEFAULT_START_WITH_FLOW);
 }
 
-template <> void
-MultiCameraRTC<V4L2CameraArray>::embedTimestamp(bool)
-{
-}
-    
-template <> size_t
-MultiCameraRTC<V4L2CameraArray>::setImageFormat(const camera_type& camera,
-						Img::Header& header)
+template <> template <> size_t
+CameraRTC<V4L2CameraArray, Img::TimedImages>
+::setImageFormat(const camera_type& camera, Img::Header& header)
 {
     header.width  = camera.width();
     header.height = camera.height();

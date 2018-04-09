@@ -15,7 +15,7 @@ MOCHDRS		= ImageView.h
 #CXX		= c++
 
 INCDIRS		= -I. -I../include -I$(PREFIX)/include
-CPPFLAGS	= -DNDEBUG -DDEBUG
+CPPFLAGS	= -DNDEBUG #-DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O
 ifeq ($(shell arch), armv7l)

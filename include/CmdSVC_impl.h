@@ -11,7 +11,7 @@
 
 namespace TU
 {
-template <class CAMERAS>	class MultiCameraRTC;
+template <class CAMERAS>	class CameraRTCBase;
 
 #ifdef DEBUG
 inline std::ostream&
@@ -56,7 +56,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     };
     
   public:
-			CmdSVC_impl(MultiCameraRTC<CAMERAS>& rtc)	;
+			CmdSVC_impl(CameraRTCBase<CAMERAS>& rtc)	;
     virtual		~CmdSVC_impl()					;
 
   // カメラを操作するコンポーネントとのコマンド通信
@@ -67,9 +67,8 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
     
   private:
     CmdDefs		createCmds()					;
-    static CmdDefs	createFormatItems(const camera_type& camera)	;
-    static void		appendFeatureCmds(const camera_type& camera,
-					  CmdDefs& cmds)		;
+    CmdDefs		createFormatItems()			const	;
+    void		appendFeatureCmds(CmdDefs& cmds)	const	;
     bool		inRecordingImages()			const	;
     bool		inContinuousShot()			const	;
     Cmd::Values		getFormat(const Cmd::Values& ids,
@@ -79,7 +78,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
 				   CORBA::Boolean range)	const	;
     
   private:
-    MultiCameraRTC<CAMERAS>&	_rtc;
+    CameraRTCBase<CAMERAS>&	_rtc;
     size_t			_n;	// currently selected camera #
     bool			_all;	// steel all cameras simultaneously
 };
@@ -89,7 +88,7 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
   \param rtc	マルチカメラシステムを管理するコンポーネント
 */
 template <class CAMERAS>
-CmdSVC_impl<CAMERAS>::CmdSVC_impl(MultiCameraRTC<CAMERAS>& rtc)
+CmdSVC_impl<CAMERAS>::CmdSVC_impl(CameraRTCBase<CAMERAS>& rtc)
     :_rtc(rtc), _n(0), _all(true)
 {
 }
@@ -239,13 +238,12 @@ CmdSVC_impl<CAMERAS>::getValues(const Cmd::Values& ids, CORBA::Boolean range)
 template <class CAMERAS> CmdDefs
 CmdSVC_impl<CAMERAS>::createCmds()
 {
-    const auto	ncameras = TU::size(_rtc.cameras());
+    const auto	ncameras = _rtc.cameras().size();
     CmdDefs	cmds;
     
     if (ncameras == 0)
 	return cmds;
 
-    const auto&	camera = *std::begin(_rtc.cameras());	// 最初のカメラ
     _n = 0;						// 最初のカメラを選択
     _all = true;					// 全カメラ同時操作モード
     
@@ -255,7 +253,7 @@ CmdSVC_impl<CAMERAS>::createCmds()
 
   // カメラ画像フォーマット選択コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_Button, c_Format,
-			  "Format", 1, 0, 1, 1, 0, createFormatItems(camera)));
+			  "Format", 1, 0, 1, 1, 0, createFormatItems()));
 
   // ファイルへの録画コマンドの生成
     cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_RecordImages,
@@ -281,7 +279,7 @@ CmdSVC_impl<CAMERAS>::createCmds()
     }
 
   // 属性操作コマンドの生成
-    appendFeatureCmds(camera, cmds);
+    appendFeatureCmds(cmds);
 
     return cmds;
 }
@@ -295,7 +293,7 @@ CmdSVC_impl<CAMERAS>::inRecordingImages() const
 template <class CAMERAS> inline bool
 CmdSVC_impl<CAMERAS>::inContinuousShot() const
 {
-    return std::begin(_rtc.cameras())->inContinuousShot();
+    return _rtc.inContinuousShot();
 }
 
 }

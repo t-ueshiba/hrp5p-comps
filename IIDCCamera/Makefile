@@ -24,7 +24,8 @@ else
 endif
 CCFLAGS		= $(CFLAGS)
 
-LIBS		= -lTUV4L2++ -lTUTools++ -lboost_serialization
+LIBS		= -lTUIIDC++ -lTUTools++ \
+		  -lraw1394 -lusb-1.0 -lboost_serialization
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
@@ -44,11 +45,11 @@ EXTHDRS		= ../include/CameraRTC.h \
 		/usr/local/include/TU/Array++.h \
 		/usr/local/include/TU/Camera++.h \
 		/usr/local/include/TU/Geometry++.h \
+		/usr/local/include/TU/IIDC++.h \
+		/usr/local/include/TU/IIDCCameraArray.h \
 		/usr/local/include/TU/Image++.h \
 		/usr/local/include/TU/Manip.h \
 		/usr/local/include/TU/Minimize.h \
-		/usr/local/include/TU/V4L2++.h \
-		/usr/local/include/TU/V4L2CameraArray.h \
 		/usr/local/include/TU/Vector++.h \
 		/usr/local/include/TU/algorithm.h \
 		/usr/local/include/TU/cuda/iterator.h \
@@ -59,12 +60,12 @@ EXTHDRS		= ../include/CameraRTC.h \
 		/usr/local/include/TU/tuple.h \
 		/usr/local/include/TU/type_traits.h
 HDRS		=
-SRCS		= V4L2CameraRTC.cc \
-		V4L2CmdSVC_impl.cc \
+SRCS		= IIDCCameraRTC.cc \
+		IIDCCmdSVC_impl.cc \
 		main.cc \
 		saveImageHeader.cc
-OBJS		= V4L2CameraRTC.o \
-		V4L2CmdSVC_impl.o \
+OBJS		= IIDCCameraRTC.o \
+		IIDCCmdSVC_impl.o \
 		main.o \
 		saveImageHeader.o
 
@@ -78,8 +79,8 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
-V4L2CameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
-	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
+IIDCCameraRTC.o: /usr/local/include/TU/IIDCCameraArray.h \
+	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/pair.h /usr/local/include/TU/type_traits.h \
 	/usr/local/include/TU/Manip.h /usr/local/include/TU/Camera++.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
@@ -89,8 +90,8 @@ V4L2CameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/cuda/tuple.h \
 	/usr/local/include/TU/cuda/iterator.h ../include/CameraRTC.h \
 	../include/CmdSVC_impl.h ../include/CmdDef.h ../include/RTCTime.h
-V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
-	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
+IIDCCmdSVC_impl.o: /usr/local/include/TU/IIDCCameraArray.h \
+	/usr/local/include/TU/IIDC++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/pair.h /usr/local/include/TU/type_traits.h \
 	/usr/local/include/TU/Manip.h /usr/local/include/TU/Camera++.h \
 	/usr/local/include/TU/Geometry++.h /usr/local/include/TU/Minimize.h \
