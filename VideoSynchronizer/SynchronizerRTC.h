@@ -39,12 +39,16 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
 
   private:
     void	initializeConfigurations()				;
-    bool	select(RTC::Time time)					;
+    bool	select(RTC::Time tm)					;
     static std::chrono::nanoseconds
 		nsec(RTC::Time tm)
 		{
 		    return std::chrono::nanoseconds(1000000000*tm.sec +
 						    tm.nsec);
+		}
+    static bool	comp(const secondary_type& q, RTC::Time tm)
+		{
+		    return nsec(q.tm) < nsec(tm);
 		}
     
   private:
@@ -125,16 +129,12 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
     if (_pIn.isNew())
     {
 	_pIn.read();
-#ifdef DEBUG
-	std::cerr << "primary:   " << _p.tm << std::endl;
-#endif
+
 	if (select(_p.tm))
 	{
 	    _pOut.write();
 	    _qOut.write();
 	}
-	else
-	    std::cerr << "Cannnot sync..." << std::endl << std::endl;
     }
 
     return RTC::RTC_OK;
@@ -165,39 +165,30 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onAborting(RTC::UniqueId ec_id)
 template <class PRIMARY, class SECONDARY> bool
 SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
 {
+#ifdef DEBUG
     if (_qBuf.empty())
 	return false;
 
-    const auto	time0 = nsec(tm);
-    auto	after = _qBuf.rbegin();
+    std::cerr <<   "Search     " << tm
+	      << "\n       in [" << _qBuf.front().tm << ", " << _qBuf.back().tm
+	      << "]"
+	      << std::endl;
+#endif
+    const auto	q = std::lower_bound(_qBuf.begin(), _qBuf.end(), tm, comp);
 
-    if (nsec(after->tm) < time0)
-	return false;
-
-  // リングバッファを過去に遡り，与えられた時刻よりも前のsecondaryデータを探す．
-    for (auto q = _qBuf.rbegin(); q != _qBuf.rend(); ++q)
+    if (q == _qBuf.begin() || q == _qBuf.end())
     {
-	const auto	time = nsec(q->tm);
-	
-	if (time <= time0)	// time0の直前のデータならば．．．
-	{
-	  // qとafterのうち，その時刻がtimeに近い方を返す．
-	    if ((time0 - time) < (nsec(after->tm) - time0))
-	    {			// time0がafterよりもqの時刻に近ければ．．．
-		_qSelected = *q;
-	    }
-	    else		// time0がqよりもafterの時刻に近ければ．．．
-	    {
-		_qSelected = *after;
-	    }
-
-	    return true;	// time0を挟む２つのポーズを発見した
-	}
-
-	after = q;
+#ifdef DEBUG
+	std::cerr << "Failed to sync.\n" << std::endl;
+#endif
+	return false;
     }
 
-    return false;		// time0の直前のポーズを発見できなかった
+#ifdef DEBUG
+    std::cerr << q->tm << "selected.\n" << std::endl;
+#endif
+    _qSelected = *q;
+    return true;
 }
 
 }	// namespace TU
