@@ -46,9 +46,9 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
 		    return std::chrono::nanoseconds(1000000000*tm.sec +
 						    tm.nsec);
 		}
-    static bool	comp(const secondary_type& q, RTC::Time tm)
+    static bool	comp(const secondary_type& q, std::chrono::nanoseconds ns)
 		{
-		    return nsec(q.tm) < nsec(tm);
+		    return nsec(q.tm) < ns;
 		}
     
   private:
@@ -140,8 +140,7 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 
-template <class PRIMARY, class SECONDARY>
-RTC::ReturnCode_t
+template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onDeactivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
@@ -151,8 +150,7 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onDeactivated(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 
-template <class PRIMARY, class SECONDARY>
-RTC::ReturnCode_t
+template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onAborting(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
@@ -174,7 +172,8 @@ SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
 	      << "]"
 	      << std::endl;
 #endif
-    const auto	q = std::lower_bound(_qBuf.begin(), _qBuf.end(), tm, comp);
+    const auto	q = std::lower_bound(_qBuf.begin(), _qBuf.end(),
+				     nsec(tm), comp);
 
     if (q == _qBuf.begin() || q == _qBuf.end())
     {
