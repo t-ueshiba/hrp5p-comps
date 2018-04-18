@@ -6,21 +6,21 @@ items:
   children: 
     - 
       id: 1
-      name: "V4L2CameraRTC"
+      name: "IIDCMultiCameraRTC"
       plugin: OpenRTM
       class: RTCItem
       data: 
-        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/V4L2CameraRTC.so"
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCMultiCameraRTC.so"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
-        periodicRate: 1000
+        periodicRate: 30
     - 
       id: 2
-      name: "V4L2Camera.py"
+      name: "IIDCMultiCamera.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/V4L2Camera.py"
+        file: "${PROJECT_DIR}/IIDCMultiCamera.py"
         executionOnLoading: true
         backgroundExecution: false
     - 
@@ -32,29 +32,48 @@ items:
         AutoConnection: true
         RTSComps: 
           - 
-            name: ImageViewer0
-            pos: [ 92, -106 ]
-            InPorts: 
-              - 
-                name: ImageViewer0.images
-                isServicePort: false
-          - 
-            name: V4L2Camera0
-            pos: [ -134, -106 ]
+            name: ControlPanel0
+            pos: [ -415, -570 ]
             OutPorts: 
               - 
-                name: V4L2Camera0.TimedCameraImage
+                name: ControlPanel0.Command
+                isServicePort: true
+          - 
+            name: IIDCMultiCamera0
+            pos: [ -432, -427 ]
+            OutPorts: 
+              - 
+                name: IIDCMultiCamera0.Command
+                isServicePort: true
+              - 
+                name: IIDCMultiCamera0.TimedImages
+                isServicePort: false
+          - 
+            name: MultiImageViewer0
+            pos: [ -159, -409 ]
+            InPorts: 
+              - 
+                name: MultiImageViewer0.TimedImages
                 isServicePort: false
         RTSConnections: 
           - 
             name: connector0
-            sourceRtcName: V4L2Camera0
-            sourcePortName: V4L2Camera0.TimedCameraImage
-            targetRtcName: ImageViewer0
-            targetPortName: ImageViewer0.images
+            sourceRtcName: MultiImageViewer0
+            sourcePortName: MultiImageViewer0.TimedImages
+            targetRtcName: IIDCMultiCamera0
+            targetPortName: IIDCMultiCamera0.TimedImages
             dataflow: Push
             subscription: flush
-            position: [ -48, -87, -43, -87, 40.5, -87, 40.5, -87, 115, -87, 120, -87 ]
+            position: [ -114, -390, -119, -390, -222.5, -390, -222.5, -390, -326, -390, -331, -390 ]
+          - 
+            name: connector0
+            sourceRtcName: IIDCMultiCamera0
+            sourcePortName: IIDCMultiCamera0.Command
+            targetRtcName: ControlPanel0
+            targetPortName: ControlPanel0.Command
+            dataflow: Push
+            subscription: flush
+            position: [ -333, -408, -328, -408, -326.5, -408, -326.5, -551, -325, -551, -330, -551 ]
 views: 
   - 
     id: 0
@@ -68,7 +87,6 @@ views:
     mounted: true
     state: 
       selected: [ 1 ]
-      expanded: [ 1, 2 ]
   - 
     id: 2
     plugin: Base
@@ -78,6 +96,7 @@ views:
     id: 3
     plugin: Base
     class: SceneView
+    mounted: true
     state: 
       editMode: false
       viewpointControlMode: thirdPerson
@@ -194,9 +213,15 @@ views:
     mounted: true
   - 
     id: 13
-    name: "Image viewer"
-    plugin: TU::ImageViewer
-    class: TU::ImageViewer
+    name: "Control panel"
+    plugin: TU::ControlPanel
+    class: TU::v::ControlPaneView
+    mounted: true
+  - 
+    id: 14
+    name: "Multi image viewer"
+    plugin: TU::MultiImageViewer
+    class: TU::MultiImageViewer
     mounted: true
 toolbars: 
   "TimeBar": 
@@ -245,7 +270,7 @@ toolbars:
     balancerIterations: 2
     plainBalancerMode: false
     boundaryConditionType: position
-    boundarySmootherType: off
+    boundarySmootherType: quintic
     boundarySmootherTime: 0.5
     boundaryCmAdjustment: false
     boundaryCmAdjustmentTime: 1
@@ -275,7 +300,7 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 315, 1533 ]
+      sizes: [ 402, 1446 ]
       children: 
         - 
           type: splitter
@@ -285,7 +310,7 @@ viewAreas:
             - 
               type: pane
               views: [ 1, 10 ]
-              current: 1
+              current: 10
             - 
               type: pane
               views: [ 0, 11, 8 ]
@@ -298,16 +323,16 @@ viewAreas:
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 664, 863 ]
+              sizes: [ 626, 814 ]
               children: 
                 - 
                   type: pane
-                  views: [ 9 ]
-                  current: 9
+                  views: [ 13, 9 ]
+                  current: 13
                 - 
                   type: pane
-                  views: [ 13 ]
-                  current: 13
+                  views: [ 3, 14 ]
+                  current: 14
             - 
               type: pane
               views: [ 2, 12 ]
@@ -318,10 +343,10 @@ layoutOfToolBars:
       - { name: "FileBar", x: 0, priority: 0 }
       - { name: "ScriptBar", x: 47, priority: 0 }
       - { name: "TimeBar", x: 94, priority: 0 }
-      - { name: "SceneBar", x: 1087, priority: 0 }
-      - { name: "GraphBar", x: 1357, priority: 0 }
-      - { name: "SimulationBar", x: 1464, priority: 0 }
-      - { name: "BodyBar", x: 1661, priority: 0 }
+      - { name: "SceneBar", x: 1064, priority: 0 }
+      - { name: "GraphBar", x: 1334, priority: 0 }
     - 
-      - { name: "KinematicsBar", x: 0, priority: 0 }
-      - { name: "BodyMotionGenerationBar", x: 234, priority: 0 }
+      - { name: "SimulationBar", x: 0, priority: 0 }
+      - { name: "BodyBar", x: 197, priority: 0 }
+      - { name: "KinematicsBar", x: 457, priority: 0 }
+      - { name: "BodyMotionGenerationBar", x: 691, priority: 0 }

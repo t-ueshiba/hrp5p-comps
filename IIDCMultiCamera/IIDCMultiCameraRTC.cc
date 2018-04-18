@@ -4,7 +4,8 @@
 #include <fstream>
 #include <cstdlib>			// for atoi()
 #include "TU/IIDCCameraArray.h"
-#include "MultiCameraRTC.h"
+#include "Img.hh"
+#include "CameraRTC.h"
 
 /************************************************************************
 *  static data								*
@@ -43,94 +44,39 @@ extern "C"
 void
 IIDCMultiCameraRTCInit(RTC::Manager* manager)
 {
+    using	rtc_type = TU::CameraRTC<TU::IIDCCameraArray, Img::TimedImages>;
+    
     coil::Properties	profile(iidcmulticamera_spec);
-    manager->registerFactory(
-		 profile,
-		 RTC::Create<TU::MultiCameraRTC<TU::IIDCCameraArray> >,
-		 RTC::Delete<TU::MultiCameraRTC<TU::IIDCCameraArray> >);
+    manager->registerFactory(profile,
+			     RTC::Create<rtc_type>, RTC::Delete<rtc_type>);
 }
 };
 
 namespace TU
 {
 /************************************************************************
-*  class MultiCameraRTC<IIDCCameraArray>				*
+*  class CameraRTC<IIDCCameraArray, Img::TimedImages>			*
 ************************************************************************/
 /*
  *  public member functions
  */
 template <>
-MultiCameraRTC<IIDCCameraArray>::MultiCameraRTC(RTC::Manager* manager)
-    :RTC::DataFlowComponentBase(manager),
-     _cameras(),
-     _mutex(),
+CameraRTC<IIDCCameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
+    :super(manager),
      _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
      _syncedSnap(atoi(DEFAULT_SYNCED_SNAP)),
      _startWithFlow(atoi(DEFAULT_START_WITH_FLOW)),
      _images(),
-     _imagesOut("TimedImages", _images),
-     _command(*this),
-     _commandPort("Command")
+     _imagesOut("TimedImages", _images)
 {
-}
-
-template <> void
-MultiCameraRTC<IIDCCameraArray>::saveConfig()
-{
-    for (auto& camera : _cameras)
-	camera.saveConfig(1);
-}
-    
-template <> void
-MultiCameraRTC<IIDCCameraArray>::restoreConfig()
-{
-    for (auto& camera : _cameras)
-	camera.restoreConfig(1);
-}
-    
-template <> void
-MultiCameraRTC<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
-{
-    std::unique_lock<std::mutex>	lock(_mutex);
-
-    if (vals.length() == 3)
-	TU::setFormat(_cameras, vals[1].i, vals[2].i);
-    else if (vals.length() == 8)
-    {
-	const auto	format7	    = IIDCCamera::uintToFormat(vals[1].i);
-	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[7].i);
-	
-	for (auto& camera : _cameras)
-	    camera.setFormat_7_ROI(format7,
-				   vals[2].i, vals[3].i, vals[4].i, vals[5].i)
-		  .setFormat_7_PixelFormat(format7, pixelFormat)
-		  .setFormat_7_PacketSize(format7, vals[6].i)
-		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
-    }
-
-    allocateImages();
-}
-    
-template <> bool
-MultiCameraRTC<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
-					    size_t n, bool all)
-{
-    if (all)
-	return TU::setFeature(_cameras, vals[0].i, vals[1].i, vals[1].f);
-    else
-    {
-	auto	camera = std::begin(_cameras);
-	std::advance(camera, n);
-	return TU::setFeature(*camera, vals[0].i, vals[1].i, vals[1].f);
-    }
 }
 
 /*
  *  private member functions
  */
 template <> void
-MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
+CameraRTC<IIDCCameraArray, Img::TimedImages>::initializeConfigurations()
 {
     bindParameter("str_cameraName",
 		  _cameraName, IIDCCameraArray::DEFAULT_CAMERA_NAME);
@@ -142,16 +88,9 @@ MultiCameraRTC<IIDCCameraArray>::initializeConfigurations()
 		  _startWithFlow, DEFAULT_START_WITH_FLOW);
 }
 
-template <> void
-MultiCameraRTC<IIDCCameraArray>::embedTimestamp(bool enable)
-{
-    std::for_each(std::begin(_cameras), std::end(_cameras),
-		  [enable](auto& camera){ camera.embedTimestamp(enable); });
-}
-
-template <> size_t
-MultiCameraRTC<IIDCCameraArray>::setImageFormat(const camera_type& camera,
-						Img::Header& header)
+template <> template <> size_t
+CameraRTC<IIDCCameraArray, Img::TimedImages>
+::setImageFormat(const camera_type& camera, Img::Header& header)
 {
     header.width  = camera.width();
     header.height = camera.height();

@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include <cstdlib>		// for atoi()
-#include "TU/V4L2CameraArray.h"
+#include "TU/IIDCCameraArray.h"
 #include "Img.hh"
 #include "CameraRTC.h"
 #ifdef DEBUG
@@ -12,16 +12,16 @@
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_RECFILE_PREFIX	"/tmp/V4L2CameraRTC"
+#define DEFAULT_RECFILE_PREFIX	"/tmp/IIDCCameraRTC"
 #define DEFAULT_DEVICE_NAME	"/dev/video0"
 #define DEFAULT_START_WITH_FLOW	"1"
 
 // Module specification
 static const char* v4l2camera_spec[] =
 {
-    "implementation_id",		"V4L2CameraRTC",
-    "type_name",			"V4L2Camera",
-    "description",			"Controlling a V4L2 camera",
+    "implementation_id",		"IIDCCameraRTC",
+    "type_name",			"IIDCCamera",
+    "description",			"Controlling a IIDC camera",
     "version",				"1.0.0",
     "vendor",				"t.ueshiba@aist.go.jp",
     "category",				"sensor",
@@ -42,9 +42,9 @@ static const char* v4l2camera_spec[] =
 extern "C"
 {
 void
-V4L2CameraRTCInit(RTC::Manager* manager)
+IIDCCameraRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::CameraRTC<TU::V4L2CameraArray,
+    using	rtc_type = TU::CameraRTC<TU::IIDCCameraArray,
 					 Img::TimedCameraImage>;
     
     coil::Properties	profile(v4l2camera_spec);
@@ -56,10 +56,10 @@ V4L2CameraRTCInit(RTC::Manager* manager)
 namespace TU
 {
 /************************************************************************
-*  class CameraRTC<V4L2CameraArray>					*
+*  class CameraRTC<IIDCCameraArray>					*
 ************************************************************************/
 template <> inline RTC::Time
-CameraRTCBase<V4L2CameraArray>::getTimestamp(const camera_type& camera)
+CameraRTCBase<IIDCCameraArray>::getTimestamp(const camera_type& camera)
 {
     const auto	timestamp   = camera.getTimestamp();
 #ifdef DEBUG
@@ -74,13 +74,13 @@ CameraRTCBase<V4L2CameraArray>::getTimestamp(const camera_type& camera)
 }
 
 /************************************************************************
-*  class CameraRTC<V4L2CameraArray, Img::TimedCameraImage>		*
+*  class CameraRTC<IIDCCameraArray, Img::TimedCameraImage>		*
 ************************************************************************/
 /*
  *  private member functions
  */
 template <> void
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::initializeConfigurations()
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig",
 		  _cameraName, DEFAULT_DEVICE_NAME);
@@ -91,7 +91,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::initializeConfigurations()
 }
 
 template <> void
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::allocateImages()
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::allocateImages()
 {
     auto&	imageData = _images.data.image;
 
@@ -100,8 +100,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::allocateImages()
 
     switch (_cameras[0].pixelFormat())
     {
-      case V4L2Camera::GREY:
-      case V4L2Camera::Y16:
+      case IIDCCamera::MONO_8:
 	imageData.format = Img::CF_GRAY;
 	imageData.raw_data.length(imageData.width * imageData.height);
 	break;
@@ -114,7 +113,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::allocateImages()
 }
     
 template <> void
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::recordImages(bool enable)
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::recordImages(bool enable)
 {
     if (enable == inRecordingImages())
 	return;
@@ -150,7 +149,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::recordImages(bool enable)
  *  public member functions
  */
 template <>
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>
 ::CameraRTC(RTC::Manager* manager)
     :super(manager),
      _cameraName(DEFAULT_DEVICE_NAME),
@@ -163,7 +162,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>
 }
 
 template <> RTC::ReturnCode_t
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>
 ::onActivated(RTC::UniqueId ec_id)
 {
 #ifdef DEBUG
@@ -173,7 +172,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>
     {
       // 設定ファイルを読み込んでカメラを生成・セットアップ
 	_cameras.resize(1);
-	_cameras[0].initialize(_cameraName.c_str());
+	_cameras[0].initialize();
 	allocateImages();		// 画像データ領域を確保
 	embedTimestamp(true);		// 撮影時刻の記録を初期化
 	continuousShot(_startWithFlow);	// 連続撮影/停止のいずれかで開始
@@ -189,7 +188,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>
 }
 
 template <> RTC::ReturnCode_t
-CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::onExecute(RTC::UniqueId ec_id)
+CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::onExecute(RTC::UniqueId ec_id)
 {
     std::unique_lock<std::mutex>	lock(super::_mutex);
 
@@ -204,8 +203,7 @@ CameraRTC<V4L2CameraArray, Img::TimedCameraImage>::onExecute(RTC::UniqueId ec_id
 	auto&	imageData = _images.data.image;
 	switch (camera.pixelFormat())
 	{
-	  case V4L2Camera::GREY:
-	  case V4L2Camera::Y16:
+	  case IIDCCamera::MONO_8:
 	  {
 	    Image<u_char>	image(reinterpret_cast<u_char*>(
 					  imageData.raw_data.get_buffer(false)),

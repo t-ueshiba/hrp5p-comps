@@ -2,18 +2,77 @@
  *  $Id$
  */
 #include "TU/IIDCCameraArray.h"
-#include "MultiCameraRTC.h"
+#include "Img.hh"
+#include "CameraRTC.h"
 
 namespace TU
 {
+/************************************************************************
+*  class CameraRTCBase<IIDCCameraArray>					*
+************************************************************************/
+template <> void
+CameraRTCBase<IIDCCameraArray>::saveConfig()
+{
+    for (auto& camera : _cameras)
+	camera.saveConfig(1);
+}
+    
+template <> void
+CameraRTCBase<IIDCCameraArray>::restoreConfig()
+{
+    for (auto& camera : _cameras)
+	camera.restoreConfig(1);
+}
+    
+template <> void
+CameraRTCBase<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
+{
+    std::unique_lock<std::mutex>	lock(_mutex);
+
+    if (vals.length() == 3)
+	TU::setFormat(_cameras, vals[1].i, vals[2].i);
+    else if (vals.length() == 8)
+    {
+	const auto	format7	    = IIDCCamera::uintToFormat(vals[1].i);
+	const auto	pixelFormat = IIDCCamera::uintToPixelFormat(vals[7].i);
+	
+	for (auto& camera : _cameras)
+	    camera.setFormat_7_ROI(format7,
+				   vals[2].i, vals[3].i, vals[4].i, vals[5].i)
+		  .setFormat_7_PixelFormat(format7, pixelFormat)
+		  .setFormat_7_PacketSize(format7, vals[6].i)
+		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
+    }
+
+    allocateImages();
+}
+    
+template <> bool
+CameraRTCBase<IIDCCameraArray>::setFeature(const Cmd::Values& vals,
+					   size_t n, bool all)
+{
+    if (all)
+	return TU::setFeature(_cameras, vals[0].i, vals[1].i, vals[1].f);
+    else
+	return TU::setFeature(_cameras[n], vals[0].i, vals[1].i, vals[1].f);
+}
+
+template <> void
+CameraRTCBase<IIDCCameraArray>::embedTimestamp(bool enable)
+{
+    for (auto& camera : _cameras)
+	camera.embedTimestamp(enable);
+}
+
 namespace v
 {
 /************************************************************************
 *  class CmdSVC_impl<IIDCCameraArray>					*
 ************************************************************************/
 template <> CmdDefs
-CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
+CmdSVC_impl<IIDCCameraArray>::createFormatItems() const
 {
+    const auto&	camera = _rtc.cameras()[0];
     CmdDefs	cmds;
     
     for (const auto& format : IIDCCamera::formatNames)
@@ -81,8 +140,7 @@ CmdSVC_impl<IIDCCameraArray>::createFormatItems(const camera_type& camera)
 }
 
 template <> void
-CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
-						CmdDefs& cmds)
+CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(CmdDefs& cmds) const
 {
     size_t	y = (cmds.empty() ? 0 : cmds.back().gridy + 1);
 
@@ -97,7 +155,8 @@ CmdSVC_impl<IIDCCameraArray>::appendFeatureCmds(const camera_type& camera,
   // 属性操作コマンドの生成
     for (const auto& feature : IIDCCamera::featureNames)
     {
-	const auto	inq = camera.inquireFeatureFunction(feature.feature);
+	const auto	inq = _rtc.cameras()[0]
+				  .inquireFeatureFunction(feature.feature);
 	
 	if (!((inq & IIDCCamera::Presence) &&
 	      (inq & IIDCCamera::Manual)   &&

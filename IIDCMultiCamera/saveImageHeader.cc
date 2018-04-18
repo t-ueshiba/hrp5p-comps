@@ -3,11 +3,12 @@
  */
 #include <iostream>
 #include "Img.hh"
+#include "CameraRTC.h"
 
 namespace TU
 {
-void
-saveImageHeader(std::ostream& out, const Img::Header& header)
+template <> void
+saveImageHeader<Img::Header>(std::ostream& out, const Img::Header& header)
 {
     using namespace	std;
     

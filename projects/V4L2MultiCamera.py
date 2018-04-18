@@ -23,18 +23,18 @@ except:
     rtm.initCORBA()
     inChoreonoid = False
 
-camera = rtm.findRTC("V4L2MultiCamera0")
-viewer = rtm.findRTC("MultiImageViewer0")
 cpanel = rtm.findRTC("ControlPanel0")
+viewer = rtm.findRTC("MultiImageViewer0")
+camera = rtm.findRTC("V4L2MultiCamera0")
 
-connectPorts(camera.port("TimedImages"), viewer.port("images"))
 connectPorts(cpanel.port("Command"),     camera.port("Command"))
+connectPorts(camera.port("TimedImages"), viewer.port("images"))
 
-#rtm.serializeComponents([camera, viewer, cpanel])
+#rtm.serializeComponents([cpanel, viewer, camera])
 
-camera.start()
-viewer.start()
 cpanel.start()
+viewer.start()
+camera.start()
 
 
     
