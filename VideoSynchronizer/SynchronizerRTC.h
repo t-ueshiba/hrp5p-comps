@@ -43,12 +43,14 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
     static std::chrono::nanoseconds
 		nsec(RTC::Time tm)
 		{
-		    return std::chrono::nanoseconds(1000000000*tm.sec +
-						    tm.nsec);
+		    using	std::chrono::nanoseconds;
+		    
+		    return nanoseconds(1000000000*nanoseconds::rep(tm.sec)
+						+ nanoseconds::rep(tm.nsec));
 		}
-    static bool	comp(const secondary_type& q, std::chrono::nanoseconds ns)
+    static bool	comp(std::chrono::nanoseconds ns, const secondary_type& q)
 		{
-		    return nsec(q.tm) < ns;
+		    return ns < nsec(q.tm);
 		}
     
   private:
@@ -104,7 +106,7 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onActivated(RTC::UniqueId ec_id)
     std::cerr << "SynchronizerRTC<PRIMARY, SECONDARY>::onActivated"
 	      << std::endl;
 #endif
-    _qBuf.resize(_bufSize);
+    _qBuf.clear();
     
     return RTC::RTC_OK;
 }
@@ -112,17 +114,17 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onActivated(RTC::UniqueId ec_id)
 template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (_qIn.isNew())
     {
 	_qIn.read();		// ポート _poseIn から _pose に関節角を読み込む
 	_qBuf.push_back(_q);
 #ifdef DEBUG
-	static size_t	n = 0;
-	if (n % 10 == 0)
-	    std::cerr << "secondary: " << _q.tm << std::endl;
-	++n;
+      //static size_t	n = 0;
+      //if (n % 10 == 0)
+      //    std::cerr << "secondary: " << _q.tm << std::endl;
+      //++n;
 #endif
     }
 
@@ -164,15 +166,19 @@ template <class PRIMARY, class SECONDARY> bool
 SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
 {
 #ifdef DEBUG
-    if (_qBuf.empty())
-	return false;
+    static int	n = 0;
+    if (n % 10 == 0)
+    {
+	if (_qBuf.empty())
+	    return false;
 
-    std::cerr <<   "Search     " << tm
-	      << "\n       in [" << _qBuf.front().tm << ", " << _qBuf.back().tm
-	      << "]"
-	      << std::endl;
+	std::cerr <<   "Search     " << tm
+		  << "\n       in [" << _qBuf.front().tm
+		  << ", " << _qBuf.back().tm << "]"
+		  << std::endl;
+    }
 #endif
-    const auto	q = std::lower_bound(_qBuf.begin(), _qBuf.end(),
+    const auto	q = std::upper_bound(_qBuf.begin(), _qBuf.end(),
 				     nsec(tm), comp);
 
     if (q == _qBuf.begin() || q == _qBuf.end())
@@ -184,7 +190,12 @@ SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
     }
 
 #ifdef DEBUG
-    std::cerr << q->tm << "selected.\n" << std::endl;
+    if (n % 10 == 0)
+    {
+	std::cerr << "Selected  [" << (q-1)->tm << ", " << q->tm << "]\n"
+		  << std::endl;
+    }
+    ++n;
 #endif
     _qSelected = *q;
     return true;

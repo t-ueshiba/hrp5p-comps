@@ -8,6 +8,7 @@ SUBDIR	= IIDCMultiCamera		\
 	  MultiImageViewer		\
 	  ImageViewer			\
 	  TU				\
+	  VideoSynchronizer		\
 #	  TUMultiImageViewerPlugin	\
 	  TUImageViewerPlugin		\
 	  TUControlPanelPlugin		\

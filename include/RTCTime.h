@@ -39,13 +39,19 @@ operator <<(std::ostream& out,
 inline std::ostream&
 operator <<(std::ostream& out, const timeval& tm)
 {
-    return out << std::chrono::microseconds(1000000*tm.tv_sec + tm.tv_usec);
+    using	std::chrono::microseconds;
+    
+    return out << microseconds(1000000*microseconds::rep(tm.tv_sec)
+				     + microseconds::rep(tm.tv_usec));
 }
     
 inline std::ostream&
 operator <<(std::ostream& out, const timespec& tm)
 {
-    return out << std::chrono::nanoseconds(1000000000*tm.tv_sec + tm.tv_nsec);
+    using	std::chrono::nanoseconds;
+    
+    return out << nanoseconds(1000000000*nanoseconds::rep(tm.tv_sec)
+				       + nanoseconds::rep(tm.tv_nsec));
 }
     
 inline std::ostream&

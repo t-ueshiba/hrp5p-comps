@@ -51,8 +51,6 @@ EXTHDRS		= ../include/CameraRTC.h \
 		/usr/local/include/TU/V4L2CameraArray.h \
 		/usr/local/include/TU/Vector++.h \
 		/usr/local/include/TU/algorithm.h \
-		/usr/local/include/TU/cuda/iterator.h \
-		/usr/local/include/TU/cuda/tuple.h \
 		/usr/local/include/TU/iterator.h \
 		/usr/local/include/TU/pair.h \
 		/usr/local/include/TU/range.h \
@@ -86,9 +84,8 @@ V4L2CameraRTC.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/iterator.h \
 	/usr/local/include/TU/tuple.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/cuda/tuple.h \
-	/usr/local/include/TU/cuda/iterator.h ../include/CameraRTC.h \
-	../include/CmdSVC_impl.h ../include/CmdDef.h ../include/RTCTime.h
+	../include/CameraRTC.h ../include/CmdSVC_impl.h ../include/CmdDef.h \
+	../include/RTCTime.h
 V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/V4L2++.h /usr/local/include/TU/Image++.h \
 	/usr/local/include/TU/pair.h /usr/local/include/TU/type_traits.h \
@@ -97,8 +94,6 @@ V4L2CmdSVC_impl.o: /usr/local/include/TU/V4L2CameraArray.h \
 	/usr/local/include/TU/Vector++.h /usr/local/include/TU/Array++.h \
 	/usr/local/include/TU/range.h /usr/local/include/TU/iterator.h \
 	/usr/local/include/TU/tuple.h /usr/local/include/TU/algorithm.h \
-	/usr/local/include/TU/cuda/tuple.h \
-	/usr/local/include/TU/cuda/iterator.h ../include/CameraRTC.h \
-	../include/CmdSVC_impl.h ../include/CmdDef.h
+	../include/CameraRTC.h ../include/CmdSVC_impl.h ../include/CmdDef.h
 saveImageHeader.o: ../include/CameraRTC.h ../include/CmdSVC_impl.h \
 	../include/CmdDef.h

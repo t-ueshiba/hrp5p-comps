@@ -12,8 +12,7 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/include/TU
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .idl:hC
-HDRS		= idl/Cmd.idl \
-		idl/Img.idl
+HDRS		=
 SRCS		=
 
 OTHER_HDRS	= $(HDRS)
