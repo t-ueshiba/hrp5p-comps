@@ -4,6 +4,9 @@ nameserver=localhost
 camera_name=V4L2Camera
 viewer_name=ImageViewer
 
+${camera_name}Comp &
+${viewer_name}Comp &
+
 camera=/${nameserver}/${camera_name}0.rtc
 viewer=/${nameserver}/${viewer_name}0.rtc
        

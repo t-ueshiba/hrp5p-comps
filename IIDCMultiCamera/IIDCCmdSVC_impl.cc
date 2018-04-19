@@ -27,7 +27,7 @@ CameraRTCBase<IIDCCameraArray>::restoreConfig()
 template <> void
 CameraRTCBase<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (vals.length() == 3)
 	TU::setFormat(_cameras, vals[1].i, vals[2].i);

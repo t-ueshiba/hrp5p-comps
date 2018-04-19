@@ -84,7 +84,7 @@ ControlPanelRTC::onExecute(RTC::UniqueId ec_id)
     {
 	try
 	{
-	    std::unique_lock<std::mutex>	lock(_mutex);
+	    std::lock_guard<std::mutex>	lock(_mutex);
 	    CORBA::String_var			s = _command->getCmds();
 	    std::istringstream			iss(s._retn());
 	    boost::archive::text_iarchive	iar(iss);
@@ -117,7 +117,7 @@ ControlPanelRTC::onDeactivated(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "ControlPanelRTC::onDeactivated" << std::endl;
 #endif
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     _ready = false;
     
     return RTC::RTC_OK;
@@ -129,7 +129,7 @@ ControlPanelRTC::onAborting(RTC::UniqueId ec_id)
 #ifdef DEBUG
     std::cerr << "ControlPanelRTC::onAborting" << std::endl;
 #endif
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     _ready = false;
     
     return RTC::RTC_OK;

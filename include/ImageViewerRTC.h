@@ -72,7 +72,7 @@ ImageViewerRTC<IMAGES>::onActivated(RTC::UniqueId ec_id)
 template <class IMAGES> RTC::ReturnCode_t
 ImageViewerRTC<IMAGES>::onExecute(RTC::UniqueId ec_id)
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     
     if (!_ready && _imagesIn.isNew())
     {
@@ -108,7 +108,7 @@ ImageViewerRTC<IMAGES>::onAborting(RTC::UniqueId ec_id)
 template <class IMAGES> inline bool
 ImageViewerRTC<IMAGES>::isExiting() const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     return m_exiting;
 }

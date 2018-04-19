@@ -13,7 +13,7 @@ template <> template <> bool
 ImageViewerRTC<Img::TimedCameraImage>
 ::setImages(v::MyCmdWindow<Img::TimedCameraImage, Img::ColorFormat>& win) const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (!_ready)		// 新データが到着していなければ...
   	return false;		// falseを返す.

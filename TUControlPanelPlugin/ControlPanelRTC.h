@@ -54,21 +54,21 @@ class ControlPanelRTC : public RTC::DataFlowComponentBase
 inline bool
 ControlPanelRTC::isExiting() const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     return m_exiting;
 }
 
 inline bool
 ControlPanelRTC::ready() const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     return _ready;
 }
 
 inline bool
 ControlPanelRTC::getCmds(v::CmdDefs& cmds) const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
     if (_ready)
 	cmds = _cmds;
     

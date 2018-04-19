@@ -118,7 +118,7 @@ CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::recordImages(bool enable)
     if (enable == inRecordingImages())
 	return;
 
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (enable)
     {
@@ -190,7 +190,7 @@ CameraRTC<IIDCCameraArray, Img::TimedCameraImage>
 template <> RTC::ReturnCode_t
 CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::onExecute(RTC::UniqueId ec_id)
 {
-    std::unique_lock<std::mutex>	lock(super::_mutex);
+    std::lock_guard<std::mutex>	lock(super::_mutex);
 
     if (inContinuousShot())
     {

@@ -13,11 +13,11 @@ template <> template <> bool
 ImageViewerRTC<Img::TimedImages>
 ::setImages(v::MyCmdWindow<Img::TimedImages, Img::PixelFormat>& win) const
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (!_ready)		// 新データが到着していなければ...
   	return false;		// falseを返す.
-
+    
     const auto	resized = win.resize(_images.headers.length());
 
     auto	data = _images.data.get_buffer();

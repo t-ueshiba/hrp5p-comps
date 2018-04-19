@@ -108,7 +108,7 @@ CameraRTCBase<CAMERAS>::inContinuousShot() const
 template <class CAMERAS> void
 CameraRTCBase<CAMERAS>::continuousShot(bool enable)
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     for (auto& camera : _cameras)
 	camera.continuousShot(enable);
@@ -245,7 +245,7 @@ CameraRTC<CAMERAS, IMAGES>::onActivated(RTC::UniqueId ec_id)
 template <class CAMERAS, class IMAGES> RTC::ReturnCode_t
 CameraRTC<CAMERAS, IMAGES>::onExecute(RTC::UniqueId ec_id)
 {
-    std::unique_lock<std::mutex>	lock(super::_mutex);
+    std::lock_guard<std::mutex>	lock(super::_mutex);
 
     if (inContinuousShot())
     {
@@ -318,7 +318,7 @@ CameraRTC<CAMERAS, IMAGES>::recordImages(bool enable)
     if (enable == inRecordingImages())
 	return;
 
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     if (enable)
     {

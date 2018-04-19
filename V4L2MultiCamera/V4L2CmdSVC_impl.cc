@@ -14,7 +14,7 @@ namespace TU
 template <> void
 CameraRTCBase<V4L2CameraArray>::setFormat(const Cmd::Values& vals)
 {
-    std::unique_lock<std::mutex>	lock(_mutex);
+    std::lock_guard<std::mutex>	lock(_mutex);
 
     TU::setFormat(_cameras, vals[1].i, vals[2].i);
     allocateImages();
@@ -26,7 +26,7 @@ CameraRTCBase<V4L2CameraArray>::setFeature(const Cmd::Values& vals,
 {
     if (vals[0].i == V4L2Camera::UNKNOWN_PIXEL_FORMAT)
     {
-	std::unique_lock<std::mutex>	lock(_mutex);
+	std::lock_guard<std::mutex>	lock(_mutex);
     
 	for (auto& camera : _cameras)
 	    camera.setROI(vals[1].i, vals[2].i, vals[3].i, vals[4].i);
