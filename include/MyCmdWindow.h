@@ -135,7 +135,7 @@ MyCmdWindow<IMAGES, FORMAT>::tick()
     }
     else if (_rtc->setImages(*this))
     {
-	for (auto& canvas : *this)
+	for (const auto& canvas : *this)
 	    canvas->repaintUnderlay();
     }
 }
