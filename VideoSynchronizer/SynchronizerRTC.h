@@ -34,8 +34,6 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
-    virtual RTC::ReturnCode_t	onDeactivated(RTC::UniqueId ec_id)	;
-    virtual RTC::ReturnCode_t	onAborting(RTC::UniqueId ec_id)		;
 
   private:
     void	initializeConfigurations()				;
@@ -63,7 +61,6 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
     RTC::OutPort<primary_type>			_pOut;
     secondary_type				_qSelected;
     RTC::OutPort<secondary_type>		_qOut;
-    mutable std::mutex				_mutex;
 };
 
 template <class PRIMARY, class SECONDARY>
@@ -77,18 +74,13 @@ SynchronizerRTC<PRIMARY, SECONDARY>::SynchronizerRTC(RTC::Manager* manager)
      _qBuf(_bufSize),
      _pOut("primaryOut", _p),
      _qSelected(),
-     _qOut("secondaryOut", _qSelected),
-     _mutex()
+     _qOut("secondaryOut", _qSelected)
 {
 }
 
 template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onInitialize()
 {
-#ifdef DEBUG
-    std::cerr << "SynchronizerRTC<PRIMARY, SECONDARY>::onInitialize"
-	      << std::endl;
-#endif
     initializeConfigurations();
     
     addInPort("primary",       _pIn);
@@ -102,10 +94,6 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onInitialize()
 template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onActivated(RTC::UniqueId ec_id)
 {
-#ifdef DEBUG
-    std::cerr << "SynchronizerRTC<PRIMARY, SECONDARY>::onActivated"
-	      << std::endl;
-#endif
     _qBuf.clear();
     
     return RTC::RTC_OK;
@@ -114,8 +102,6 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onActivated(RTC::UniqueId ec_id)
 template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
 SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
 {
-    std::lock_guard<std::mutex>	lock(_mutex);
-
     if (_qIn.isNew())
     {
 	_qIn.read();		// ポート _poseIn から _pose に関節角を読み込む
@@ -139,26 +125,6 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
 	}
     }
 
-    return RTC::RTC_OK;
-}
-
-template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
-SynchronizerRTC<PRIMARY, SECONDARY>::onDeactivated(RTC::UniqueId ec_id)
-{
-#ifdef DEBUG
-    std::cerr << "SynchronizerRTC<PRIMARY, SECONDARY>::onDeactivated"
-	      << std::endl;
-#endif
-    return RTC::RTC_OK;
-}
-
-template <class PRIMARY, class SECONDARY> RTC::ReturnCode_t
-SynchronizerRTC<PRIMARY, SECONDARY>::onAborting(RTC::UniqueId ec_id)
-{
-#ifdef DEBUG
-    std::cerr << "SynchronizerRTC<PRIMARY, SECONDARY>::onAborting"
-	      << std::endl;
-#endif
     return RTC::RTC_OK;
 }
 
