@@ -24,13 +24,13 @@ add_executable(
 
 target_link_libraries(
     V4L2CameraComp
-    TUV4L2++
-    boost_serialization
-    ${OPENRTM_LIBRARIES})
+    ${TUV4L2PP_LIB}
+    ${OPENRTM_LIBRARIES}
+    boost_serialization)
 
 install(TARGETS V4L2CameraComp RUNTIME DESTINATION bin)
 
-if(BUILD_CNOID_PLUGINS)
+if(CNOID_FOUND)
   add_cnoid_rtc(
       V4L2CameraRTC
       ${idl_cpp_files}
@@ -38,8 +38,8 @@ if(BUILD_CNOID_PLUGINS)
 
   target_link_libraries(
       V4L2CameraRTC
-      TUV4L2++
-      boost_serialization
-      ${OPENRTM_LIBRARIES})
+      ${TUV4L2PP_LIB}
+      ${OPENRTM_LIBRARIES}
+      boost_serialization)
 endif()
 

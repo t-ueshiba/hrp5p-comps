@@ -2,16 +2,12 @@ cmake_minimum_required(VERSION 2.4)
 
 set(idls Cmd)
 
-set(IDL_INCLUDE_DIRS ${OPENRTM_INCLUDE_DIRS})
-
 set(idl_cpp_files "")
 set(ild_h_files "")
 set(corba_src_dirs ${PROJECT_SOURCE_DIR}/TU/idl)
 
 idl_compile_cpp(idl_cpp_files idl_h_files corba
 		"${corba_src_dirs}" ${idls})
-
-include_directories(${CNOID_INCLUDE_DIRS})
 
 set(sources
     ButtonCmd.cc
@@ -52,8 +48,8 @@ add_cnoid_plugin(
 
 target_link_libraries(
     ${target}
-    TUTools++
-    boost_serialization
-    boost_system
+    ${TUTOOLSPP_LIB}
     ${CNOID_LIBRARIES}
-    ${OPENRTM_LIBRARIES})
+    ${OPENRTM_LIBRARIES}
+    boost_serialization
+    boost_system)

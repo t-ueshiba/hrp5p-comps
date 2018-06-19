@@ -1,31 +1,30 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.1)
 
 project(TURTComponents)
+
+enable_language(CXX)
+set(CMAKE_CXX_STANDARD		14)
+set(CMAKE_CXX_STANDARD_REQUIRED	ON)
+set(CMAKE_CXX_EXTENSIONS	OFF)
+set(CMAKE_CXX_FLAGS_RELEASE	"-Wall -O3")
+set(CMAKE_CXX_FLAGS_DEBUG	"-g")
+set(CMAKE_BUILD_TYPE		Release)
+add_definitions(-DNDEBUG)
 
 include(FindPkgConfig)
 include(CheckIncludeFiles)
 
-find_package(Boost REQUIRED)
-pkg_check_modules(HRPSYSBASE hrpsys-base)
-
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules/)
 
-set(CMAKE_CXX_FLAGS		"${CMAKE_CXX_FLAGS} -std=c++14")
-set(CMAKE_CXX_FLAGS_RELEASE	"-Wall -O3")
-set(CMAKE_CXX_FLAGS_DEBUG	"-g")
-set(CMAKE_BUILD_TYPE		Release)
-
-add_definitions(-DNDEBUG)
+find_package(Boost REQUIRED)
+find_package(TULibs REQUIRED)
+pkg_check_modules(HRPSYSBASE hrpsys-base)
 
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_BINARY_DIR}/corba
     ${Boost_INCLUDE_DIRS}
-    ${CMAKE_INSTALL_PREFIX}/include
-)
-link_directories(
-    ${CMAKE_INSTALL_PREFIX}/lib
-)
+    ${TULIBS_INCLUDE_DIR})
 
 #########################
 #  RT-components	#
@@ -113,18 +112,11 @@ include_directories(${OPENRTM_INCLUDE_DIRS})
 link_directories(${OPENRTM_LIBRARY_DIRS})
 
 #########################
-#  TUv++ components	#
-#########################
-option(BUILD_TUVPP_COMPONENTS "Build TUv++ components" OFF)
-
-#########################
 #  Choreonoid plugins	#
 #########################
-option(BUILD_CNOID_PLUGINS "Build choreonoid plugins" OFF)
-if(BUILD_CNOID_PLUGINS)
+pkg_check_modules(CNOID choreonoid)
 
-  #  choreonoid がインストールされていなければならない．
-  pkg_check_modules(CNOID REQUIRED choreonoid)
+if(CNOID_FOUND)
 
   set(cnoid_uses_qt5 FALSE)
   if(APPLE)
@@ -191,8 +183,8 @@ if(BUILD_CNOID_PLUGINS)
       ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CNOID_PLUGIN_SUBDIR}
       RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CNOID_PLUGIN_SUBDIR})
     install(TARGETS ${target}
-      RUNTIME DESTINATION ${CNOID_LIBDIR}/${CNOID_PLUGIN_SUBDIR} CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel
-      LIBRARY DESTINATION ${CNOID_LIBDIR}/${CNOID_PLUGIN_SUBDIR} CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel)
+      RUNTIME DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR} CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel
+      LIBRARY DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR} CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel)
   endfunction()
 
   # RTC 生成コマンド
@@ -203,29 +195,35 @@ if(BUILD_CNOID_PLUGINS)
       LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CNOID_PLUGIN_SUBDIR}/rtc
       PREFIX "")
     install(TARGETS ${target}
-      RUNTIME DESTINATION ${CNOID_LIBDIR}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel
-      LIBRARY DESTINATION ${CNOID_LIBDIR}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel)
+      RUNTIME DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel
+      LIBRARY DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel)
   endfunction()
 
-endif(BUILD_CNOID_PLUGINS)
+  include_directories(${CNOID_INCLUDE_DIRS})
+
+endif()
 
 
 #########################
 #  Subdirectories	#
 #########################
-add_subdirectory(IIDCCamera)
-add_subdirectory(IIDCMultiCamera)
-add_subdirectory(V4L2Camera)
-add_subdirectory(V4L2MultiCamera)
+if(TUIIDCPP_FOUND)
+  add_subdirectory(IIDCCamera)
+  add_subdirectory(IIDCMultiCamera)
+endif()
+if(TUV4L2PP_FOUND)
+  add_subdirectory(V4L2Camera)
+  add_subdirectory(V4L2MultiCamera)
+endif()
 add_subdirectory(VideoSynchronizer)
 
-if(BUILD_TUVPP_COMPONENTS)
+if(TUVPP_FOUND)
   add_subdirectory(ImageViewer)
   add_subdirectory(MultiImageViewer)
 endif()
 
-if(BUILD_CNOID_PLUGINS)
+if(CNOID_FOUND)
   add_subdirectory(TUControlPanelPlugin)
   add_subdirectory(TUImageViewerPlugin)
   add_subdirectory(TUMultiImageViewerPlugin)
-endif(BUILD_CNOID_PLUGINS)
+endif()

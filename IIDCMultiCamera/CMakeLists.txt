@@ -23,13 +23,13 @@ add_executable(
 
 target_link_libraries(
     IIDCMultiCameraComp
-    TUIIDC++
-    boost_serialization
-    ${OPENRTM_LIBRARIES})
+    ${TUIIDCPP_LIB}
+    ${OPENRTM_LIBRARIES}
+    boost_serialization)
 
 install(TARGETS IIDCMultiCameraComp RUNTIME DESTINATION bin)
 
-if(BUILD_CNOID_PLUGINS)
+if(CNOID_FOUND)
   add_cnoid_rtc(
       IIDCMultiCameraRTC
       ${idl_cpp_files}
@@ -37,8 +37,8 @@ if(BUILD_CNOID_PLUGINS)
 
   target_link_libraries(
       IIDCMultiCameraRTC
-      TUIIDC++
-      boost_serialization
-      ${OPENRTM_LIBRARIES})
+      ${TUIIDCPP_LIB}
+      ${OPENRTM_LIBRARIES}
+      boost_serialization)
 endif()
 

@@ -26,7 +26,7 @@ target_link_libraries(
 
 install(TARGETS VideoSynchronizerComp RUNTIME DESTINATION bin)
 
-if(BUILD_CNOID_PLUGINS)
+if(CNOID_FOUND)
   add_cnoid_rtc(
       VideoSynchronizerRTC
       ${idl_cpp_files}

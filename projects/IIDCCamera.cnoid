@@ -10,7 +10,7 @@ items:
       plugin: OpenRTM
       class: RTCItem
       data: 
-        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCCameraRTC.so"
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCCameraRTC.dylib"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
         periodicRate: 1000
@@ -59,15 +59,6 @@ items:
         RTSConnections: 
           - 
             name: connector0
-            sourceRtcName: ControlPanel0
-            sourcePortName: ControlPanel0.Command
-            targetRtcName: IIDCCamera0
-            targetPortName: IIDCCamera0.Command
-            dataflow: Push
-            subscription: flush
-            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
-          - 
-            name: connector0
             sourceRtcName: IIDCCamera0
             sourcePortName: IIDCCamera0.TimedCameraImage
             targetRtcName: ImageViewer0
@@ -75,14 +66,28 @@ items:
             dataflow: Push
             subscription: flush
             position: [ -48, -69, -43, -69, 36, -69, 36, -69, 129, -69, 134, -69 ]
+          - 
+            name: connector0
+            sourceRtcName: ControlPanel0
+            sourcePortName: ControlPanel0.Command
+            targetRtcName: IIDCCamera0
+            targetPortName: IIDCCamera0.Command
+            dataflow: Push
+            subscription: flush
+            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
 views: 
   - 
     id: 0
+    name: "CameraImage"
+    plugin: Base
+    class: ImageView
+  - 
+    id: 1
     plugin: Base
     class: ItemPropertyView
     mounted: true
   - 
-    id: 1
+    id: 2
     plugin: Base
     class: ItemTreeView
     mounted: true
@@ -90,12 +95,12 @@ views:
       selected: [ 1 ]
       expanded: [ 1, 2 ]
   - 
-    id: 2
+    id: 3
     plugin: Base
     class: MessageView
     mounted: true
   - 
-    id: 3
+    id: 4
     plugin: Base
     class: SceneView
     state: 
@@ -151,7 +156,7 @@ views:
       yzgridColor: [ 0.899999976, 0.899999976, 0.899999976, 1 ]
       dedicatedItemTreeViewChecks: false
   - 
-    id: 4
+    id: 5
     name: "Task"
     plugin: Base
     class: TaskView
@@ -159,13 +164,13 @@ views:
       layoutMode: horizontal
       isAutoMode: false
   - 
-    id: 5
+    id: 6
     plugin: Body
     class: BodyLinkView
     state: 
       showRotationMatrix: false
   - 
-    id: 6
+    id: 7
     plugin: Body
     class: JointSliderView
     state: 
@@ -177,27 +182,25 @@ views:
       slider: true
       labelOnLeft: true
   - 
-    id: 7
+    id: 8
     plugin: Body
     class: LinkSelectionView
     state: 
       listingMode: "Link List"
   - 
-    id: 8
+    id: 9
     name: "Nameserver"
     plugin: Corba
     class: NameServerView
     mounted: true
   - 
-    id: 9
+    id: 10
     name: "RTC Diagram"
     plugin: OpenRTM
     class: RTSDiagramView
     mounted: true
-    state: 
-      currentRTSItem: 3
   - 
-    id: 10
+    id: 11
     plugin: OpenRTM
     class: RTSNameServerView
     mounted: true
@@ -205,24 +208,24 @@ views:
       host: localhost
       port: 2809
   - 
-    id: 11
+    id: 12
     name: "RTC Properties"
     plugin: OpenRTM
     class: RTSPropertiesView
     mounted: true
   - 
-    id: 12
+    id: 13
     plugin: Python
     class: PythonConsoleView
     mounted: true
   - 
-    id: 13
+    id: 14
     name: "Control panel"
     plugin: TU::ControlPanel
     class: TU::v::ControlPaneView
     mounted: true
   - 
-    id: 14
+    id: 15
     name: "Image viewer"
     plugin: TU::ImageViewer
     class: TU::ImageViewer
@@ -309,43 +312,43 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 288, 1400 ]
+      sizes: [ 223, 1082 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 451, 451 ]
+          sizes: [ 353, 352 ]
           children: 
             - 
               type: pane
-              views: [ 1, 10 ]
-              current: 10
+              views: [ 2, 11 ]
+              current: 2
             - 
               type: pane
-              views: [ 0, 11, 8 ]
-              current: 0
+              views: [ 1, 12, 9 ]
+              current: 1
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 644, 258 ]
+          sizes: [ 503, 202 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 606, 788 ]
+              sizes: [ 467, 608 ]
               children: 
                 - 
                   type: pane
-                  views: [ 13, 9 ]
-                  current: 13
+                  views: [ 14, 10 ]
+                  current: 14
                 - 
                   type: pane
-                  views: [ 14 ]
-                  current: 14
+                  views: [ 15 ]
+                  current: 15
             - 
               type: pane
-              views: [ 2, 12 ]
-              current: 2
+              views: [ 3, 13 ]
+              current: 3
 layoutOfToolBars: 
   rows: 
     - 

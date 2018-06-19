@@ -22,8 +22,7 @@ add_executable(
 
 target_link_libraries(
     MultiImageViewerComp
-    TUIIDC++
-    TUv++
+    ${TUVPP_LIB}
     ${OPENRTM_LIBRARIES})
 
 install(TARGETS MultiImageViewerComp RUNTIME DESTINATION bin)

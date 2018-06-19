@@ -29,7 +29,7 @@ target_link_libraries(
 
 install(TARGETS V4L2MultiCameraComp RUNTIME DESTINATION bin)
 
-if(BUILD_CNOID_PLUGINS)
+if(CNOID_FOUND)
   add_cnoid_rtc(
       V4L2MultiCameraRTC
       ${idl_cpp_files}
