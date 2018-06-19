@@ -4,7 +4,7 @@
 #ifndef __TU_STEREORTC_H
 #define __TU_STEREORTC_H
 
-#include "Img.hh"
+#include "MultiImage.hh"
 #include <rtm/Manager.h>
 #include <rtm/DataFlowComponentBase.h>
 #include <rtm/CorbaPort.h>
@@ -22,40 +22,40 @@ namespace TU
 /************************************************************************
 *  static functions							*
 ************************************************************************/
-template <class T> static Img::PixelFormat
+template <class T> static MultiImage::PixelFormat
 pixelFormat()
 {
-    return Img::MONO_8;
+    return MultiImage::MONO_8;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<YUV411>()
 {
-    return Img::YUV_411;
+    return MultiImage::YUV_411;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<YUV422>()
 {
-    return Img::YUV_422;
+    return MultiImage::YUV_422;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<YUYV422>()
 {
-    return Img::YUYV_422;
+    return MultiImage::YUYV_422;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<YUV444>()
 {
-    return Img::YUV_444;
+    return MultiImage::YUV_444;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<RGB>()
 {
-    return Img::RGB_24;
+    return MultiImage::RGB_24;
 }
-template <> Img::PixelFormat
+template <> MultiImage::PixelFormat
 pixelFormat<float>()
 {
-    return Img::FLT;
+    return MultiImage::FLT;
 }
 	
 template <class SRC, class DST> static void
@@ -112,25 +112,25 @@ class StereoRTC : public RTC::DataFlowComponentBase
     void		stereoMatch()					;
     
   private:
-    mutable coil::Mutex			_mutex;
-    bool				_initialized;
-    bool				_binocular;
-    double				_scale;
-    Rectify				_rectify;
-    stereo_type				_stereo;
-    Image<pixel_type>			_images[3];
-    Image<pixel_type>			_rectifiedImages[3];
-    Image<float>			_disparityMap;
+    mutable coil::Mutex				_mutex;
+    bool					_initialized;
+    bool					_binocular;
+    double					_scale;
+    Rectify					_rectify;
+    stereo_type					_stereo;
+    Image<pixel_type>				_images[3];
+    Image<pixel_type>				_rectifiedImages[3];
+    Image<float>				_disparityMap;
 
-    std::string				_stereoParams;	// config var.
-    Img::TimedImages			_inImages;
-    RTC::InPort<Img::TimedImages>	_inImagesPort;
-    Img::TimedImages			_outRectifiedImages;
-    RTC::OutPort<Img::TimedImages>	_outRectifiedImagesPort;
-    Img::TimedImages			_outDisparityMap;
-    RTC::OutPort<Img::TimedImages>	_outDisparityMapPort;
-    v::CmdSVC_impl<StereoRTC>		_command;	// service provider
-    RTC::CorbaPort			_commandPort;	// service port
+    std::string					_stereoParams;	// config var.
+    MultiImage::TimedImages			_inImages;
+    RTC::InPort<MultiImage::TimedImages>	_inImagesPort;
+    MultiImage::TimedImages			_outRectifiedImages;
+    RTC::OutPort<MultiImage::TimedImages>	_outRectifiedImagesPort;
+    MultiImage::TimedImages			_outDisparityMap;
+    RTC::OutPort<MultiImage::TimedImages>	_outDisparityMapPort;
+    v::CmdSVC_impl<StereoRTC>			_command;
+    RTC::CorbaPort				_commandPort;
 };
 
 template <class STEREO, class PIXEL> RTC::ReturnCode_t

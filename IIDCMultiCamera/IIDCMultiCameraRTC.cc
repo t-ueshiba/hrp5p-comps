@@ -4,7 +4,7 @@
 #include <fstream>
 #include <cstdlib>			// for atoi()
 #include "TU/IIDCCameraArray.h"
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "CameraRTC.h"
 
 /************************************************************************
@@ -44,7 +44,8 @@ extern "C"
 void
 IIDCMultiCameraRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::CameraRTC<TU::IIDCCameraArray, Img::TimedImages>;
+    using	rtc_type = TU::CameraRTC<TU::IIDCCameraArray,
+					 MultiImage::TimedImages>;
     
     coil::Properties	profile(iidcmulticamera_spec);
     manager->registerFactory(profile,
@@ -55,13 +56,14 @@ IIDCMultiCameraRTCInit(RTC::Manager* manager)
 namespace TU
 {
 /************************************************************************
-*  class CameraRTC<IIDCCameraArray, Img::TimedImages>			*
+*  class CameraRTC<IIDCCameraArray, MultiImage::TimedImages>			*
 ************************************************************************/
 /*
  *  public member functions
  */
 template <>
-CameraRTC<IIDCCameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
+CameraRTC<IIDCCameraArray, MultiImage::TimedImages>
+::CameraRTC(RTC::Manager* manager)
     :super(manager),
      _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
@@ -76,7 +78,7 @@ CameraRTC<IIDCCameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
  *  private member functions
  */
 template <> void
-CameraRTC<IIDCCameraArray, Img::TimedImages>::initializeConfigurations()
+CameraRTC<IIDCCameraArray, MultiImage::TimedImages>::initializeConfigurations()
 {
     bindParameter("str_cameraName",
 		  _cameraName, IIDCCameraArray::DEFAULT_CAMERA_NAME);
@@ -89,8 +91,8 @@ CameraRTC<IIDCCameraArray, Img::TimedImages>::initializeConfigurations()
 }
 
 template <> template <> size_t
-CameraRTC<IIDCCameraArray, Img::TimedImages>
-::setImageFormat(const camera_type& camera, Img::Header& header)
+CameraRTC<IIDCCameraArray, MultiImage::TimedImages>
+::setImageFormat(const camera_type& camera, MultiImage::Header& header)
 {
     header.width  = camera.width();
     header.height = camera.height();
@@ -98,23 +100,23 @@ CameraRTC<IIDCCameraArray, Img::TimedImages>
     switch (camera.pixelFormat())
     {
       case IIDCCamera::MONO_8:
-	header.format = Img::MONO_8;
+	header.format = MultiImage::MONO_8;
 	header.size = header.width * header.height;
 	break;
       case IIDCCamera::YUV_411:
-	header.format = Img::YUV_411;
+	header.format = MultiImage::YUV_411;
 	header.size = header.width * header.height * 3 / 2;
 	break;
       case IIDCCamera::YUV_422:
-	header.format = Img::YUV_422;
+	header.format = MultiImage::YUV_422;
 	header.size = header.width * header.height * 2;
 	break;
       case IIDCCamera::YUV_444:
-	header.format = Img::YUV_444;
+	header.format = MultiImage::YUV_444;
 	header.size = header.width * header.height * 3;
 	break;
       case IIDCCamera::RGB_24:
-	header.format = Img::RGB_24;
+	header.format = MultiImage::RGB_24;
 	header.size = header.width * header.height * 3;
 	break;
       default:

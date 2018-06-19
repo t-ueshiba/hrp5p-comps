@@ -9,7 +9,7 @@ LIBRARY		= $(shell basename $(PWD))RTC
 
 VPATH		= ../TU/idl
 
-IDLS		= Img.idl Cmd.idl
+IDLS		= MultiImage.idl Cmd.idl
 
 INCDIRS		= -I. -I../include -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG #-DDEBUG

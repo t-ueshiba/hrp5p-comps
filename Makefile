@@ -9,10 +9,10 @@ SUBDIR	= IIDCMultiCamera		\
 	  ImageViewer			\
 	  TU				\
 	  VideoSynchronizer		\
-#	  TUMultiImageViewerPlugin	\
+	  TUMultiImageViewerPlugin	\
 	  TUImageViewerPlugin		\
 	  TUControlPanelPlugin		\
-	  SADStereo			\
+#	  SADStereo			\
 	  GFStereo
 
 TARGETS	= all clean depend install other

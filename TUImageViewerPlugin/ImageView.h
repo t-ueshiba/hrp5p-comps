@@ -1,1 +1,1 @@
-../TUMultiImageViewerPlugin/ImageView.h
+../include/ImageView.h

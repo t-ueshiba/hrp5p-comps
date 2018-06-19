@@ -1,7 +1,7 @@
 /*
  *  $Id$
  */
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "MyCmdWindow.h"
 
 namespace TU
@@ -10,8 +10,9 @@ namespace TU
 *  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
-ImageViewerRTC<Img::TimedImages>
-::setImages(v::MyCmdWindow<Img::TimedImages, Img::PixelFormat>& win) const
+ImageViewerRTC<MultiImage::TimedImages>
+::setImages(v::MyCmdWindow<MultiImage::TimedImages,
+	    MultiImage::PixelFormat>& win) const
 {
     std::lock_guard<std::mutex>	lock(_mutex);
 
@@ -31,34 +32,34 @@ ImageViewerRTC<Img::TimedImages>
 	{
 	    switch (header.format)
 	    {
-	      case Img::MONO_8:
+	      case MultiImage::MONO_8:
 		canvas.reset(
-		    new v::MyCanvas<u_char, Img::PixelFormat>(
+		    new v::MyCanvas<u_char, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
-	      case Img::YUV_411:
+	      case MultiImage::YUV_411:
 		canvas.reset(
-		    new v::MyCanvas<TU::YUV411, Img::PixelFormat>(
+		    new v::MyCanvas<TU::YUV411, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
-	      case Img::YUV_422:
+	      case MultiImage::YUV_422:
 		canvas.reset(
-		    new v::MyCanvas<TU::YUV422, Img::PixelFormat>(
+		    new v::MyCanvas<TU::YUV422, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
-	      case Img::YUYV_422:
+	      case MultiImage::YUYV_422:
 		canvas.reset(
-		    new v::MyCanvas<TU::YUYV422, Img::PixelFormat>(
+		    new v::MyCanvas<TU::YUYV422, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
-	      case Img::YUV_444:
+	      case MultiImage::YUV_444:
 		canvas.reset(
-		    new v::MyCanvas<TU::YUV444, Img::PixelFormat>(
+		    new v::MyCanvas<TU::YUV444, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
-	      case Img::RGB_24:
+	      case MultiImage::RGB_24:
 		canvas.reset(
-		    new v::MyCanvas<TU::RGB, Img::PixelFormat>(
+		    new v::MyCanvas<TU::RGB, MultiImage::PixelFormat>(
 			win, header.width, header.height, header.format));
 		break;
 	      default:

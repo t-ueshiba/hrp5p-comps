@@ -1,7 +1,7 @@
 /*
  *  $Id$
  */
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "ImageViewer.h"
 
 /************************************************************************
@@ -30,10 +30,10 @@ namespace TU
 /************************************************************************
 *  global functions							*
 ************************************************************************/
-template <> ImageViewerRTC<Img::TimedImages>*
-createImageViewerRTC<Img::TimedImages>()
+template <> ImageViewerRTC<MultiImage::TimedImages>*
+createImageViewerRTC<MultiImage::TimedImages>()
 {
-    using rtc_type = ImageViewerRTC<Img::TimedImages>;
+    using rtc_type = ImageViewerRTC<MultiImage::TimedImages>;
     
   // OpenRTMPluginによって立てられた既存のRTCマネージャを獲得
     RTC::Manager&	manager = RTC::Manager::instance();
@@ -51,8 +51,8 @@ createImageViewerRTC<Img::TimedImages>()
 *  class ImageViewerRTC<IMAGES>						*
 ************************************************************************/
 template <> template <> bool
-ImageViewerRTC<Img::TimedImages>
-::setImages(ImageViewer<Img::TimedImages>& imageViewer) const
+ImageViewerRTC<MultiImage::TimedImages>
+::setImages(ImageViewer<MultiImage::TimedImages>& imageViewer) const
 {
     std::unique_lock<std::mutex>	lock(_mutex);
 

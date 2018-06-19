@@ -1,12 +1,12 @@
 /*
  *  $Id$
  */
-#ifndef TU_IMG_IDL
-#define TU_IMG_IDL
+#ifndef TU_MULTIIMAGE_IDL
+#define TU_MULTIIMAGE_IDL
 
 #include <BasicDataType.idl>
 
-module Img
+module MultiImage
 {
 typedef double	Matrix34d[3][4];
 
@@ -37,4 +37,4 @@ struct TimedImages
 
 };
 
-#endif	/* !TU_IMG_IDL	*/
+#endif	/* !TU_MULTIIMAGE_IDL	*/

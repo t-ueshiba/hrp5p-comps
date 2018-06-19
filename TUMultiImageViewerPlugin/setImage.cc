@@ -3,17 +3,17 @@
  */
 #include "ImageView.h"
 #include "TU/Image++.h"
-#include "Img.hh"
+#include "MultiImage.hh"
 
 namespace TU
 {
 template <> void
-ImageView::setImage(Img::PixelFormat pixelFormat,
+ImageView::setImage(MultiImage::PixelFormat pixelFormat,
 		    size_t width, size_t height, const uchar* data)
 {
     switch (pixelFormat)
     {
-      case Img::MONO_8:
+      case MultiImage::MONO_8:
 	_data.resize(width*height);
 	std::copy_n(data, width*height, _data.data());
 	_qimage = QImage(_data.data(),
@@ -21,7 +21,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	_qimage.setColorTable(_colors);
 	break;
 	
-      case Img::YUV_411:
+      case MultiImage::YUV_411:
 	_data.resize(3*width*height);
 	std::copy_n(make_pixel_iterator(reinterpret_cast<const YUV411*>(data)),
 		    width*height/4,
@@ -31,7 +31,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	_qimage.setColorTable(_colors);
 	break;
 
-      case Img::YUV_422:
+      case MultiImage::YUV_422:
 	_data.resize(3*width*height);
 	std::copy_n(make_pixel_iterator(reinterpret_cast<const YUV422*>(data)),
 		    width*height/2,
@@ -41,7 +41,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	_qimage.setColorTable(_colors);
 	break;
 
-      case Img::YUYV_422:
+      case MultiImage::YUYV_422:
 	_data.resize(3*width*height);
 	std::copy_n(make_pixel_iterator(reinterpret_cast<const YUYV422*>(data)),
 		    width*height/2,
@@ -51,7 +51,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	_qimage.setColorTable(_colors);
 	break;
 
-      case Img::YUV_444:
+      case MultiImage::YUV_444:
 	_data.resize(3*width*height);
 	std::copy_n(make_pixel_iterator(reinterpret_cast<const YUV444*>(data)),
 		    width*height,
@@ -61,7 +61,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
 	_qimage.setColorTable(_colors);
 	break;
 
-      case Img::FLT:
+      case MultiImage::FLT:
       {
 	auto	p = reinterpret_cast<const float*>(data);
 
@@ -81,7 +81,7 @@ ImageView::setImage(Img::PixelFormat pixelFormat,
       }
 	break;
 
-      case Img::RGB_24:
+      case MultiImage::RGB_24:
 	_data.resize(3*width*height);
 	std::copy_n(data, 3*width*height, _data.data());
 	_qimage = QImage(_data.data(),

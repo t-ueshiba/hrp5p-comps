@@ -2,7 +2,7 @@
  *  $Id$
  */
 #include <rtm/Manager.h>
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "MyCmdWindow.h"
 
 /************************************************************************
@@ -35,7 +35,7 @@ extern "C"
 static void
 MultiImageViewerRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::ImageViewerRTC<Img::TimedImages>;
+    using	rtc_type = TU::ImageViewerRTC<MultiImage::TimedImages>;
     
     coil::Properties	profile(multiimageviewer_spec);
     manager->registerFactory(profile,
@@ -62,8 +62,8 @@ main(int argc, char** argv)
 
     try
     {
-	using image_t	= Img::TimedImages;
-	using format_t	= Img::PixelFormat;
+	using image_t	= MultiImage::TimedImages;
+	using format_t	= MultiImage::PixelFormat;
 	
 	const auto	manager = RTC::Manager::init(argc, argv);
 	manager->setModuleInitProc(MyModuleInit);

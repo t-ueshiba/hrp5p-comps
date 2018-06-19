@@ -2,54 +2,55 @@
  *  $Id$
  */
 #include <iostream>
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "CameraRTC.h"
 
 namespace TU
 {
 template <> void
-saveImageHeader<Img::Header>(std::ostream& out, const Img::Header& header)
+saveImageHeader<MultiImage::Header>(std::ostream& out,
+				    const MultiImage::Header& header)
 {
     using namespace	std;
     
-    if (header.format == Img::RGB_24)
+    if (header.format == MultiImage::RGB_24)
 	out << "P6" << endl;
     else
 	out << "P5" << endl;
 
     switch (header.format)
     {
-      case Img::MONO_8:
+      case MultiImage::MONO_8:
 	out << "# PixelLenth: " << 1 << endl
 	    << "# DataType: "   << "Char" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::YUV_411:
+      case MultiImage::YUV_411:
 	out << "# PixelLenth: " << 2 << endl
 	    << "# DataType: "   << "YUV411" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::YUV_422:
+      case MultiImage::YUV_422:
 	out << "# PixelLenth: " << 2 << endl
 	    << "# DataType: "   << "YUV422" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::YUYV_422:
+      case MultiImage::YUYV_422:
 	out << "# PixelLenth: " << 2 << endl
 	    << "# DataType: "   << "YUYV422" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::YUV_444:
+      case MultiImage::YUV_444:
 	out << "# PixelLenth: " << 3 << endl
 	    << "# DataType: "   << "YUV444" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::RGB_24:
+      case MultiImage::RGB_24:
 	out << "# PixelLenth: " << 3 << endl
 	    << "# DataType: "   << "RGB24" << endl
 	    << "# Sign: "	<< "Unsigned" << endl;
 	break;
-      case Img::FLT:
+      case MultiImage::FLT:
 	out << "# PixelLenth: " << 4 << endl
 	    << "# DataType: "   << "Float" << endl
 	    << "# Sign: "	<< "Signed" << endl;

@@ -2,7 +2,6 @@
  *  $Id$
  */
 #include "TU/IIDCCameraArray.h"
-#include "Img.hh"
 #include "CameraRTC.h"
 
 namespace TU

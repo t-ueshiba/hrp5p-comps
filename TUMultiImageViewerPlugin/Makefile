@@ -7,9 +7,9 @@
 #PROGRAM		= $(shell basename $(PWD))
 LIBRARY		= libCnoid$(shell basename $(PWD))
 
-VPATH		= $(PREFIX)/include/TU/idl
+VPATH		= ../TU/idl ../TU/include
 
-IDLS		= Img.idl
+IDLS		= MultiImage.idl
 MOCHDRS		= ImageView.h
 
 #CXX		= c++

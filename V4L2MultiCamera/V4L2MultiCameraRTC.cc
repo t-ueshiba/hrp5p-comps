@@ -4,7 +4,7 @@
 #include <fstream>
 #include <cstdlib>			// for atoi()
 #include "TU/V4L2CameraArray.h"
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "CameraRTC.h"
 
 /************************************************************************
@@ -44,7 +44,8 @@ extern "C"
 void
 V4L2MultiCameraRTCInit(RTC::Manager* manager)
 {
-    using	rtc_type = TU::CameraRTC<TU::V4L2CameraArray, Img::TimedImages>;
+    using	rtc_type = TU::CameraRTC<TU::V4L2CameraArray,
+					 MultiImage::TimedImages>;
     
     coil::Properties	profile(v4l2multicamera_spec);
     manager->registerFactory(profile,
@@ -55,13 +56,14 @@ V4L2MultiCameraRTCInit(RTC::Manager* manager)
 namespace TU
 {
 /************************************************************************
-*  class CameraRTC<V4L2CameraArray, Img::TimedImages>			*
+*  class CameraRTC<V4L2CameraArray, MultiImage::TimedImages>			*
 ************************************************************************/
 /*
  *  public member functions
  */
 template <>
-CameraRTC<V4L2CameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
+CameraRTC<V4L2CameraArray, MultiImage::TimedImages>
+::CameraRTC(RTC::Manager* manager)
     :super(manager),
      _cameraName(V4L2CameraArray::DEFAULT_CAMERA_NAME),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
@@ -76,7 +78,7 @@ CameraRTC<V4L2CameraArray, Img::TimedImages>::CameraRTC(RTC::Manager* manager)
  *  private member functions
  */
 template <> void
-CameraRTC<V4L2CameraArray, Img::TimedImages>::initializeConfigurations()
+CameraRTC<V4L2CameraArray, MultiImage::TimedImages>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig",
 		  _cameraName, V4L2CameraArray::DEFAULT_CAMERA_NAME);
@@ -89,8 +91,8 @@ CameraRTC<V4L2CameraArray, Img::TimedImages>::initializeConfigurations()
 }
 
 template <> template <> size_t
-CameraRTC<V4L2CameraArray, Img::TimedImages>
-::setImageFormat(const camera_type& camera, Img::Header& header)
+CameraRTC<V4L2CameraArray, MultiImage::TimedImages>
+::setImageFormat(const camera_type& camera, MultiImage::Header& header)
 {
     header.width  = camera.width();
     header.height = camera.height();
@@ -98,19 +100,19 @@ CameraRTC<V4L2CameraArray, Img::TimedImages>
     switch (camera.pixelFormat())
     {
       case V4L2Camera::GREY:
-	header.format = Img::MONO_8;
+	header.format = MultiImage::MONO_8;
 	header.size = header.width * header.height;
 	break;
       case V4L2Camera::YUYV:
-	header.format = Img::YUYV_422;
+	header.format = MultiImage::YUYV_422;
 	header.size = header.width * header.height * 2;
 	break;
       case V4L2Camera::UYVY:
-	header.format = Img::YUV_422;
+	header.format = MultiImage::YUV_422;
 	header.size = header.width * header.height * 2;
 	break;
       case V4L2Camera::RGB24:
-	header.format = Img::RGB_24;
+	header.format = MultiImage::RGB_24;
 	header.size = header.width * header.height * 3;
 	break;
       default:

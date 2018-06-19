@@ -3,7 +3,7 @@
  */
 #include <cnoid/Plugin>
 #include <cnoid/ViewManager>
-#include "Img.hh"
+#include "MultiImage.hh"
 #include "ImageViewer.h"
 
 namespace TU
@@ -28,7 +28,7 @@ MultiImageViewerPlugin::MultiImageViewerPlugin()
 bool
 MultiImageViewerPlugin::initialize()
 {
-    using	viewer_type = ImageViewer<Img::TimedImages>;
+    using	viewer_type = ImageViewer<MultiImage::TimedImages>;
     
     viewManager().registerClass<viewer_type>(
 		      "TU::MultiImageViewer", "Multi image viewer",

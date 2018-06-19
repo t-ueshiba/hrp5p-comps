@@ -9,7 +9,7 @@ LIBRARY		= $(shell basename $(PWD))RTC
 
 VPATH		= ../TU/idl
 
-IDLS		= Img.idl
+IDLS		= MultiImage.idl
 MOCHDRS		=
 
 INCDIRS		= -I. -I../include -I$(PREFIX)/include

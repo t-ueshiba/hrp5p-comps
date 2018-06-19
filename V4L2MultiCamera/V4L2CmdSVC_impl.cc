@@ -3,7 +3,6 @@
  */
 #include <boost/foreach.hpp>
 #include "TU/V4L2CameraArray.h"
-#include "Img.hh"
 #include "CameraRTC.h"
 
 namespace TU
