@@ -1,4 +1,3 @@
-
 # @author Shin'ichiro Nakaoka
 
 set(OPENRTM_FOUND FALSE)
