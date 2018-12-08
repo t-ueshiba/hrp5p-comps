@@ -10,7 +10,7 @@ items:
       plugin: OpenRTM
       class: RTCItem
       data: 
-        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCCameraRTC.dylib"
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCCameraRTC.so"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
         periodicRate: 1000

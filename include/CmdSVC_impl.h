@@ -39,20 +39,21 @@ class CmdSVC_impl : public virtual POA_Cmd::Controller,
   //! カメラ操作コマンド
     enum
     {
-	c_RecordImages,		//!< 録画
-	c_SaveConfigToFile,	//!< 設定ファイルへの保存
-	c_SaveConfig,		//!< メモリへの設定の保存
-	c_RestoreConfig,	//!< メモリからの設定の読み込み
-	c_ContinuousShot,	//!< 画像ストリームの起動/停止
-	c_Format,		//!< 画像フォーマットの選択
-	c_CameraSelection,	//!< 操作対象カメラの選択
-	c_AllCameras,		//!< 全カメラ一斉操作モード
-	c_U0,			//!< ROIの左上隅横座標
-	c_V0,			//!< ROIの左上隅縦座標
-	c_Width,		//!< ROIの幅
-	c_Height,		//!< ROIの高さ
-	c_PacketSize,		//!< パケットサイズ
-	c_PixelFormat,		//!< ROIの画素フォーマット
+	c_RecordImages,			//!< 録画
+	c_SaveConfigToFile,		//!< ファイルへの設定の保存
+	c_RestoreConfigFromFile,	//!< ファイルからの設定の読み込み
+	c_SaveConfig,			//!< メモリへの設定の保存
+	c_RestoreConfig,		//!< メモリからの設定の読み込み
+	c_ContinuousShot,		//!< 画像ストリームの起動/停止
+	c_Format,			//!< 画像フォーマットの選択
+	c_CameraSelection,		//!< 操作対象カメラの選択
+	c_AllCameras,			//!< 全カメラ一斉操作モード
+	c_U0,				//!< ROIの左上隅横座標
+	c_V0,				//!< ROIの左上隅縦座標
+	c_Width,			//!< ROIの幅
+	c_Height,			//!< ROIの高さ
+	c_PacketSize,			//!< パケットサイズ
+	c_PixelFormat,			//!< ROIの画素フォーマット
     };
     
   public:
@@ -137,7 +138,13 @@ CmdSVC_impl<CAMERAS>::setValues(const Cmd::Values& vals)
 	break;
 	
       case c_SaveConfigToFile:		// ファイルへカメラ設定を保存
-	_rtc.cameras().save();
+	_rtc.saveConfigToFile();
+	break;
+
+      case c_RestoreConfigFromFile:	// メモリからカメラ設定を読み込み
+	_rtc.restoreConfigFromFile();
+	ids.length(1);
+	ids[0] = {CORBA::Long(CmdDef::c_RefreshAll), 0};
 	break;
 
       case c_SaveConfig:		// メモリへカメラ設定を保存
@@ -259,10 +266,6 @@ CmdSVC_impl<CAMERAS>::createCmds()
     cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_RecordImages,
 			  "Rec.", 2, 0));
 
-  // ファイルへのカメラ設定保存コマンドの生成
-    cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfigToFile,
-			  "Save conf.", 3, 0));
-
     if (ncameras > 1)
     {
       // 操作対象カメラ選択コマンドの生成
@@ -277,6 +280,14 @@ CmdSVC_impl<CAMERAS>::createCmds()
 	cmds.push_back(CmdDef(CmdDef::C_ToggleButton, c_AllCameras,
 			      "all", 1, 1));
     }
+
+  // ファイルへのカメラ設定保存コマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_Button, c_SaveConfigToFile,
+			  "Save conf.", 0, 2));
+
+  // ファイルからのカメラ設定読み込みコマンドの生成
+    cmds.push_back(CmdDef(CmdDef::C_Button, c_RestoreConfigFromFile,
+			  "Restore conf.", 1, 2));
 
   // 属性操作コマンドの生成
     appendFeatureCmds(cmds);

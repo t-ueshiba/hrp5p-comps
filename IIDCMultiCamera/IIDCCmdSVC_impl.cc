@@ -40,7 +40,7 @@ CameraRTCBase<IIDCCameraArray>::setFormat(const Cmd::Values& vals)
 				   vals[2].i, vals[3].i, vals[4].i, vals[5].i)
 		  .setFormat_7_PixelFormat(format7, pixelFormat)
 		  .setFormat_7_PacketSize(format7, vals[6].i)
-		  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
+          	  .setFormatAndFrameRate(format7, IIDCCamera::FrameRate_x);
     }
 
     allocateImages();

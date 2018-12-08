@@ -1,40 +1,42 @@
-import sys,os,datetime
-
-import rtm
+import sys,os,datetime,socket,rtm
 from rtm import *
 
-import socket
-
-rtm.nsport = 2809
+def setNameserver(nshost=None, nsport=2809):
+  if nshost == None:
+    rtm.nshost = socket.gethostname()
+  else:
+    rtm.nshost = nshost
+  rtm.nsport = nsport
+  nsloc = "corbaloc:iiop:%s:%d/NameService" % (rtm.nshost, rtm.nsport)
+  rtm.rootnc = rtm.orb.string_to_object(nsloc)._narrow(CosNaming.NamingContext)
+      
+try:
+  import cnoid.Corba
+  rtm.orb = cnoid.Corba.getORB()
+except:
+  rtm.initCORBA()
 
 try:
-    # for choreonoid
-    import cnoid.Corba
+  setNameserver()
 
-    rtm.orb = cnoid.Corba.getORB()
-    if rtm.nshost == None:
-        rtm.nshost = socket.gethostname()
-    nsloc = "corbaloc:iiop:%s:%d/NameService" % (rtm.nshost, rtm.nsport)
-    print nsloc
-    rtm.rootnc = rtm.orb.string_to_object(nsloc)._narrow(CosNaming.NamingContext)
-    sys.argv = []
-    inChoreonoid = True
-except:
-    rtm.initCORBA()
-    inChoreonoid = False
+  camera = rtm.findRTC("IIDCMultiCamera0")
+  if camera == None:
+    raise Exception("Failed to find IIDCMultiCamera0")
+  viewer = rtm.findRTC("MultiImageViewer0")
+  if viewer == None:
+    raise Exception("Failed to find MultiImageViewer0")
+  cpanel = rtm.findRTC("ControlPanel0")
+  if cpanel == None:
+    raise Exception("Failed to find ControlPanel0")
 
-camera = rtm.findRTC("IIDCMultiCamera0")
-viewer = rtm.findRTC("MultiImageViewer0")
-cpanel = rtm.findRTC("ControlPanel0")
+  connectPorts(camera.port("TimedImages"), viewer.port("images"))
+  connectPorts(cpanel.port("Command"),     camera.port("Command"))
 
-connectPorts(camera.port("TimedImages"), viewer.port("images"))
-connectPorts(cpanel.port("Command"),     camera.port("Command"))
-
-#rtm.serializeComponents([camera, viewer, cpanel])
-
-camera.start()
-viewer.start()
-cpanel.start()
+  camera.start()
+  viewer.start()
+  cpanel.start()
+except Exception as err:
+  print(err)
 
 
     

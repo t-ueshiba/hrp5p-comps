@@ -13,7 +13,6 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_RECFILE_PREFIX	"/tmp/IIDCCameraRTC"
-#define DEFAULT_DEVICE_NAME	"/dev/video0"
 #define DEFAULT_START_WITH_FLOW	"1"
 
 // Module specification
@@ -30,7 +29,6 @@ static const char* v4l2camera_spec[] =
     "max_instance",			"0",
     "language",				"C++",
     "lang_type",			"compile",
-    "conf.default.str_deviceName",	DEFAULT_DEVICE_NAME,
     "conf.default.str_recFilePrefix",	DEFAULT_RECFILE_PREFIX,
     "conf.default.int_startWithFlow",	DEFAULT_START_WITH_FLOW,
     ""
@@ -56,24 +54,6 @@ IIDCCameraRTCInit(RTC::Manager* manager)
 namespace TU
 {
 /************************************************************************
-*  class CameraRTC<IIDCCameraArray>					*
-************************************************************************/
-template <> inline RTC::Time
-CameraRTCBase<IIDCCameraArray>::getTimestamp(const camera_type& camera)
-{
-    const auto	timestamp   = camera.getTimestamp();
-#ifdef DEBUG
-    const auto	arrivaltime = camera.getArrivaltime();
-    std::cerr << "timestamp: " << timestamp << '\t'
-	      << "arrival: "   << arrivaltime << std::endl;
-#endif
-    const std::chrono::nanoseconds	nsec = timestamp.time_since_epoch();
-    
-    return {CORBA::ULong(nsec.count() / 1000000000),
-	    CORBA::ULong(nsec.count() % 1000000000)};
-}
-
-/************************************************************************
 *  class CameraRTC<IIDCCameraArray, Img::TimedCameraImage>		*
 ************************************************************************/
 /*
@@ -83,11 +63,12 @@ template <> void
 CameraRTC<IIDCCameraArray, Img::TimedCameraImage>::initializeConfigurations()
 {
     bindParameter("str_cameraConfig",
-		  _cameraName, DEFAULT_DEVICE_NAME);
+		  _cameraName, IIDCCameraArray::DEFAULT_CAMERA_NAME);
     bindParameter("str_recFilePrefix",
 		  _recFilePrefix, DEFAULT_RECFILE_PREFIX);
     bindParameter("int_startWithFlow",
 		  _startWithFlow, DEFAULT_START_WITH_FLOW);
+    _cameras.setName(_cameraName.c_str());
 }
 
 template <> void
@@ -152,7 +133,7 @@ template <>
 CameraRTC<IIDCCameraArray, Img::TimedCameraImage>
 ::CameraRTC(RTC::Manager* manager)
     :super(manager),
-     _cameraName(DEFAULT_DEVICE_NAME),
+     _cameraName(IIDCCameraArray::DEFAULT_CAMERA_NAME),
      _recFilePrefix(DEFAULT_RECFILE_PREFIX),
      _syncedSnap(false),
      _startWithFlow(atoi(DEFAULT_START_WITH_FLOW)),
@@ -170,9 +151,16 @@ CameraRTC<IIDCCameraArray, Img::TimedCameraImage>
 #endif
     try
     {
-      // 設定ファイルを読み込んでカメラを生成・セットアップ
+	std::ifstream	in(_cameras.configFile().c_str());
+	if (!in)
+	    throw std::runtime_error("Cannot open configuration file: "
+				     + _cameras.configFile());
+	const auto	node = YAML::Load(in);
+	if (node.size() == 0)
+	    throw std::runtime_error("Empty configuration file: "
+				     + _cameras.configFile());
 	_cameras.resize(1);
-	_cameras[0].initialize();
+	node[0] >> _cameras[0];
 	allocateImages();		// 画像データ領域を確保
 	embedTimestamp(true);		// 撮影時刻の記録を初期化
 	continuousShot(_startWithFlow);	// 連続撮影/停止のいずれかで開始
