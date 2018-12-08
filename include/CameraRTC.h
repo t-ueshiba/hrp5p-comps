@@ -186,12 +186,16 @@ class CameraRTC : public CameraRTCBase<CAMERAS>
 template <class CAMERAS, class IMAGES> void
 CameraRTC<CAMERAS, IMAGES>::saveConfigToFile() const
 {
+    std::lock_guard<std::mutex>	lock(_mutex);
+
     _cameras.save();
 }
     
 template <class CAMERAS, class IMAGES> void
 CameraRTC<CAMERAS, IMAGES>::restoreConfigFromFile()
 {
+    std::lock_guard<std::mutex>	lock(_mutex);
+
     _cameras.restore();
 }
     

@@ -9,7 +9,7 @@ set(CMAKE_CXX_EXTENSIONS	OFF)
 set(CMAKE_CXX_FLAGS_RELEASE	"-Wall -O3")
 set(CMAKE_CXX_FLAGS_DEBUG	"-g")
 set(CMAKE_BUILD_TYPE		Release)
-add_definitions(-DNDEBUG -DDEBUG)
+add_definitions(-DNDEBUG)
 
 include(FindPkgConfig)
 include(CheckIncludeFiles)
