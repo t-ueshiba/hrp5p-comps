@@ -11,5 +11,7 @@ install(FILES
     V4L2Camera-HRP2KAI.py
     SyncV4L2Camera-HRP2KAI.cnoid
     SyncV4L2Camera-HRP2KAI.py
+    SyncLentiMarkV4L2Camera-HRP2KAI.cnoid
+    SyncLentiMarkV4L2Camera-HRP2KAI.py
     DESTINATION $ENV{HOME}/cnoid_project
 )
