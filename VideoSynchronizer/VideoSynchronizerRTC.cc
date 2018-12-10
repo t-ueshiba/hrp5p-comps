@@ -8,6 +8,7 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_BUFFER_SIZE	"100"
+#define DEFAULT_VERBOSE		"0"
 
 // Module specification
 static const char* videosynchronizer_spec[] =
@@ -24,6 +25,7 @@ static const char* videosynchronizer_spec[] =
     "language",				"C++",
     "lang_type",			"compile",
     "conf.default.int_bufferSize",	DEFAULT_BUFFER_SIZE,
+    "conf.default.int_verbose",		DEFAULT_VERBOSE,
     ""				// <-- Important! End of Spec. mark
 };
 
@@ -47,7 +49,6 @@ VideoSynchronizerRTCInit(RTC::Manager* manager)
 
 namespace TU
 {
-#ifdef DEBUG
 std::ostream&
 operator <<(std::ostream& out, const RTC::TimedDoubleSeq& q)
 {
@@ -58,13 +59,13 @@ operator <<(std::ostream& out, const RTC::TimedDoubleSeq& q)
   */
     return out;
 }
-#endif
 
 template <> void
 SynchronizerRTC<Img::TimedCameraImage, RTC::TimedDoubleSeq>
 ::initializeConfigurations()
 {
     bindParameter("int_bufferSize", _bufSize, DEFAULT_BUFFER_SIZE);
+    bindParameter("int_verbose",    _verbose, DEFAULT_VERBOSE);
 }
     
 }

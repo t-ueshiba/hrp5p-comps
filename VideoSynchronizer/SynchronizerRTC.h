@@ -12,9 +12,7 @@
 #include <boost/circular_buffer.hpp>
 #include <chrono>
 #include <mutex>
-#ifdef DEBUG
-#  include "RTCTime.h"
-#endif
+#include "RTCTime.h"
 
 namespace TU
 {
@@ -61,6 +59,7 @@ class SynchronizerRTC : public RTC::DataFlowComponentBase
     RTC::OutPort<primary_type>			_pOut;
     secondary_type				_qSelected;
     RTC::OutPort<secondary_type>		_qOut;
+    bool					_verbose;
 };
 
 template <class PRIMARY, class SECONDARY>
@@ -74,7 +73,8 @@ SynchronizerRTC<PRIMARY, SECONDARY>::SynchronizerRTC(RTC::Manager* manager)
      _qBuf(_bufSize),
      _pOut("primaryOut", _p),
      _qSelected(),
-     _qOut("secondaryOut", _qSelected)
+     _qOut("secondaryOut", _qSelected),
+     _verbose(false)
 {
 }
 
@@ -131,38 +131,37 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
 template <class PRIMARY, class SECONDARY> bool
 SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
 {
-#ifdef DEBUG
     static int	n = 0;
-    if (n % 10 == 0)
-    {
-	if (_qBuf.empty())
-	    return false;
+    if (_verbose)
+	if (n % 10 == 0)
+	{
+	    if (_qBuf.empty())
+		return false;
 
-	std::cerr <<   "Search     " << tm
-		  << "\n       in [" << _qBuf.front().tm
-		  << ", " << _qBuf.back().tm << "]"
-		  << std::endl;
-    }
-#endif
+	    std::cerr <<   "Search " << tm
+		      << "\n   in [" << _qBuf.front().tm
+		      << ", " << _qBuf.back().tm << "]"
+		      << std::endl;
+	}
+
     const auto	q = std::upper_bound(_qBuf.begin(), _qBuf.end(),
 				     nsec(tm), comp);
 
     if (q == _qBuf.begin() || q == _qBuf.end())
     {
-#ifdef DEBUG
-	std::cerr << "Failed to sync.\n" << std::endl;
-#endif
+	if (_verbose)
+	    std::cerr << "Failed to sync.\n" << std::endl;
 	return false;
     }
 
-#ifdef DEBUG
-    if (n % 10 == 0)
+    if (_verbose)
     {
-	std::cerr << "Selected  [" << (q-1)->tm << ", " << q->tm << "]\n"
-		  << std::endl;
+	if (n % 10 == 0)
+	    std::cerr << "Found [" << (q-1)->tm << ", " << q->tm << "]\n"
+		      << std::endl;
+	++n;
     }
-    ++n;
-#endif
+
     _qSelected = *q;
     return true;
 }

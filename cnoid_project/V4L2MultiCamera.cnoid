@@ -6,46 +6,22 @@ items:
   children: 
     - 
       id: 1
-      name: "RTSystem"
+      name: "V4L2MultiCameraRTC"
       plugin: OpenRTM
-      class: RTSystemItem
+      class: RTCItem
       data: 
-        AutoConnection: true
-        RTSComps: 
-          - 
-            name: ImageViewer0
-            pos: [ 92, -106 ]
-            InPorts: 
-              - 
-                name: ImageViewer0.images
-                isServicePort: false
-          - 
-            name: V4L2Camera0
-            pos: [ -397, -111 ]
-            OutPorts: 
-              - 
-                name: V4L2Camera0.Command
-                isServicePort: true
-              - 
-                name: V4L2Camera0.TimedCameraImage
-                isServicePort: false
-        RTSConnections: 
-          - 
-            name: V4L2Camera0.TimedCameraImage_ImageViewer0.images
-            sourceRtcName: V4L2Camera0
-            sourcePortName: V4L2Camera0.TimedCameraImage
-            targetRtcName: ImageViewer0
-            targetPortName: ImageViewer0.images
-            dataflow: push
-            subscription: flush
-            position: [ -267, -92, -262, -92, -51, -92, -51, -87, 160, -87, 165, -87 ]
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/V4L2MultiCameraRTC.so"
+        baseDirectory: "RTC directory"
+        periodicType: PeriodicExecutionContext
+        periodicRate: 50
+        activation: false
     - 
       id: 2
-      name: "SyncV4L2Camera-HRP2KAI.py"
+      name: "V4L2MultiCamera.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/SyncV4L2Camera-HRP2KAI.py"
+        file: "${PROJECT_DIR}/V4L2MultiCamera.py"
         executionOnLoading: true
         backgroundExecution: false
 views: 
@@ -60,7 +36,6 @@ views:
     class: ItemTreeView
     mounted: true
     state: 
-      selected: [ 2 ]
       expanded: [ 1 ]
   - 
     id: 2
@@ -107,7 +82,7 @@ views:
         - 
           camera: [ System, Perspective ]
           isCurrent: true
-          fieldOfView: 0.698132
+          fieldOfView: 0.6978
           near: 0.01
           far: 100
           eye: [ 4, 2, 1.5 ]
@@ -163,43 +138,34 @@ views:
     mounted: true
   - 
     id: 9
-    plugin: Multicopter
-    class: MulticopterMonitorView
-  - 
-    id: 10
-    name: "RTC Diagram"
-    plugin: OpenRTM
-    class: RTSDiagramView
-  - 
-    id: 11
     plugin: OpenRTM
     class: RTSNameServerView
     mounted: true
     state: 
-      host: hrp2001v
+      host: localhost
       port: 2809
   - 
-    id: 12
+    id: 10
     name: "RTC Properties"
     plugin: OpenRTM
     class: RTSPropertiesView
     mounted: true
   - 
-    id: 13
+    id: 11
     plugin: Python
     class: PythonConsoleView
     mounted: true
   - 
-    id: 14
+    id: 12
     name: "Control panel"
     plugin: TU::ControlPanel
     class: TU::v::ControlPaneView
     mounted: true
   - 
-    id: 15
-    name: "Image viewer"
-    plugin: TU::ImageViewer
-    class: TU::ImageViewer
+    id: 13
+    name: "Multi image viewer"
+    plugin: TU::MultiImageViewer
+    class: TU::MultiImageViewer
     mounted: true
 toolbars: 
   "TimeBar": 
@@ -248,7 +214,7 @@ toolbars:
     balancerIterations: 2
     plainBalancerMode: false
     boundaryConditionType: position
-    boundarySmootherType: off
+    boundarySmootherType: quintic
     boundarySmootherTime: 0.5
     boundaryCmAdjustment: false
     boundaryCmAdjustmentTime: 1
@@ -283,53 +249,53 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 234, 710 ]
+      sizes: [ 364, 1550 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 387, 387 ]
+          sizes: [ 459, 458 ]
           children: 
             - 
               type: pane
-              views: [ 1, 11 ]
+              views: [ 1, 9 ]
               current: 1
             - 
               type: pane
-              views: [ 0, 12, 8 ]
+              views: [ 0, 10, 8 ]
               current: 0
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 366, 408 ]
+          sizes: [ 655, 262 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 306, 398 ]
+              sizes: [ 723, 821 ]
               children: 
                 - 
                   type: pane
-                  views: [ 14 ]
-                  current: 14
+                  views: [ 12 ]
+                  current: 12
                 - 
                   type: pane
-                  views: [ 15 ]
-                  current: 15
+                  views: [ 13 ]
+                  current: 13
             - 
               type: pane
-              views: [ 2, 13 ]
+              views: [ 2, 11 ]
               current: 2
 layoutOfToolBars: 
   rows: 
     - 
       - { name: "FileBar", x: 0, priority: 0 }
-      - { name: "ScriptBar", x: 47, priority: 0 }
-      - { name: "TimeBar", x: 94, priority: 0 }
-      - { name: "SceneBar", x: 1087, priority: 0 }
-      - { name: "GraphBar", x: 1357, priority: 0 }
-      - { name: "SimulationBar", x: 1464, priority: 0 }
-      - { name: "BodyBar", x: 1661, priority: 0 }
+      - { name: "ScriptBar", x: 48, priority: 0 }
+      - { name: "TimeBar", x: 96, priority: 0 }
+      - { name: "SceneBar", x: 1046, priority: 0 }
+      - { name: "GraphBar", x: 1368, priority: 0 }
+      - { name: "SimulationBar", x: 1478, priority: 0 }
     - 
-      - { name: "KinematicsBar", x: 0, priority: 0 }
-      - { name: "BodyMotionGenerationBar", x: 234, priority: 0 }
+      - { name: "BodyBar", x: 0, priority: 0 }
+      - { name: "KinematicsBar", x: 268, priority: 0 }
+      - { name: "BodyMotionGenerationBar", x: 509, priority: 0 }
