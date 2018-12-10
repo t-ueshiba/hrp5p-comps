@@ -74,7 +74,7 @@ SynchronizerRTC<PRIMARY, SECONDARY>::SynchronizerRTC(RTC::Manager* manager)
      _pOut("primaryOut", _p),
      _qSelected(),
      _qOut("secondaryOut", _qSelected),
-     _verbose(false)
+     _verbose(true)
 {
 }
 

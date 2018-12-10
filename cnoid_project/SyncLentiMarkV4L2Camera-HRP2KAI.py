@@ -41,6 +41,8 @@ try:
   if lmtrck == None:
     raise Exception("Failed to find LentiMarkTrackerRTC0")
 
+  syncer.setProperty("verbose", "1")
+
   lmtrck_dir = "/home/hrp2user/src/lentimark-tracker/LentiMarkTrackerRTC/Data/"
   lmtrck.setProperty("AUTO_ADJUSTING", "1")
   lmtrck.setProperty("AUTO_TUNING",    "1")

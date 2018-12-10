@@ -38,6 +38,8 @@ try:
   if syncer == None:
     raise Exception("Failed to find VideoSynchronizer0")
 
+  syncer.setProperty("verbose", "1")
+
   connectPorts(camera.port("TimedCameraImage"), syncer.port("primary"))
   connectPorts(robohw.port("q"),                syncer.port("secondary"))
   connectPorts(cpanel.port("Command"),          camera.port("Command"))
