@@ -10,7 +10,7 @@ items:
       plugin: OpenRTM
       class: RTCItem
       data: 
-        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCMultiCameraRTC.so"
+        module: "${PROGRAM_TOP}/lib/choreonoid-1.7/rtc/IIDCMultiCameraRTC.dylib"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
         periodicRate: 30
@@ -53,18 +53,9 @@ items:
             pos: [ -159, -409 ]
             InPorts: 
               - 
-                name: MultiImageViewer0.TimedImages
+                name: MultiImageViewer0.images
                 isServicePort: false
         RTSConnections: 
-          - 
-            name: connector0
-            sourceRtcName: MultiImageViewer0
-            sourcePortName: MultiImageViewer0.TimedImages
-            targetRtcName: IIDCMultiCamera0
-            targetPortName: IIDCMultiCamera0.TimedImages
-            dataflow: Push
-            subscription: flush
-            position: [ -114, -390, -119, -390, -222.5, -390, -222.5, -390, -326, -390, -331, -390 ]
           - 
             name: connector0
             sourceRtcName: IIDCMultiCamera0
@@ -193,8 +184,6 @@ views:
     plugin: OpenRTM
     class: RTSDiagramView
     mounted: true
-    state: 
-      currentRTSItem: 3
   - 
     id: 10
     plugin: OpenRTM
@@ -291,6 +280,11 @@ Body:
     targetJoints: all
     checkSelfCollisions: true
     onlyTimeBarRange: false
+  "SplineFilterDialog": 
+    isInputFrameRateSpecified: false
+    inputFrameRate: 200
+    isOutputFrameRateSpecified: false
+    outputFrameRate: 200
 OpenRTM: 
   "deleteUnmanagedRTCsOnStartingSimulation": false
 viewAreas: 
@@ -300,12 +294,12 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 402, 1446 ]
+      sizes: [ 312, 1121 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 527, 526 ]
+          sizes: [ 571, 570 ]
           children: 
             - 
               type: pane
@@ -318,12 +312,12 @@ viewAreas:
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 752, 301 ]
+          sizes: [ 815, 326 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 626, 814 ]
+              sizes: [ 484, 630 ]
               children: 
                 - 
                   type: pane

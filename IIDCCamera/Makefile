@@ -13,7 +13,7 @@ IDLS		= Img.idl Cmd.idl
 
 INCDIRS		= -I. -I../include -I$(PREFIX)/include
 CPPFLAGS	= -DNDEBUG #-DDEBUG
-CFLAGS		= -O3
+CFLAGS		= -g #-O3
 NVCCFLAGS	= -O
 ifeq ($(shell arch), armv7l)
   CPPFLAGS     += -DNEON
