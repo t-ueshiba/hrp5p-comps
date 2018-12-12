@@ -8,6 +8,8 @@ set(corba_src_dirs ${CMAKE_SOURCE_DIR}/TU/idl)
 
 idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 
+include_directories(${PROJECT_BINARY_DIR}/corba)
+
 set(sources
     V4L2CmdSVC_impl.cc
     V4L2MultiCameraRTC.cc

@@ -24,57 +24,6 @@ items:
         file: "${PROJECT_DIR}/IIDCCamera.py"
         executionOnLoading: true
         backgroundExecution: false
-    - 
-      id: 3
-      name: "RTSystem"
-      plugin: OpenRTM
-      class: RTSystemItem
-      data: 
-        AutoConnection: true
-        RTSComps: 
-          - 
-            name: ControlPanel0
-            pos: [ -140, -230 ]
-            OutPorts: 
-              - 
-                name: ControlPanel0.Command
-                isServicePort: true
-          - 
-            name: IIDCCamera0
-            pos: [ -134, -106 ]
-            OutPorts: 
-              - 
-                name: IIDCCamera0.Command
-                isServicePort: true
-              - 
-                name: IIDCCamera0.TimedCameraImage
-                isServicePort: false
-          - 
-            name: ImageViewer0
-            pos: [ 106, -88 ]
-            InPorts: 
-              - 
-                name: ImageViewer0.images
-                isServicePort: false
-        RTSConnections: 
-          - 
-            name: connector0
-            sourceRtcName: IIDCCamera0
-            sourcePortName: IIDCCamera0.TimedCameraImage
-            targetRtcName: ImageViewer0
-            targetPortName: ImageViewer0.images
-            dataflow: Push
-            subscription: flush
-            position: [ -48, -69, -43, -69, 36, -69, 36, -69, 129, -69, 134, -69 ]
-          - 
-            name: connector0
-            sourceRtcName: ControlPanel0
-            sourcePortName: ControlPanel0.Command
-            targetRtcName: IIDCCamera0
-            targetPortName: IIDCCamera0.Command
-            dataflow: Push
-            subscription: flush
-            position: [ -55, -211, -50, -211, -46.5, -211, -46.5, -87, -45, -87, -50, -87 ]
 views: 
   - 
     id: 0
@@ -92,7 +41,6 @@ views:
     class: ItemTreeView
     mounted: true
     state: 
-      selected: [ 1 ]
       expanded: [ 1, 2 ]
   - 
     id: 3
@@ -195,12 +143,6 @@ views:
     mounted: true
   - 
     id: 10
-    name: "RTC Diagram"
-    plugin: OpenRTM
-    class: RTSDiagramView
-    mounted: true
-  - 
-    id: 11
     plugin: OpenRTM
     class: RTSNameServerView
     mounted: true
@@ -208,24 +150,24 @@ views:
       host: localhost
       port: 2809
   - 
-    id: 12
+    id: 11
     name: "RTC Properties"
     plugin: OpenRTM
     class: RTSPropertiesView
     mounted: true
   - 
-    id: 13
+    id: 12
     plugin: Python
     class: PythonConsoleView
     mounted: true
   - 
-    id: 14
+    id: 13
     name: "Control panel"
     plugin: TU::ControlPanel
     class: TU::v::ControlPaneView
     mounted: true
   - 
-    id: 15
+    id: 14
     name: "Image viewer"
     plugin: TU::ImageViewer
     class: TU::ImageViewer
@@ -312,42 +254,42 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 223, 1082 ]
+      sizes: [ 300, 1388 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 353, 352 ]
+          sizes: [ 452, 450 ]
           children: 
             - 
               type: pane
-              views: [ 2, 11 ]
+              views: [ 2, 10 ]
               current: 2
             - 
               type: pane
-              views: [ 1, 12, 9 ]
+              views: [ 1, 11, 9 ]
               current: 1
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 503, 202 ]
+          sizes: [ 644, 258 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 467, 608 ]
+              sizes: [ 600, 782 ]
               children: 
                 - 
                   type: pane
-                  views: [ 14, 10 ]
-                  current: 14
+                  views: [ 13 ]
+                  current: 13
                 - 
                   type: pane
-                  views: [ 15 ]
-                  current: 15
+                  views: [ 14 ]
+                  current: 14
             - 
               type: pane
-              views: [ 3, 13 ]
+              views: [ 3, 12 ]
               current: 3
 layoutOfToolBars: 
   rows: 
