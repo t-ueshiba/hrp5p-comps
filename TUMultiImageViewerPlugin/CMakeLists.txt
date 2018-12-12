@@ -1,12 +1,14 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.0)
+project(TUMultiImageViewer)
 
 set(idls MultiImage)
 set(idl_cpp_files "")
 set(ild_h_files "")
-set(corba_src_dirs ${PROJECT_SOURCE_DIR}/TU/idl)
+set(corba_src_dirs ${CMAKE_SOURCE_DIR}/TU/idl)
 
-idl_compile_cpp(idl_cpp_files idl_h_files corba
-		"${corba_src_dirs}" ${idls})
+idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
+
+include_directories(${PROJECT_BINARY_DIR}/corba)
 
 set(sources
     ImageView.cc
@@ -19,7 +21,7 @@ set(moc_sources "")
 set(moc_headers ImageView.h)
 qt_wrap_cpp(moc_sources ${moc_headers})
 
-set(target CnoidTUMultiImageViewerPlugin)
+set(target Cnoid${PROJECT_NAME})
 
 add_cnoid_plugin(
     ${target}

@@ -1,18 +1,18 @@
 cmake_minimum_required(VERSION 2.4)
-
-pkg_check_modules(YAML-CPP REQUIRED yaml-cpp)
-
-include_directories(${YAML-CPP_INCLUDE_DIRS})
+project(V4L2Camera)
 
 set(idls Img Cmd)
 set(idl_cpp_files "")
 set(ild_h_files "")
 set(corba_src_dirs
     ${HRPSYSBASE_PREFIX}/share/hrpsys/idl
-    ${PROJECT_SOURCE_DIR}/TU/idl)
+    ${CMAKE_SOURCE_DIR}/TU/idl)
 
-idl_compile_cpp(idl_cpp_files idl_h_files corba
-		"${corba_src_dirs}" ${idls})
+idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
+
+pkg_check_modules(YAML-CPP REQUIRED yaml-cpp)
+
+include_directories(${PROJECT_BINARY_DIR}/corba ${YAML-CPP_INCLUDE_DIRS})
 
 set(sources
     V4L2CmdSVC_impl.cc
@@ -20,31 +20,31 @@ set(sources
     saveImageHeader.cc)
 
 add_executable(
-    V4L2CameraComp
+    ${PROJECT_NAME}Comp
     main.cc
     ${idl_cpp_files}
-    ${idl_h_files}
     ${sources})
 
 target_link_libraries(
-    V4L2CameraComp
+    ${PROJECT_NAME}Comp
     ${TUV4L2PP_LIB}
     ${OPENRTM_LIBRARIES}
     ${YAML-CPP_LIBRARIES}
     boost_serialization)
 
-install(TARGETS V4L2CameraComp RUNTIME DESTINATION bin)
+install(TARGETS ${PROJECT_NAME}Comp RUNTIME DESTINATION bin)
 
 if(CNOID_FOUND)
   add_cnoid_rtc(
-      V4L2CameraRTC
+      ${PROJECT_NAME}RTC
       ${idl_cpp_files}
       ${sources})
 
   target_link_libraries(
-      V4L2CameraRTC
+      ${PROJECT_NAME}RTC
       ${TUV4L2PP_LIB}
       ${OPENRTM_LIBRARIES}
+      ${YAML-CPP_LIBRARIES}
       boost_serialization)
 endif()
 

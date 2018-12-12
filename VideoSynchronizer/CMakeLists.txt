@@ -1,39 +1,37 @@
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.0)
+project(VideoSynchronizer)
 
-set(idls Img Cmd)
+set(idls Img)
 set(idl_cpp_files "")
 set(ild_h_files "")
-set(corba_src_dirs
-    ${HRPSYSBASE_PREFIX}/share/hrpsys/idl
-    ${PROJECT_SOURCE_DIR}/TU/idl)
+set(corba_src_dirs ${HRPSYSBASE_PREFIX}/share/hrpsys/idl)
+idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 
-idl_compile_cpp(idl_cpp_files idl_h_files corba
-		"${corba_src_dirs}" ${idls})
+include_directories(${PROJECT_BINARY_DIR}/corba)
 
 set(sources
     VideoSynchronizerRTC.cc)
 
 add_executable(
-    VideoSynchronizerComp
+    ${PROJECT_NAME}Comp
     main.cc
     ${idl_cpp_files}
-    ${idl_h_files}
     ${sources})
 
 target_link_libraries(
-    VideoSynchronizerComp
+    ${PROJECT_NAME}Comp
     ${OPENRTM_LIBRARIES})
 
-install(TARGETS VideoSynchronizerComp RUNTIME DESTINATION bin)
+install(TARGETS ${PROJECT_NAME}Comp RUNTIME DESTINATION bin)
 
 if(CNOID_FOUND)
   add_cnoid_rtc(
-      VideoSynchronizerRTC
+      ${PROJECT_NAME}RTC
       ${idl_cpp_files}
       ${sources})
 
   target_link_libraries(
-      VideoSynchronizerRTC
+      ${PROJECT_NAME}RTC
       ${OPENRTM_LIBRARIES})
 endif()
 
