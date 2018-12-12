@@ -73,8 +73,7 @@ function(add_cnoid_rtc target)
 
   set_target_properties(${target} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/${CNOID_PLUGIN_SUBDIR}/rtc
-    PREFIX ""
-    SUFFIX ".so")
+    PREFIX "")
   install(TARGETS ${target}
     RUNTIME DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel
     LIBRARY DESTINATION ${CNOID_PREFIX}/${CNOID_PLUGIN_SUBDIR}/rtc CONFIGURATIONS Release Debug RelWithDebInfo MinSizeRel)

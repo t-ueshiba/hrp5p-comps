@@ -41,6 +41,7 @@ views:
     class: ItemTreeView
     mounted: true
     state: 
+      selected: [ 1 ]
       expanded: [ 1, 2 ]
   - 
     id: 3
@@ -173,6 +174,8 @@ views:
     class: TU::ImageViewer
     mounted: true
 toolbars: 
+  "LeggedBodyBar": 
+    stanceWidth: 0.15
   "TimeBar": 
     minTime: 0
     maxTime: 30
@@ -191,8 +194,6 @@ toolbars:
     snapDistance: 0.025
     penetrationBlockDepth: 0.0005
     lazyCollisionDetectionMode: true
-  "LeggedBodyBar": 
-    stanceWidth: 0.15
   "BodyMotionGenerationBar": 
     autoGenerationForNewBody: true
     balancer: false
@@ -254,12 +255,12 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 300, 1388 ]
+      sizes: [ 255, 1178 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 452, 450 ]
+          sizes: [ 572, 569 ]
           children: 
             - 
               type: pane
@@ -272,12 +273,12 @@ viewAreas:
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 644, 258 ]
+          sizes: [ 815, 326 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 600, 782 ]
+              sizes: [ 508, 663 ]
               children: 
                 - 
                   type: pane

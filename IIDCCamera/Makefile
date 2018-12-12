@@ -25,7 +25,7 @@ endif
 CCFLAGS		= $(CFLAGS)
 
 LIBS		= -lTUIIDC++ -lTUTools++ \
-		  -lraw1394 -lusb-1.0 -lboost_serialization
+		  -lraw1394 -lusb-1.0 -lboost_serialization -lyaml-cpp
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
