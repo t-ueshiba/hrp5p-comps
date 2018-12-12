@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.4)
 
+pkg_check_modules(YAML-CPP REQUIRED yaml-cpp)
+
+include_directories(${YAML-CPP_INCLUDE_DIRS})
+
 set(idls Img Cmd)
 set(idl_cpp_files "")
 set(ild_h_files "")
@@ -26,6 +30,7 @@ target_link_libraries(
     IIDCCameraComp
     ${TUIIDCPP_LIB}
     ${OPENRTM_LIBRARIES}
+    ${YAML-CPP_LIBRARIES}
     boost_serialization)
 
 install(TARGETS IIDCCameraComp RUNTIME DESTINATION bin)

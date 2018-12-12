@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 2.4)
 
+pkg_check_modules(YAML-CPP REQUIRED yaml-cpp)
+
+include_directories(${YAML-CPP_INCLUDE_DIRS})
+
 set(idls Img Cmd)
 set(idl_cpp_files "")
 set(ild_h_files "")
@@ -26,6 +30,7 @@ target_link_libraries(
     V4L2CameraComp
     ${TUV4L2PP_LIB}
     ${OPENRTM_LIBRARIES}
+    ${YAML-CPP_LIBRARIES}
     boost_serialization)
 
 install(TARGETS V4L2CameraComp RUNTIME DESTINATION bin)

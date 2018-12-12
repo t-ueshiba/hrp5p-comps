@@ -88,6 +88,7 @@ CameraRTC<V4L2CameraArray, MultiImage::TimedImages>::initializeConfigurations()
 		  _syncedSnap, DEFAULT_SYNCED_SNAP);
     bindParameter("int_startWithFlow",
 		  _startWithFlow, DEFAULT_START_WITH_FLOW);
+    _cameras.setName(_cameraName.c_str());
 }
 
 template <> template <> size_t

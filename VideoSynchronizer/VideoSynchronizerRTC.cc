@@ -8,22 +8,24 @@
 *  static data								*
 ************************************************************************/
 #define DEFAULT_BUFFER_SIZE	"100"
+#define DEFAULT_VERBOSE		"0"
 
 // Module specification
 static const char* videosynchronizer_spec[] =
 {
-    "implementation_id",		"VideoSynchronizerRTC",
-    "type_name",			"VideoSynchronizer",
-    "description",			"Sync. image streams with robot poses",
-    "version",				"1.0.0",
-    "vendor",				"t.ueshiba@aist.go.jp",
-    "category",				"sensor reader",
-    "activity_type",			"PERIODIC",
-    "kind",				"DataFlowComponent",
-    "max_instance",			"10",
-    "language",				"C++",
-    "lang_type",			"compile",
-    "conf.default.int_bufferSize",	DEFAULT_BUFFER_SIZE,
+    "implementation_id",	"VideoSynchronizerRTC",
+    "type_name",		"VideoSynchronizer",
+    "description",		"Sync. image streams with robot poses",
+    "version",			"1.0.0",
+    "vendor",			"t.ueshiba@aist.go.jp",
+    "category",			"sensor reader",
+    "activity_type",		"PERIODIC",
+    "kind",			"DataFlowComponent",
+    "max_instance",		"10",
+    "language",			"C++",
+    "lang_type",		"compile",
+    "conf.default.bufferSize",	DEFAULT_BUFFER_SIZE,
+    "conf.default.verbose",	DEFAULT_VERBOSE,
     ""				// <-- Important! End of Spec. mark
 };
 
@@ -47,7 +49,6 @@ VideoSynchronizerRTCInit(RTC::Manager* manager)
 
 namespace TU
 {
-#ifdef DEBUG
 std::ostream&
 operator <<(std::ostream& out, const RTC::TimedDoubleSeq& q)
 {
@@ -58,13 +59,13 @@ operator <<(std::ostream& out, const RTC::TimedDoubleSeq& q)
   */
     return out;
 }
-#endif
 
 template <> void
 SynchronizerRTC<Img::TimedCameraImage, RTC::TimedDoubleSeq>
 ::initializeConfigurations()
 {
-    bindParameter("int_bufferSize", _bufSize, DEFAULT_BUFFER_SIZE);
+    bindParameter("bufferSize", _bufSize, DEFAULT_BUFFER_SIZE);
+    bindParameter("verbose",    _verbose, DEFAULT_VERBOSE);
 }
     
 }

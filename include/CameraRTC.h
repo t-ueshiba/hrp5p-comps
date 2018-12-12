@@ -59,6 +59,8 @@ class CameraRTCBase : public RTC::DataFlowComponentBase
 
   // カメラ状態の変更を伴うコマンドのみ本クラスで扱い、
   // カメラ状態を取得するだけのコマンドは class CmdSVC_impl<CAMERAS> で扱う
+    virtual void	saveConfigToFile()			const	= 0;
+    virtual void	restoreConfigFromFile()				= 0;
     void		saveConfig()					{}
     void		restoreConfig()					{}
     bool		inRecordingImages()			const	;
@@ -89,7 +91,7 @@ CameraRTCBase<CAMERAS>::CameraRTCBase(RTC::Manager* manager)
      _commandPort("Command")
 {
 }
-
+    
 template <class CAMERAS> bool
 CameraRTCBase<CAMERAS>::inRecordingImages() const
 {
@@ -136,6 +138,9 @@ class CameraRTC : public CameraRTCBase<CAMERAS>
   public:
     CameraRTC(RTC::Manager* manager)					;
 
+    virtual void		saveConfigToFile()		const	;
+    virtual void		restoreConfigFromFile()			;
+    
     virtual RTC::ReturnCode_t	onInitialize()				;
     virtual RTC::ReturnCode_t	onActivated(RTC::UniqueId ec_id)	;
     virtual RTC::ReturnCode_t	onExecute(RTC::UniqueId ec_id)		;
@@ -166,7 +171,7 @@ class CameraRTC : public CameraRTCBase<CAMERAS>
     using			super::_fout;
     using			super::_command;
     using			super::_commandPort;
-    
+
     std::string			_cameraName;	// config var.
     std::string			_recFilePrefix;	// config var.
     int				_syncedSnap;	// config var.
@@ -178,6 +183,22 @@ class CameraRTC : public CameraRTCBase<CAMERAS>
 /*
  *  public member functions
  */
+template <class CAMERAS, class IMAGES> void
+CameraRTC<CAMERAS, IMAGES>::saveConfigToFile() const
+{
+    std::lock_guard<std::mutex>	lock(_mutex);
+
+    _cameras.save();
+}
+    
+template <class CAMERAS, class IMAGES> void
+CameraRTC<CAMERAS, IMAGES>::restoreConfigFromFile()
+{
+    std::lock_guard<std::mutex>	lock(_mutex);
+
+    _cameras.restore();
+}
+    
 template <class CAMERAS, class IMAGES> RTC::ReturnCode_t
 CameraRTC<CAMERAS, IMAGES>::onInitialize()
 {
@@ -206,7 +227,7 @@ CameraRTC<CAMERAS, IMAGES>::onActivated(RTC::UniqueId ec_id)
     try
     {
       // 設定ファイルを読み込んでカメラを生成・セットアップ
-	_cameras.restore(_cameraName.c_str());
+	_cameras.restore();
 
       // カメラ数分の画像ヘッダを確保
 	_images.headers.length(_cameras.size());
