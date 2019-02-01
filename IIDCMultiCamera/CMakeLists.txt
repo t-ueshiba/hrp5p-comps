@@ -4,7 +4,7 @@ project(IIDCMultiCamera)
 set(idls MultiImage Cmd)
 set(idl_cpp_files "")
 set(ild_h_files "")
-set(corba_src_dirs ${CMAKE_SOURCE_DIR}/TU/idl)
+set(corba_src_dirs ${CMAKE_SOURCE_DIR}/include/TU/idl)
 
 idl_compile_cpp(idl_cpp_files idl_h_files corba "${corba_src_dirs}" ${idls})
 
@@ -42,4 +42,3 @@ if(CNOID_FOUND)
       ${OPENRTM_LIBRARIES}
       boost_serialization)
 endif()
-

@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ../TU/idl
+VPATH		= ../include/TU/idl
 
 IDLS		= MultiImage.idl Cmd.idl
 

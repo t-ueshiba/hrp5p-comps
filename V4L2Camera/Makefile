@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ${OPENRTPHOME}/share/hrpsys/idl:../TU/idl
+VPATH		= ${OPENRTPHOME}/share/hrpsys/idl:../include/TU/idl
 
 IDLS		= Img.idl Cmd.idl
 
@@ -24,7 +24,7 @@ else
 endif
 CCFLAGS		= $(CFLAGS)
 
-LIBS		= -lTUV4L2++ -lTUTools++ -lboost_serialization
+LIBS		= -lTUV4L2++ -lTUTools++ -lboost_serialization -lyaml-cpp
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin

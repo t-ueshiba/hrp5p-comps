@@ -7,7 +7,7 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ${OPENRTPHOME}/share/hrpsys/idl:../TU/idl
+VPATH		= ${OPENRTPHOME}/share/hrpsys/idl:../include/TU/idl
 
 IDLS		= Img.idl Cmd.idl
 

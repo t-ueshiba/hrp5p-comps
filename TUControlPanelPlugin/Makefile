@@ -7,7 +7,7 @@
 #PROGRAM		= $(shell basename $(PWD))
 LIBRARY		= libCnoid$(shell basename $(PWD))
 
-VPATH		= $(PREFIX)/include/TU/idl
+VPATH		= ../include/TU/idl
 
 IDLS		= Cmd.idl
 MOCHDRS		= ControlPanelView.h LabelCmd_.h ButtonCmd_.h \
