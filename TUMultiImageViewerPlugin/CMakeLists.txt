@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
-project(TUMultiImageViewer)
+project(TUMultiImageViewerPlugin)
 
 set(idls MultiImage)
 set(idl_cpp_files "")
