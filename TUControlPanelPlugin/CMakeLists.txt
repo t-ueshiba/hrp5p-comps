@@ -8,6 +8,7 @@ set(corba_src_dirs ${CMAKE_SOURCE_DIR}/include/TU/idl)
 idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 
 include_directories(${PROJECT_BINARY_DIR}/corba)
+link_directories(${CNOID_LIBRARY_DIRS})
 
 set(sources
     ButtonCmd.cc
