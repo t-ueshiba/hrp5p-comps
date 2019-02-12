@@ -9,14 +9,12 @@ set(corba_src_dirs ${HRPSYSBASE_PREFIX}/share/hrpsys/idl)
 idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 
 include_directories(${PROJECT_BINARY_DIR}/corba)
-link_directories(${CNOID_LIBRARY_DIRS})
 
 set(sources
     ImageView.cc
     ImageViewerPlugin.cc
     ImageViewerRTC.cc
-    setImage.cc
-)
+    setImage.cc)
 
 set(moc_sources "")
 set(moc_headers ImageView.h)

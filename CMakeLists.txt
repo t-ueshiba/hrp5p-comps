@@ -56,6 +56,7 @@ include(IdlCompile)
 pkg_check_modules(CNOID choreonoid)
 if(CNOID_FOUND)
   include_directories(${CNOID_INCLUDE_DIRS})
+  link_directories(${CNOID_LIBRARY_DIRS})
   include(CnoidTools)
 endif()
 

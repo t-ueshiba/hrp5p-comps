@@ -15,7 +15,7 @@ ImageView::ImageView(QWidget* parent)
 {
     setBackgroundRole(QPalette::Dark);
     setViewportUpdateMode(FullViewportUpdate);
-    
+
     for (int i = 0; i < _colors.size(); ++i)
 	_colors[i] = 0xff000000 | (i << 16) | (i << 8) | i;
 
@@ -24,7 +24,7 @@ ImageView::ImageView(QWidget* parent)
 	_colorsF[128+i] = 0xff000000 | (i << 9);
 	_colorsF[127-i] = 0xff000000 | ((i << 17) + 1);
     }
-    
+
     auto	menuItems = new QActionGroup(this);
     auto	menuItem  = new MenuItem("fit", _menu, menuItems);
     menuItem->sigTriggered().connect(std::bind(&ImageView::setScale,
@@ -44,18 +44,18 @@ ImageView::ImageView(QWidget* parent)
     menuItem = new MenuItem("x4", _menu, menuItems);
     menuItem->sigTriggered().connect(std::bind(&ImageView::setScale,
 					       this, 4));
-    
+
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
 	    this, SLOT(showContextMenu(const QPoint&)));
 }
-    
+
 void
 ImageView::paintEvent(QPaintEvent* event)
 {
     if (_qimage.bits() == 0)
 	return;
-    
+
     if (_fit)
 	_scale = std::min(qreal(viewport()->width())  / _qimage.width(),
 			  qreal(viewport()->height()) / _qimage.height());
@@ -83,7 +83,7 @@ ImageView::setScale(qreal scale)
       // Sceneの範囲を設定することによって(必要ならば）ScrollBarを表示させる
 	setSceneRect(0, 0, _scale*_qimage.width(), _scale*_qimage.height());
     }
-    
+
     viewport()->update();
 }
 
@@ -95,11 +95,11 @@ ImageView::showContextMenu(const QPoint& p)
     const qreal	scale = _scale;
     const int	left  = horizontalScrollBar()->sliderPosition(),
 		top   = verticalScrollBar()->sliderPosition();
-    
+
   // pはviewport中の現在表示されている領域の左上隅を原点としたクリック位置なので，
   // ディスプレイ全体座標系での値に直してメニューをポップアップ
     _menu->exec(viewport()->mapToGlobal(p));
-    
+
   // メニューを出した位置に対応する画像上の点をビューの中央にもってくるため，
   // メニューをポップアップした位置のviewport座標 (left + p.x(), top + p.u())
   // を新しいスケールに合わせて変換したものをビューの大きさの半分だけ左上にシフト
@@ -109,5 +109,5 @@ ImageView::showContextMenu(const QPoint& p)
     verticalScrollBar()
 	->setSliderPosition(int(_scale/scale*(top  + p.y())) - height()/2);
 }
-    
+
 }
