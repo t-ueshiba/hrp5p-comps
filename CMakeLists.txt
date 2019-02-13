@@ -34,7 +34,7 @@ add_definitions(${OMNIORB_CFLAGS})
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${Boost_INCLUDE_DIRS}
-    ${TULIBS_INCLUDE_DIR}
+    ${TULIBS_INCLUDE_DIRS}
     ${OMNIORB_INCLUDE_DIRS}
     ${OPENRTM_INCLUDE_DIRS}
 )
