@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<rts:RtsProfile rts:version="0.2" rts:id="RTSystem:AIST:RTSystem:1.0.0" xmlns:rts="http://www.openrtp.org/namespaces/rts" xmlns:rtsExt="http://www.openrtp.org/namespaces/rts_ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="false" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="ControlPanel0" rts:pathUri="localhost/ControlPanel0.rtc" rts:id="RTC:t.ueshiba@aist.go.jp:controller:ControlPanel0:1.0.0">
+		<rtsExt:Properties rtsExt:value="false" rtsExt:name="OpenRTM_NS" />
+		<rts:ServicePorts xsi:type="rtsExt:serviceport_ext" rts:name="ControlPanel0.Command">
+			<rtsExt:Properties rtsExt:value="CorbaPort" rtsExt:name="port.port_type" />
+		</rts:ServicePorts>
+		<rts:ConfigurationSets rts:id="default" />
+		<rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:id="0" rts:rate="1000" rts:kind="PERIODIC" />
+		<rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:x="0" rtsExt:y="0" />
+	</rts:Components>
+	<rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="false" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="ImageViewer0" rts:pathUri="localhost/ImageViewer0.rtc" rts:id="RTC:t.ueshiba@aist.go.jp:viewer:ImageViewer0:1.0.0">
+		<rtsExt:Properties rtsExt:value="false" rtsExt:name="OpenRTM_NS" />
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="ImageViewer0.images">
+			<rtsExt:Properties rtsExt:value="DataInPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="Any" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:ConfigurationSets rts:id="default" />
+		<rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:id="0" rts:rate="1000" rts:kind="PERIODIC" />
+		<rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:x="451" rtsExt:y="134" />
+	</rts:Components>
+	<rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="false" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="sync" rts:pathUri="hrp5p01c.local/sync.rtc" rts:id="RTC:t.ueshiba@aist.go.jp:sensor reader:sync:1.0.0">
+		<rtsExt:Properties rtsExt:value="false" rtsExt:name="OpenRTM_NS" />
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="sync.primary">
+			<rtsExt:Properties rtsExt:value="DataInPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="Any" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="sync.secondary">
+			<rtsExt:Properties rtsExt:value="DataInPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:RTC/TimedDoubleSeq:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="Any" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="sync.primaryOut">
+			<rtsExt:Properties rtsExt:value="DataOutPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="flush,new,periodic" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="sync.secondaryOut">
+			<rtsExt:Properties rtsExt:value="DataOutPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:RTC/TimedDoubleSeq:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="flush,new,periodic" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:ConfigurationSets rts:id="default">
+			<rts:ConfigurationData rts:data="100" rts:name="bufferSize" />
+			<rts:ConfigurationData rts:data="1" rts:name="verbose" />
+		</rts:ConfigurationSets>
+		<rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:id="0" rts:rate="10" rts:kind="PERIODIC" />
+		<rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:x="253" rtsExt:y="121" />
+	</rts:Components>
+	<rts:Components xsi:type="rtsExt:component_ext" rts:isRequired="false" rts:compositeType="None" rts:activeConfigurationSet="default" rts:instanceName="v4l2" rts:pathUri="hrp5p01c.local/v4l2.rtc" rts:id="RTC:t.ueshiba@aist.go.jp:sensor:v4l2:1.0.0">
+		<rtsExt:Properties rtsExt:value="false" rtsExt:name="OpenRTM_NS" />
+		<rts:DataPorts xsi:type="rtsExt:dataport_ext" rts:name="v4l2.TimedCameraImage">
+			<rtsExt:Properties rtsExt:value="DataOutPort" rtsExt:name="port.port_type" />
+			<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+			<rtsExt:Properties rtsExt:value="flush,new,periodic" rtsExt:name="dataport.subscription_type" />
+			<rtsExt:Properties rtsExt:value="push,pull" rtsExt:name="dataport.dataflow_type" />
+			<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		</rts:DataPorts>
+		<rts:ServicePorts xsi:type="rtsExt:serviceport_ext" rts:name="v4l2.Command">
+			<rtsExt:Properties rtsExt:value="CorbaPort" rtsExt:name="port.port_type" />
+		</rts:ServicePorts>
+		<rts:ConfigurationSets rts:id="default">
+			<rts:ConfigurationData rts:data="/tmp/V4L2CameraRTC" rts:name="str_recFilePrefix" />
+			<rts:ConfigurationData rts:data="1" rts:name="int_startWithFlow" />
+		</rts:ConfigurationSets>
+		<rts:ExecutionContexts xsi:type="rtsExt:execution_context_ext" rts:id="0" rts:rate="10" rts:kind="PERIODIC" />
+		<rtsExt:Location rtsExt:direction="RIGHT" rtsExt:width="-1" rtsExt:height="-1" rtsExt:x="40" rtsExt:y="68" />
+	</rts:Components>
+	<rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:connectorId="61237e1d-c24b-4c6c-87ab-30dedb059911" rts:name="connector0" rts:dataType="IDL:Img/TimedCameraImage:1.0" rts:interfaceType="corba_cdr" rts:dataflowType="Push" rts:subscriptionType="flush">
+		<rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName="sync.primaryOut" rts:instanceName="sync" rts:componentId="RTC:t.ueshiba@aist.go.jp:sensor reader:sync:1.0.0">
+			<rtsExt:Properties rtsExt:value="hrp5p01c.local/sync.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:sourceDataPort>
+		<rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName="ImageViewer0.images" rts:instanceName="ImageViewer0" rts:componentId="RTC:t.ueshiba@aist.go.jp:viewer:ImageViewer0:1.0.0">
+			<rtsExt:Properties rtsExt:value="localhost/ImageViewer0.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:targetDataPort>
+		<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		<rtsExt:Properties rtsExt:value="Push" rtsExt:name="dataport.dataflow_type" />
+		<rtsExt:Properties rtsExt:value="flush" rtsExt:name="dataport.subscription_type" />
+		<rtsExt:Properties rtsExt:value="1" rtsExt:name="dataport.buffer.length" />
+		<rtsExt:Properties rtsExt:value="1000" rtsExt:name="dataport.publisher.push_rate" />
+		<rtsExt:Properties rtsExt:value="new" rtsExt:name="dataport.publisher.push_policy" />
+		<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+		<rtsExt:Properties rtsExt:value="little,big" rtsExt:name="dataport.serializer.cdr.endian" />
+		<rtsExt:Properties rtsExt:value="{1:(307,140),2:(312,140),3:(393,140),4:(393,153),5:(474,153),6:(479,153)}" rtsExt:name="POSITION" />
+	</rts:DataPortConnectors>
+	<rts:DataPortConnectors xsi:type="rtsExt:dataport_connector_ext" rts:connectorId="aad0b748-15f1-4af8-ae3d-9ea0233f3c1b" rts:name="connector0" rts:dataType="IDL:Img/TimedCameraImage:1.0" rts:interfaceType="corba_cdr" rts:dataflowType="Push" rts:subscriptionType="flush">
+		<rts:sourceDataPort xsi:type="rtsExt:target_port_ext" rts:portName="sync.primary" rts:instanceName="sync" rts:componentId="RTC:t.ueshiba@aist.go.jp:sensor reader:sync:1.0.0">
+			<rtsExt:Properties rtsExt:value="hrp5p01c.local/sync.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:sourceDataPort>
+		<rts:targetDataPort xsi:type="rtsExt:target_port_ext" rts:portName="v4l2.TimedCameraImage" rts:instanceName="v4l2" rts:componentId="RTC:t.ueshiba@aist.go.jp:sensor:v4l2:1.0.0">
+			<rtsExt:Properties rtsExt:value="hrp5p01c.local/v4l2.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:targetDataPort>
+		<rtsExt:Properties rtsExt:value="corba_cdr" rtsExt:name="dataport.interface_type" />
+		<rtsExt:Properties rtsExt:value="Push" rtsExt:name="dataport.dataflow_type" />
+		<rtsExt:Properties rtsExt:value="flush" rtsExt:name="dataport.subscription_type" />
+		<rtsExt:Properties rtsExt:value="1" rtsExt:name="dataport.buffer.length" />
+		<rtsExt:Properties rtsExt:value="1000" rtsExt:name="dataport.publisher.push_rate" />
+		<rtsExt:Properties rtsExt:value="new" rtsExt:name="dataport.publisher.push_policy" />
+		<rtsExt:Properties rtsExt:value="IDL:Img/TimedCameraImage:1.0" rtsExt:name="dataport.data_type" />
+		<rtsExt:Properties rtsExt:value="little,big" rtsExt:name="dataport.serializer.cdr.endian" />
+		<rtsExt:Properties rtsExt:value="{1:(247,140),2:(242,140),3:(228.5,140),4:(228.5,114),5:(99,114),6:(94,114)}" rtsExt:name="POSITION" />
+	</rts:DataPortConnectors>
+	<rts:ServicePortConnectors xsi:type="rtsExt:serviceport_connector_ext" rts:connectorId="9f85133c-a62e-4a7a-a306-ce25247fa611" rts:name="connector0">
+		<rts:sourceServicePort xsi:type="rtsExt:target_port_ext" rts:portName="v4l2.Command" rts:instanceName="v4l2" rts:componentId="RTC:t.ueshiba@aist.go.jp:sensor:v4l2:1.0.0">
+			<rtsExt:Properties rtsExt:value="hrp5p01c.local/v4l2.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:sourceServicePort>
+		<rts:targetServicePort xsi:type="rtsExt:target_port_ext" rts:portName="ControlPanel0.Command" rts:instanceName="ControlPanel0" rts:componentId="RTC:t.ueshiba@aist.go.jp:controller:ControlPanel0:1.0.0">
+			<rtsExt:Properties rtsExt:value="localhost/ControlPanel0.rtc" rtsExt:name="COMPONENT_PATH_ID" />
+		</rts:targetServicePort>
+	</rts:ServicePortConnectors>
+</rts:RtsProfile>

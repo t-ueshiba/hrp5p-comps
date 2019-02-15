@@ -6,13 +6,25 @@ items:
   children: 
     - 
       id: 1
-      name: "LentiMarkV4L2Camera-HRP2KAI.py"
+      name: "SyncV4L2Camera-HRP.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/LentiMarkV4L2Camera-HRP2KAI.py"
+        file: "${PROJECT_DIR}/SyncV4L2Camera-HRP.py"
         executionOnLoading: true
         backgroundExecution: false
+    - 
+      id: 2
+      name: "RTSystem"
+      plugin: OpenRTM
+      class: RTSystemItem
+      data: 
+        filename: "${PROJECT_DIR}/SyncV4L2Camera-HRP.xml"
+        format: RTS-PROFILE-XML
+        autoConnection: true
+        pollingCycle: 1000
+        stateCheck: Polling
+        checkAtLoading: true
 views: 
   - 
     id: 0
@@ -24,8 +36,6 @@ views:
     plugin: Base
     class: ItemTreeView
     mounted: true
-    state: 
-      selected: [ 1 ]
   - 
     id: 2
     plugin: Base
@@ -40,6 +50,7 @@ views:
       viewpointControlMode: thirdPerson
       collisionLines: false
       polygonMode: fill
+      cullingMode: enabled
       defaultHeadLight: true
       defaultHeadLightIntensity: 0.75
       headLightLightingFromBack: false
@@ -112,6 +123,7 @@ views:
       numColumns: 1
       spinBox: true
       slider: true
+      dial: false
       labelOnLeft: true
   - 
     id: 7
@@ -130,14 +142,24 @@ views:
     name: "RTC Diagram"
     plugin: OpenRTM
     class: RTSDiagramView
+    mounted: true
+    state: 
+      currentRTSItem: 2
   - 
     id: 10
     plugin: OpenRTM
     class: RTSNameServerView
     mounted: true
     state: 
-      host: localhost
-      port: 2809
+      NameServers: 
+        - 
+          isDefaultNameServer: false
+          host: "localhost"
+          port: 2809
+        - 
+          isDefaultNameServer: false
+          host: "hrp5p01c.local"
+          port: 2809
   - 
     id: 11
     name: "RTC Properties"
@@ -162,26 +184,6 @@ views:
     class: TU::ImageViewer
     mounted: true
 toolbars: 
-  "TimeBar": 
-    minTime: 0
-    maxTime: 30
-    frameRate: 100
-    playbackFrameRate: 50
-    idleLoopDrivenMode: false
-    currentTime: 0
-    speedScale: 1
-    syncToOngoingUpdates: true
-    autoExpansion: true
-  "KinematicsBar": 
-    mode: AUTO
-    enablePositionDragger: true
-    penetrationBlock: false
-    collisionLinkHighlight: false
-    snapDistance: 0.025
-    penetrationBlockDepth: 0.0005
-    lazyCollisionDetectionMode: true
-  "LeggedBodyBar": 
-    stanceWidth: 0.15
   "BodyMotionGenerationBar": 
     autoGenerationForNewBody: true
     balancer: false
@@ -215,6 +217,26 @@ toolbars:
     waistHeightRelaxation: false
     gravity: 9.8
     dynamicsTimeRatio: 1
+  "TimeBar": 
+    minTime: 0
+    maxTime: 30
+    frameRate: 100
+    playbackFrameRate: 50
+    idleLoopDrivenMode: false
+    currentTime: 0
+    speedScale: 1
+    syncToOngoingUpdates: true
+    autoExpansion: true
+  "KinematicsBar": 
+    mode: AUTO
+    enablePositionDragger: true
+    penetrationBlock: false
+    collisionLinkHighlight: false
+    snapDistance: 0.025
+    penetrationBlockDepth: 0.0005
+    lazyCollisionDetectionMode: true
+  "LeggedBodyBar": 
+    stanceWidth: 0.15
 Body: 
   "BodyMotionEngine": 
     updateJointVelocities: false
@@ -243,17 +265,17 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 352, 1562 ]
+      sizes: [ 441, 1341 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 459, 458 ]
+          sizes: [ 458, 457 ]
           children: 
             - 
               type: pane
               views: [ 1, 10 ]
-              current: 1
+              current: 10
             - 
               type: pane
               views: [ 0, 11, 8 ]
@@ -261,16 +283,16 @@ viewAreas:
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 655, 262 ]
+          sizes: [ 433, 482 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 677, 879 ]
+              sizes: [ 580, 755 ]
               children: 
                 - 
                   type: pane
-                  views: [ 13 ]
+                  views: [ 13, 9 ]
                   current: 13
                 - 
                   type: pane

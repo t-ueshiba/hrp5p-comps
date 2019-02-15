@@ -6,11 +6,11 @@ items:
   children: 
     - 
       id: 1
-      name: "V4L2Camera-HRP2KAI.py"
+      name: "SyncLentiMarkV4L2Camera-HRP.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/V4L2Camera-HRP2KAI.py"
+        file: "${PROJECT_DIR}/SyncLentiMarkV4L2Camera-HRP.py"
         executionOnLoading: true
         backgroundExecution: false
 views: 
@@ -24,6 +24,8 @@ views:
     plugin: Base
     class: ItemTreeView
     mounted: true
+    state: 
+      selected: [ 1 ]
   - 
     id: 2
     plugin: Base
@@ -38,6 +40,7 @@ views:
       viewpointControlMode: thirdPerson
       collisionLines: false
       polygonMode: fill
+      cullingMode: enabled
       defaultHeadLight: true
       defaultHeadLightIntensity: 0.75
       headLightLightingFromBack: false
@@ -110,6 +113,7 @@ views:
       numColumns: 1
       spinBox: true
       slider: true
+      dial: false
       labelOnLeft: true
   - 
     id: 7
@@ -134,8 +138,11 @@ views:
     class: RTSNameServerView
     mounted: true
     state: 
-      host: localhost
-      port: 2809
+      NameServers: 
+        - 
+          isDefaultNameServer: false
+          host: "localhost"
+          port: 2809
   - 
     id: 11
     name: "RTC Properties"
@@ -241,12 +248,12 @@ viewAreas:
     contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 259, 1151 ]
+      sizes: [ 441, 1341 ]
       children: 
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 401, 400 ]
+          sizes: [ 458, 457 ]
           children: 
             - 
               type: pane
@@ -259,12 +266,12 @@ viewAreas:
         - 
           type: splitter
           orientation: vertical
-          sizes: [ 572, 229 ]
+          sizes: [ 433, 482 ]
           children: 
             - 
               type: splitter
               orientation: horizontal
-              sizes: [ 498, 647 ]
+              sizes: [ 580, 755 ]
               children: 
                 - 
                   type: pane

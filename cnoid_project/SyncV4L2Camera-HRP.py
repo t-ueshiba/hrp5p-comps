@@ -28,6 +28,7 @@ def setNameserver(nsport=2809, mgrport=2810):
   setupRTM(nshost, nsport, mgrport)
   return vision_pc
 
+    
 try:
   rtm.initCORBA()
   setupRTM()
@@ -40,6 +41,10 @@ try:
     raise Exception("Failed to find ControlPanel0")
 
   vision_pc = setNameserver()
+  robohw = rtm.findRTC("RobotHardware0")
+  if robohw == None:
+    raise Exception("Failed to find RobotHardware0")
+     
   mgr = rtm.findRTCmanager(vision_pc)
   if mgr == None:
     raise Exception("Failed to find manager")
@@ -47,13 +52,27 @@ try:
   mgr.load("V4L2CameraRTC")
   camera = mgr.create("V4L2CameraRTC", "v4l2")
   if camera == None:
-    raise Exception("Failed to find V4L2Camera0")
+    raise Exception("Failed to create V4L2CameraRTC")
 
+  mgr.load("VideoSynchronizerRTC")
+  syncer = mgr.create("VideoSynchronizerRTC", "sync")
+  if syncer == None:
+    raise Exception("Failed to create VideoSynchronizerRTC")
+
+  syncer.setProperty("verbose", "1")
+
+  connectPorts(camera.port("TimedCameraImage"), syncer.port("primary"))
+  connectPorts(robohw.port("q"),                syncer.port("secondary"))
   connectPorts(cpanel.port("Command"),          camera.port("Command"))
-  connectPorts(camera.port("TimedCameraImage"), viewer.port("images"))
-
-  viewer.start()
+  connectPorts(syncer.port("primaryOut"),       viewer.port("images"))
+    
   cpanel.start()
+  viewer.start()
+  robohw.start()
+  syncer.start()
   camera.start()
 except Exception as err:
   print(err)
+
+
+    

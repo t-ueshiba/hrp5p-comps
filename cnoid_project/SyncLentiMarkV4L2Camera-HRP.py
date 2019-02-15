@@ -28,9 +28,10 @@ def setNameserver(nsport=2809, mgrport=2810):
   setupRTM(nshost, nsport, mgrport)
   return vision_pc
 
+    
 try:
   rtm.initCORBA()
-  setupRTM()
+  setupRTM()                            # Set NameServer to this host.
 
   viewer = rtm.findRTC("ImageViewer0")
   if viewer == None:
@@ -39,7 +40,11 @@ try:
   if cpanel == None:
     raise Exception("Failed to find ControlPanel0")
 
-  vision_pc = setNameserver()
+  vision_pc = setNameserver()           # Set NameServer to control PC.
+  robohw = rtm.findRTC("RobotHardware0")
+  if robohw == None:
+    raise Exception("Failed to find RobotHardware0")
+     
   mgr = rtm.findRTCmanager(vision_pc)
   if mgr == None:
     raise Exception("Failed to find manager")
@@ -47,13 +52,39 @@ try:
   mgr.load("V4L2CameraRTC")
   camera = mgr.create("V4L2CameraRTC", "v4l2")
   if camera == None:
-    raise Exception("Failed to find V4L2Camera0")
+    raise Exception("Failed to create V4L2CameraRTC")
 
+  mgr.load("VideoSynchronizerRTC")
+  syncer = mgr.create("VideoSynchronizerRTC", "sync")
+  if syncer == None:
+    raise Exception("Failed to create VideoSynchronizerRTC")
+
+  mgr.load("LentiMarkTrackerRTC")
+  lmtrck = mgr.create("LentiMarkTrackerRTC", "lmt")
+  if lmtrck == None:
+    raise Exception("Failed to create LentiMarkTrackerRTC")
+     
+  syncer.setProperty("verbose", "1")
+
+  lmtrck_dir = "LentiMarkTrackerRTC/Data/"
+  lmtrck.setProperty("AUTO_ADJUSTING", "1")
+  lmtrck.setProperty("AUTO_TUNING",    "1")
+  lmtrck.setProperty("IMAGE_DISP",     "0")
+  lmtrck.setProperty("CAMERA_PARAM_FILE", lmtrck_dir + "asahi-NCM03-V-02.yml")
+  lmtrck.setProperty("MARKER_DEF_FILE",   lmtrck_dir + "markers.def")
+  lmtrck.setProperty("RECOG_PARAM_FILE",  lmtrck_dir + "recog.yml")
+  
+  connectPorts(camera.port("TimedCameraImage"), syncer.port("primary"))
+  connectPorts(robohw.port("q"),                syncer.port("secondary"))
   connectPorts(cpanel.port("Command"),          camera.port("Command"))
-  connectPorts(camera.port("TimedCameraImage"), viewer.port("images"))
-
+  connectPorts(syncer.port("primaryOut"),       lmtrck.port("TimedCameraImage"))
+  connectPorts(lmtrck.port("ResultImage"),      viewer.port("images"))
+   
   viewer.start()
   cpanel.start()
+  robohw.start()
+  syncer.start()
+  lmtrck.start()
   camera.start()
 except Exception as err:
   print(err)
