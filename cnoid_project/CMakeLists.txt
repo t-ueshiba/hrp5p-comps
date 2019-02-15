@@ -9,6 +9,8 @@ install(FILES
     V4L2MultiCamera.py
     V4L2Camera-HRP2KAI.cnoid
     V4L2Camera-HRP2KAI.py
+    V4L2Camera-HRP.cnoid
+    V4L2Camera-HRP.py
     SyncV4L2Camera-HRP2KAI.cnoid
     SyncV4L2Camera-HRP2KAI.py
     SyncLentiMarkV4L2Camera-HRP2KAI.cnoid
