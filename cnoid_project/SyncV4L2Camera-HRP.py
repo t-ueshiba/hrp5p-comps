@@ -28,36 +28,37 @@ def setNameserver(nsport=2809, mgrport=2810):
   setupRTM(nshost, nsport, mgrport)
   return vision_pc
 
-    
+def searchRTC(comp_name):
+  rtc = rtm.findRTC(comp_name)
+  if rtc == None:
+    raise Exception("Failed to find {}.".format(comp_name))
+  return rtc
+
+def createRTC(mgr, module_name, comp_name):
+  mgr.load(module_name)
+  rtc = mgr.create(module_name, comp_name)
+  if rtc == None:
+    raise Exception("Failed to create {} from {}.".format(comp_name,
+                                                          module_name))
+  return rtc
+
+
 try:
   rtm.initCORBA()
-  setupRTM()
 
-  viewer = rtm.findRTC("ImageViewer0")
-  if viewer == None:
-    raise Exception("Failed to find ImageViewer0")
-  cpanel = rtm.findRTC("ControlPanel0")
-  if cpanel == None:
-    raise Exception("Failed to find ControlPanel0")
+  setupRTM()                            # Set NameServer to this host.
+  viewer = searchRTC("ImageViewer0")    # Search for existing viewer.
+  cpanel = searchRTC("ControlPanel0")   # Search for existing control panel.
 
-  vision_pc = setNameserver()
-  robohw = rtm.findRTC("RobotHardware0")
-  if robohw == None:
-    raise Exception("Failed to find RobotHardware0")
+  vision_pc = setNameserver()           # Set NameServer to control PC.
+  robohw = searchRTC("RobotHardware0")  # Search for existing robot hardware.
      
-  mgr = rtm.findRTCmanager(vision_pc)
+  mgr = rtm.findRTCmanager(vision_pc)   # Find RTC manager on vision PC.
   if mgr == None:
-    raise Exception("Failed to find manager")
+    raise Exception("Failed to find manager on {}.".format(vision_pc))
 
-  mgr.load("V4L2CameraRTC")
-  camera = mgr.create("V4L2CameraRTC", "v4l2")
-  if camera == None:
-    raise Exception("Failed to create V4L2CameraRTC")
-
-  mgr.load("VideoSynchronizerRTC")
-  syncer = mgr.create("VideoSynchronizerRTC", "sync")
-  if syncer == None:
-    raise Exception("Failed to create VideoSynchronizerRTC")
+  camera = createRTC(mgr, "V4L2CameraRTC",        "v4l2")
+  syncer = createRTC(mgr, "VideoSynchronizerRTC", "sync")
 
   syncer.setProperty("verbose", "1")
 

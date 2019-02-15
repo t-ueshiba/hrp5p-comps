@@ -18,13 +18,6 @@ items:
       name: "RTSystem"
       plugin: OpenRTM
       class: RTSystemItem
-      data: 
-        filename: "${PROJECT_DIR}/SyncV4L2Camera-HRP.xml"
-        format: RTS-PROFILE-XML
-        autoConnection: true
-        pollingCycle: 1000
-        stateCheck: Polling
-        checkAtLoading: true
 views: 
   - 
     id: 0
@@ -293,7 +286,7 @@ viewAreas:
                 - 
                   type: pane
                   views: [ 13, 9 ]
-                  current: 13
+                  current: 9
                 - 
                   type: pane
                   views: [ 14 ]
