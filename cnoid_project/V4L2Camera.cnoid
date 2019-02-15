@@ -1,57 +1,58 @@
-items:
+items: 
   id: 0
   name: "Root"
   plugin: Base
   class: RootItem
-  children:
-    -
+  children: 
+    - 
       id: 1
       name: "V4L2CameraRTC"
       plugin: OpenRTM
       class: RTCItem
-      data:
+      data: 
         module: "${PROGRAM_TOP}/lib/V4L2CameraRTC.so"
         baseDirectory: "RTC directory"
         periodicType: PeriodicExecutionContext
         periodicRate: 50
         activation: false
-    -
+    - 
       id: 2
       name: "V4L2Camera.py"
       plugin: Python
       class: PythonScriptItem
-      data:
+      data: 
         file: "${PROJECT_DIR}/V4L2Camera.py"
         executionOnLoading: true
         backgroundExecution: false
-views:
-  -
+views: 
+  - 
     id: 0
     plugin: Base
     class: ItemPropertyView
     mounted: true
-  -
+  - 
     id: 1
     plugin: Base
     class: ItemTreeView
     mounted: true
-    state:
+    state: 
       selected: [ 2 ]
       expanded: [ 1, 2 ]
-  -
+  - 
     id: 2
     plugin: Base
     class: MessageView
     mounted: true
-  -
+  - 
     id: 3
     plugin: Base
     class: SceneView
-    state:
+    state: 
       editMode: false
       viewpointControlMode: thirdPerson
       collisionLines: false
       polygonMode: fill
+      cullingMode: enabled
       defaultHeadLight: true
       defaultHeadLightIntensity: 0.75
       headLightLightingFromBack: false
@@ -79,8 +80,8 @@ views:
       enableNewDisplayListDoubleRendering: false
       useBufferForPicking: true
       upsideDown: false
-      cameras:
-        -
+      cameras: 
+        - 
           camera: [ System, Perspective ]
           isCurrent: true
           fieldOfView: 0.698132
@@ -89,7 +90,7 @@ views:
           eye: [ 4, 2, 1.5 ]
           direction: [ -0.888888889, -0.444444444, -0.111111111 ]
           up: [ -0.0993807989, -0.0496903995, 0.99380799 ]
-        -
+        - 
           camera: [ System, Orthographic ]
           orthoHeight: 20
           near: 0.01
@@ -99,77 +100,81 @@ views:
       xzgridColor: [ 0.899999976, 0.899999976, 0.899999976, 1 ]
       yzgridColor: [ 0.899999976, 0.899999976, 0.899999976, 1 ]
       dedicatedItemTreeViewChecks: false
-  -
+  - 
     id: 4
     name: "Task"
     plugin: Base
     class: TaskView
-    state:
+    state: 
       layoutMode: horizontal
       isAutoMode: false
-  -
+  - 
     id: 5
     plugin: Body
     class: BodyLinkView
-    state:
+    state: 
       showRotationMatrix: false
-  -
+  - 
     id: 6
     plugin: Body
     class: JointSliderView
-    state:
+    state: 
       showAllJoints: true
       jointId: false
       name: true
       numColumns: 1
       spinBox: true
       slider: true
+      dial: false
       labelOnLeft: true
-  -
+  - 
     id: 7
     plugin: Body
     class: LinkSelectionView
-    state:
+    state: 
       listingMode: "Link List"
-  -
+  - 
     id: 8
     name: "Nameserver"
     plugin: Corba
     class: NameServerView
     mounted: true
-  -
+  - 
     id: 9
     plugin: OpenRTM
     class: RTSNameServerView
     mounted: true
-    state:
-      host: localhost
-      port: 2809
-  -
+    state: 
+      NameServers: 
+        - 
+          isDefaultNameServer: false
+          host: "localhost"
+          port: 2809
+  - 
     id: 10
     name: "RTC Properties"
     plugin: OpenRTM
     class: RTSPropertiesView
     mounted: true
-  -
+  - 
     id: 11
     plugin: Python
     class: PythonConsoleView
     mounted: true
-  -
+  - 
     id: 12
     name: "Control panel"
     plugin: TU::ControlPanel
     class: TU::v::ControlPaneView
     mounted: true
-  -
+  - 
     id: 13
     name: "Image viewer"
     plugin: TU::ImageViewer
     class: TU::ImageViewer
     mounted: true
-toolbars:
-  "TimeBar":
+toolbars: 
+  "TimeBar": 
     minTime: 0
     maxTime: 30
     frameRate: 100
@@ -179,7 +184,7 @@ toolbars:
     speedScale: 1
     syncToOngoingUpdates: true
     autoExpansion: true
-  "KinematicsBar":
+  "KinematicsBar": 
     mode: AUTO
     enablePositionDragger: true
     penetrationBlock: false
@@ -187,9 +192,9 @@ toolbars:
     snapDistance: 0.025
     penetrationBlockDepth: 0.0005
     lazyCollisionDetectionMode: true
-  "LeggedBodyBar":
+  "LeggedBodyBar": 
     stanceWidth: 0.15
-  "BodyMotionGenerationBar":
+  "BodyMotionGenerationBar": 
     autoGenerationForNewBody: true
     balancer: false
     autoGeneration: false
@@ -211,23 +216,12 @@ toolbars:
     zmpMaxDistanceFromCenter: 0.02
     allLinkPositions: false
     lipSyncMix: false
-    timeToStartBalancer: 0
-    balancerIterations: 2
-    plainBalancerMode: false
-    boundaryConditionType: position
-    boundarySmootherType: off
-    boundarySmootherTime: 0.5
-    boundaryCmAdjustment: false
-    boundaryCmAdjustmentTime: 1
-    waistHeightRelaxation: false
-    gravity: 9.8
-    dynamicsTimeRatio: 1
-Body:
-  "BodyMotionEngine":
+Body: 
+  "BodyMotionEngine": 
     updateJointVelocities: false
-  "EditableSceneBody":
+  "EditableSceneBody": 
     staticModelEditing: true
-  "KinematicFaultChecker":
+  "KinematicFaultChecker": 
     checkJointPositions: true
     angleMargin: 0
     translationMargin: 0
@@ -236,60 +230,60 @@ Body:
     targetJoints: all
     checkSelfCollisions: true
     onlyTimeBarRange: false
-  "SplineFilterDialog":
+  "SplineFilterDialog": 
     isInputFrameRateSpecified: false
     inputFrameRate: 200
     isOutputFrameRateSpecified: false
     outputFrameRate: 200
-OpenRTM:
+OpenRTM: 
   "deleteUnmanagedRTCsOnStartingSimulation": false
-viewAreas:
-  -
+viewAreas: 
+  - 
     type: embedded
     tabs: true
-    contents:
+    contents: 
       type: splitter
       orientation: horizontal
-      sizes: [ 326, 1588 ]
-      children:
-        -
+      sizes: [ 240, 1170 ]
+      children: 
+        - 
           type: splitter
           orientation: vertical
-          sizes: [ 459, 458 ]
-          children:
-            -
+          sizes: [ 438, 437 ]
+          children: 
+            - 
               type: pane
               views: [ 1, 9 ]
               current: 1
-            -
+            - 
               type: pane
               views: [ 0, 10, 8 ]
               current: 0
-        -
+        - 
           type: splitter
           orientation: vertical
-          sizes: [ 655, 262 ]
-          children:
-            -
+          sizes: [ 625, 250 ]
+          children: 
+            - 
               type: splitter
               orientation: horizontal
-              sizes: [ 687, 895 ]
-              children:
-                -
+              sizes: [ 505, 659 ]
+              children: 
+                - 
                   type: pane
                   views: [ 12 ]
                   current: 12
-                -
+                - 
                   type: pane
                   views: [ 13 ]
                   current: 13
-            -
+            - 
               type: pane
               views: [ 2, 11 ]
               current: 2
-layoutOfToolBars:
-  rows:
-    -
+layoutOfToolBars: 
+  rows: 
+    - 
       - { name: "FileBar", x: 0, priority: 0 }
       - { name: "ScriptBar", x: 47, priority: 0 }
       - { name: "TimeBar", x: 94, priority: 0 }
@@ -297,6 +291,6 @@ layoutOfToolBars:
       - { name: "GraphBar", x: 1357, priority: 0 }
       - { name: "SimulationBar", x: 1464, priority: 0 }
       - { name: "BodyBar", x: 1661, priority: 0 }
-    -
+    - 
       - { name: "KinematicsBar", x: 0, priority: 0 }
       - { name: "BodyMotionGenerationBar", x: 234, priority: 0 }
