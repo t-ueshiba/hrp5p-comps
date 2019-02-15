@@ -29,15 +29,19 @@ target_link_libraries(
 
 install(TARGETS ${PROJECT_NAME}Comp RUNTIME DESTINATION bin)
 
-if(CNOID_FOUND)
-  add_cnoid_rtc(
-      ${PROJECT_NAME}RTC
-      ${idl_cpp_files}
-      ${sources})
+add_library(
+    ${PROJECT_NAME}RTC SHARED
+    ${idl_cpp_files}
+    ${sources})
 
-  target_link_libraries(
-      ${PROJECT_NAME}RTC
-      ${TUV4L2PP_LIB}
-      ${OPENRTM_LIBRARIES}
-      boost_serialization)
-endif()
+target_link_libraries(
+    ${PROJECT_NAME}RTC
+    ${TUV4L2PP_LIB}
+    ${OPENRTM_LIBRARIES}
+    boost_serialization)
+
+set_target_properties(
+    ${PROJECT_NAME}RTC PROPERTIES
+    PREFIX "")
+
+install(TARGETS ${PROJECT_NAME}RTC LIBRARY DESTINATION lib)

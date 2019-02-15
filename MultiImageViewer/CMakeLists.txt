@@ -11,11 +11,11 @@ idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 include_directories(${PROJECT_BINARY_DIR}/corba)
 
 set(sources
-    main.cc
     ImageViewerRTC.cc)
 
 add_executable(
     ${PROJECT_NAME}Comp
+    main.cc
     ${idl_cpp_files}
     ${sources})
 
@@ -25,3 +25,19 @@ target_link_libraries(
     ${OPENRTM_LIBRARIES})
 
 install(TARGETS ${PROJECT_NAME}Comp RUNTIME DESTINATION bin)
+
+add_library(
+    ${PROJECT_NAME}RTC SHARED
+    ${idl_cpp_files}
+    ${sources})
+
+target_link_libraries(
+    ${PROJECT_NAME}RTC
+    ${TUVPP_LIB}
+    ${OPENRTM_LIBRARIES})
+
+set_target_properties(
+    ${PROJECT_NAME}RTC PROPERTIES
+    PREFIX "")
+
+install(TARGETS ${PROJECT_NAME}RTC LIBRARY DESTINATION lib)
