@@ -156,10 +156,10 @@ class CmdDef
 	   size_t		size_=0,
 	   CmdDefs		subcmds_=CmdDefs(),
 	   u_int		attrs_=CA_None)
-	:type(type_), id(id_), name(name_), subcmds(subcmds_),
+	:type(type_), id(id_), name(name_),
 	 gridx(gridx_), gridy(gridy_),
 	 gridWidth(gridWidth_), gridHeight(gridHeight_),
-	 size(size_), attrs(attrs_)					{}
+	 size(size_), subcmds(subcmds_), attrs(attrs_)			{}
 
   private:
     friend	class boost::serialization::access;
