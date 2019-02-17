@@ -1,0 +1,12 @@
+#include "BasicDataType.idl"
+
+struct MarkerPose {
+  long id;                      //マーカID
+  sequence<double> rotation;    //３×３の回転行列を配列化した要素
+  sequence<double> translation; //３×１の並進ベクトルを配列化した要素
+};
+
+struct TimedMarkerPoseSeq {
+  RTC::Time tm;
+  sequence<MarkerPose> pose;
+};

@@ -72,6 +72,7 @@ if(TUV4L2PP_FOUND)
   add_subdirectory(V4L2MultiCamera)
 endif()
 add_subdirectory(VideoSynchronizer)
+add_subdirectory(MarkerPoseSynchronizer)
 
 if(TUVPP_FOUND)
   add_subdirectory(ImageViewer)
