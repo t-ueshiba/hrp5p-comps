@@ -1,16 +1,12 @@
 /*
  *  $Id$
  */
-#include "Img.hh"
 #include "LentiMarkDataType.hh"
 #include "SynchronizerRTC.h"
 
 /************************************************************************
 *  static data								*
 ************************************************************************/
-#define DEFAULT_BUFFER_SIZE	"100"
-#define DEFAULT_VERBOSE		"0"
-
 // Module specification
 static const char* videosynchronizer_spec[] =
 {
