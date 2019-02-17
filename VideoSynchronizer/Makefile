@@ -29,7 +29,7 @@ LIBS		=
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
-LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
+LIBDIR		= $(PREFIX)/lib
 INCDIR		= $(PREFIX)/include
 
 OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/JointReader
@@ -38,11 +38,16 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/JointReader
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../include/RTCTime.h
-HDRS		= SynchronizerRTC.h
-SRCS		= VideoSynchronizerRTC.cc \
+EXTHDRS		= ../include/RTCTime.h \
+		../include/SynchronizerRTC.h
+HDRS		=
+SRCS		= ImgDynSK.cc \
+		ImgSK.cc \
+		VideoSynchronizerRTC.cc \
 		main.cc
-OBJS		= VideoSynchronizerRTC.o \
+OBJS		= ImgDynSK.o \
+		ImgSK.o \
+		VideoSynchronizerRTC.o \
 		main.o
 
 OTHER_HDRS	= $(HDRS)
@@ -55,4 +60,7 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
-VideoSynchronizerRTC.o: SynchronizerRTC.h ../include/RTCTime.h
+ImgDynSK.o: Img.hh
+ImgSK.o: Img.hh
+VideoSynchronizerRTC.o: Img.hh ../include/SynchronizerRTC.h \
+	../include/RTCTime.h

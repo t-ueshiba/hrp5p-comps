@@ -28,7 +28,7 @@ LIBS		= -lTUV4L2++ -lTUTools++ -lboost_serialization
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
-LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
+LIBDIR		= $(PREFIX)/lib
 INCDIR		= $(PREFIX)/include
 
 OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/V4L2MultiCamera

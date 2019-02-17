@@ -4,12 +4,12 @@ project(MarkerPoseSynchronizer)
 set(idls Img LentiMarkDataType)
 set(idl_cpp_files "")
 set(ild_h_files "")
-set(corba_src_dirs ${HRPSYSBASE_PREFIX}/share/hrpsys/idl)
+set(corba_src_dirs
+    ${HRPSYSBASE_PREFIX}/share/hrpsys/idl
+    ${CMAKE_SOURCE_DIR}/include/TU/idl)
 idl_compile_cpp(idl_cpp_files idl_h_files corba	"${corba_src_dirs}" ${idls})
 
-include_directories(
-    ${PROJECT_SOURCE_DIR}/../VideoSynchronizer
-    ${PROJECT_BINARY_DIR}/corba)
+include_directories(${PROJECT_BINARY_DIR}/corba)
 
 set(sources
     MarkerPoseSynchronizerRTC.cc)

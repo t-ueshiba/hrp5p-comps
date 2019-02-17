@@ -14,6 +14,9 @@
 #include <mutex>
 #include "RTCTime.h"
 
+#define SYNCHRONIZERRTC_DEFAULT_BUFFER_SIZE	"100"
+#define SYNCHRONIZERRTC_DEFAULT_VERBOSE		"0"
+
 namespace TU
 {
 /************************************************************************
@@ -128,6 +131,13 @@ SynchronizerRTC<PRIMARY, SECONDARY>::onExecute(RTC::UniqueId ec_id)
     return RTC::RTC_OK;
 }
 
+template <class PRIMARY, class SECONDARY> void
+SynchronizerRTC<PRIMARY, SECONDARY>::initializeConfigurations()
+{
+    bindParameter("bufferSize", _bufSize, SYNCHRONIZERRTC_DEFAULT_BUFFER_SIZE);
+    bindParameter("verbose",    _verbose, SYNCHRONIZERRTC_DEFAULT_VERBOSE);
+}
+    
 template <class PRIMARY, class SECONDARY> bool
 SynchronizerRTC<PRIMARY, SECONDARY>::select(RTC::Time tm)
 {

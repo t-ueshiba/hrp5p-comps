@@ -25,8 +25,8 @@ static const char* videosynchronizer_spec[] =
     "max_instance",		"10",
     "language",			"C++",
     "lang_type",		"compile",
-    "conf.default.bufferSize",	DEFAULT_BUFFER_SIZE,
-    "conf.default.verbose",	DEFAULT_VERBOSE,
+    "conf.default.bufferSize",	SYNCHRONIZERRTC_DEFAULT_BUFFER_SIZE,
+    "conf.default.verbose",	SYNCHRONIZERRTC_DEFAULT_VERBOSE,
     ""				// <-- Important! End of Spec. mark
 };
 
@@ -47,27 +47,3 @@ MarkerPoseSynchronizerRTCInit(RTC::Manager* manager)
 			     RTC::Delete<synchronizer_t>);
 }
 }
-
-namespace TU
-{
-std::ostream&
-operator <<(std::ostream& out, const RTC::TimedDoubleSeq& q)
-{
-    out << q.tm << '\t';
-  /*
-    for (size_t i = 0; i < q.data.length(); ++i)
-	out << ' ' << q.data[i];
-  */
-    return out;
-}
-
-template <> void
-SynchronizerRTC<TimedMarkerPoseSeq, RTC::TimedDoubleSeq>
-::initializeConfigurations()
-{
-    bindParameter("bufferSize", _bufSize, DEFAULT_BUFFER_SIZE);
-    bindParameter("verbose",    _verbose, DEFAULT_VERBOSE);
-}
-    
-}
-    

@@ -7,12 +7,12 @@
 PROGRAM		= $(shell basename $(PWD))Comp
 LIBRARY		= $(shell basename $(PWD))RTC
 
-VPATH		= ${OPENRTPHOME}/share/hrpsys/idl
+VPATH		= ${OPENRTPHOME}/share/hrpsys/idl:../include/TU/idl
 
 IDLS		= Img.idl LentiMarkDataType.idl
 MOCHDRS		=
 
-INCDIRS		= -I. -I../include -I../VideoSynchronizer
+INCDIRS		= -I. -I../include
 CPPFLAGS	= -DNDEBUG -DDEBUG
 CFLAGS		= -O3
 NVCCFLAGS	= -O
@@ -29,7 +29,7 @@ LIBS		=
 LINKER		= $(CXX)
 
 BINDIR		= $(PREFIX)/bin
-LIBDIR		= $(shell pkg-config --variable=plugindir choreonoid)/rtc
+LIBDIR		= $(PREFIX)/lib
 INCDIR		= $(PREFIX)/include
 
 OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/JointReader
@@ -38,8 +38,8 @@ OTHER_DIR	= $(HOME)/projects/HRP-5P/hrp5p-calib/rtc/JointReader
 #  Macros set by mkmf	#
 #########################
 SUFFIX		= .cc:sC .cpp:sC .cu:sC
-EXTHDRS		= ../VideoSynchronizer/SynchronizerRTC.h \
-		../include/RTCTime.h
+EXTHDRS		= ../include/RTCTime.h \
+		../include/SynchronizerRTC.h
 HDRS		=
 SRCS		= MarkerPoseSynchronizerRTC.cc \
 		main.cc
@@ -56,5 +56,5 @@ include $(PROJECT)/lib/rtc.mk		# IDLHDRS, IDLSRCS, CPPFLAGS, OBJS, LIBS
 include $(PROJECT)/lib/common.mk
 include $(PROJECT)/lib/other.mk
 ###
-MarkerPoseSynchronizerRTC.o: ../VideoSynchronizer/SynchronizerRTC.h \
+MarkerPoseSynchronizerRTC.o: ../include/SynchronizerRTC.h \
 	../include/RTCTime.h
