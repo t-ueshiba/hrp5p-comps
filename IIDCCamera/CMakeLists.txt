@@ -43,6 +43,7 @@ target_link_libraries(
     ${PROJECT_NAME}RTC
     ${TUIIDCPP_LIB}
     ${OPENRTM_LIBRARIES}
+    ${YAML-CPP_LIBRARIES}
     boost_serialization)
 
 set_target_properties(
