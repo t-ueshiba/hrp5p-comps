@@ -6,11 +6,11 @@ items:
   children: 
     - 
       id: 2
-      name: "V4L2Camera-HRP.py"
+      name: "V4L2MultiCamera-HRP.py"
       plugin: Python
       class: PythonScriptItem
       data: 
-        file: "${PROJECT_DIR}/V4L2Camera-HRP.py"
+        file: "${PROJECT_DIR}/V4L2MultiCamera-HRP.py"
         executionOnLoading: true
         backgroundExecution: false
 views: 
@@ -158,9 +158,9 @@ views:
     mounted: true
   - 
     id: 13
-    name: "Image viewer"
-    plugin: TU::ImageViewer
-    class: TU::ImageViewer
+    name: "Multi image viewer"
+    plugin: TU::MultiImageViewer
+    class: TU::MultiImageViewer
     mounted: true
 toolbars: 
   "TimeBar": 

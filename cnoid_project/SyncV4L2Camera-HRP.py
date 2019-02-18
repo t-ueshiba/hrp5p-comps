@@ -1,57 +1,16 @@
-import sys,os,datetime,socket,rtm
-from rtm import *
+import sys, os, datetime, rtm
 
-def setupRTM(nshost=None, nsport=2809, mgrport=2810):
-  rtm.nsport  = nsport
-  rtm.mgrport = mgrport
-  rtm.nshost  = socket.gethostname() if nshost == None else nshost
-  nsloc      = "corbaloc:iiop:%s:%d/NameService" % (rtm.nshost, rtm.nsport)
-  rtm.rootnc = rtm.orb.string_to_object(nsloc)._narrow(CosNaming.NamingContext)
-      
-def setNameserver(nsport=2809, mgrport=2810):
-  hostname = socket.gethostname()
-  if os.getenv("ROBOTHOST"):
-    nshost    = os.getenv("ROBOTHOST")+"c"
-    vision_pc = os.getenv("ROBOTHOST")+"v"
-  elif hostname == "hrp2001t":
-    nshost    = "hrp2001c"
-    vision_pc = "hrp2001v"
-  elif hostname == "hrp5p01t":
-    nshost    = "hrp5p01c.local"
-    vision_pc = "hrp5p01v.local"
-  elif hostname == "hrp2012t" or hostname == "hrp2010t" or hostname == "edin":
-    nshost    = "hrp2012c"
-    vision_pc = "hrp2012v"
-  else:
-    nshost    = hostname
-    vision_pc = "localhost"
-  setupRTM(nshost, nsport, mgrport)
-  return vision_pc
-
-def searchRTC(comp_name):
-  rtc = rtm.findRTC(comp_name)
-  if rtc == None:
-    raise Exception("Failed to find {}.".format(comp_name))
-  return rtc
-
-def createRTC(mgr, module_name, comp_name):
-  mgr.load(module_name)
-  rtc = mgr.create(module_name, comp_name)
-  if rtc == None:
-    raise Exception("Failed to create {} from {}.".format(comp_name,
-                                                          module_name))
-  return rtc
-
+execfile("rtm-utils.py")
 
 try:
   rtm.initCORBA()
 
   setupRTM()                            # Set NameServer to this host.
-  viewer = searchRTC("ImageViewer0")    # Search for existing viewer.
-  cpanel = searchRTC("ControlPanel0")   # Search for existing control panel.
+  viewer = findRTC("ImageViewer0")      # Find for existing viewer.
+  cpanel = findRTC("ControlPanel0")     # Find for existing control panel.
 
-  vision_pc = setNameserver()           # Set NameServer to control PC.
-  robohw = searchRTC("RobotHardware0")  # Search for existing robot hardware.
+  vision_pc = setupNameserver()         # Set NameServer to control PC.
+  robohw = findRTC("RobotHardware0")    # Find for existing robot hardware.
      
   mgr = rtm.findRTCmanager(vision_pc)   # Find RTC manager on vision PC.
   if mgr == None:
@@ -62,10 +21,10 @@ try:
 
   syncer.setProperty("verbose", "1")
 
-  connectPorts(camera.port("TimedCameraImage"), syncer.port("primary"))
-  connectPorts(robohw.port("q"),                syncer.port("secondary"))
-  connectPorts(cpanel.port("Command"),          camera.port("Command"))
-  connectPorts(syncer.port("primaryOut"),       viewer.port("images"))
+  rtm.connectPorts(camera.port("TimedCameraImage"), syncer.port("primary"))
+  rtm.connectPorts(robohw.port("q"),                syncer.port("secondary"))
+  rtm.connectPorts(cpanel.port("Command"),          camera.port("Command"))
+  rtm.connectPorts(syncer.port("primaryOut"),       viewer.port("images"))
     
   cpanel.start()
   viewer.start()
