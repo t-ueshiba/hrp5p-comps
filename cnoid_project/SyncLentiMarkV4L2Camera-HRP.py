@@ -7,7 +7,7 @@ try:
   viewer = findRTC("ImageViewer0")      # Find for existing viewer.
   cpanel = findRTC("ControlPanel0")     # Find for existing control panel.
 
-  vision_pc = setNameserver()           # Set NameServer to control PC.
+  vision_pc = setupNameserver()         # Set NameServer to control PC.
   robohw = findRTC("RobotHardware0")    # Find for existing robot hardware.
      
   mgr = rtm.findRTCmanager(vision_pc)   # Find RTC manager on vision PC.
